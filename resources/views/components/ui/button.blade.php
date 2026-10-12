@@ -17,6 +17,7 @@
     $sizes = [
         'md' => 'min-h-9 px-3.5 py-2 text-sm',
         'lg' => 'min-h-12 px-6 py-3 text-base',
+        'responsive' => 'min-h-12 px-6 py-3 text-base md:min-h-9 md:px-3.5 md:py-2 md:text-sm',
     ];
 
     $classes = 'inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-xs border font-heading leading-tight transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-45 '

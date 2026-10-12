@@ -13,7 +13,7 @@
 
     <x-global.header :audience="$audience" />
 
-    <main id="main" class="flex-1">
+    <main id="main" tabindex="-1" class="flex-1 outline-none">
         {{ $slot }}
     </main>
 
@@ -21,5 +21,6 @@
     <x-global.flash />
     <x-global.loading-overlay />
     <x-global.back-to-top />
+    <x-global.cookie-banner />
 </body>
 </html>

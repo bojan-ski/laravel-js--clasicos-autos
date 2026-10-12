@@ -25,6 +25,11 @@ class Header extends Component
      */
     public array $actions;
 
+    /**
+     * @var list<NavLink>
+     */
+    public array $legalLinks;
+
     public bool $menuSignal;
 
     public function __construct(MainNavigation $navigation, ?NavAudience $audience = null)
@@ -34,6 +39,7 @@ class Header extends Component
         $this->audience = $audience ?? NavAudience::forUser($user);
         $this->links = $navigation->linksFor($this->audience, $user);
         $this->actions = $navigation->actionsFor($this->audience, $user);
+        $this->legalLinks = $navigation->legalLinks();
         $this->menuSignal = collect($this->links)
             ->contains(fn (NavLink $link): bool => $link->countStyle === NavCountStyle::Unread && $link->count !== null);
     }

@@ -1,6 +1,7 @@
 @props([
     'links',
     'actions',
+    'legalLinks',
     'audience',
     'signal' => false,
 ])
@@ -44,12 +45,17 @@
             </nav>
         @endif
 
-        @if ($actions !== [])
-            <div class="mt-auto flex flex-col gap-2.5 p-5">
-                @foreach ($actions as $action)
-                    <x-global.header-action :action="$action" :audience="$audience" :block="true" />
+        <div class="mt-auto flex flex-col gap-2.5 p-5">
+            @foreach ($actions as $action)
+                <x-global.header-action :action="$action" :audience="$audience" :block="true" />
+            @endforeach
+
+            <nav aria-label="{{ __('app.legal.kicker') }}" class="flex flex-col">
+                @foreach ($legalLinks as $link)
+                    <a href="{{ $link->url }}" @if ($link->active) aria-current="page" @endif
+                       class="flex min-h-11 items-center text-sm {{ $link->active ? ($onDark ? 'text-gold-light' : 'text-red') : ($onDark ? 'text-cream-on-dark' : 'text-muted') }}">{{ $link->label }}</a>
                 @endforeach
-            </div>
-        @endif
+            </nav>
+        </div>
     </div>
 </details>

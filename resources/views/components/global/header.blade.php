@@ -33,6 +33,6 @@
             </div>
         @endif
 
-        <x-global.mobile-menu :links="$links" :actions="$actions" :audience="$audience" :signal="$menuSignal" />
+        <x-global.mobile-menu :links="$links" :actions="$actions" :legal-links="$legalLinks" :audience="$audience" :signal="$menuSignal" />
     </div>
 </header>

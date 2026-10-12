@@ -57,6 +57,31 @@ class MainNavigation
         return [];
     }
 
+    /**
+     * @return list<NavLink>
+     */
+    public function legalLinks(): array
+    {
+        $routes = [
+            'privacy' => 'legal.privacy',
+            'terms' => 'legal.terms',
+            'cookies' => 'legal.cookies',
+        ];
+
+        $links = [];
+
+        foreach ($routes as $key => $route) {
+            $links[] = new NavLink(
+                key: $key,
+                label: __("app.legal.links.{$key}"),
+                url: route($route),
+                active: $this->router->currentRouteNamed($route),
+            );
+        }
+
+        return $links;
+    }
+
     private function countFor(NavItem $item, ?User $user): ?int
     {
         if ($item->counter === null) {

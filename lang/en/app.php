@@ -41,6 +41,129 @@ return [
 
     'back_to_top' => 'Back to top',
 
+    'back_link' => 'Back',
+
+    'cookie_banner' => [
+        'label' => 'Cookie notice',
+        'notice' => 'Clásicos Autos uses only the cookies it needs to work: your session, form security and the remember-me option. No analytics, no advertising.',
+        'policy' => 'Cookie policy',
+        'accept' => 'Accept',
+    ],
+
+    'legal' => [
+        'kicker' => 'Legal',
+        'disclaimer' => [
+            'The following content is has been generate using AI',
+            'This is just for development purposes',
+        ],
+        'contents' => 'Contents',
+        'links' => [
+            'privacy' => 'Privacy policy',
+            'terms' => 'Terms and conditions',
+            'cookies' => 'Cookie policy',
+        ],
+        'privacy' => [
+            'title' => 'Privacy Policy page',
+            'intro' => 'Welcome to ClassicCarsApp. We are committed to protecting your privacy and ensuring your personal information is handled securely and responsibly.',
+            'sections' => [
+                'information-we-collect' => [
+                    'heading' => '1. Information We Collect',
+                    'items' => [
+                        'Personal information: name, email address, phone number, etc.',
+                        'Usage data: pages visited, time spent, clicks, etc.',
+                        'Cookies and tracking technologies.',
+                    ],
+                ],
+                'how-we-use-your-information' => [
+                    'heading' => '2. How We Use Your Information',
+                    'items' => [
+                        'To provide and maintain our service',
+                        'To notify you about updates',
+                        'To personalize your experience',
+                        'For analytics and marketing',
+                    ],
+                ],
+                'sharing-of-information' => [
+                    'heading' => '3. Sharing of Information',
+                    'paragraph' => 'We do not sell or rent your personal information. Data may be shared only with trusted partners to support our services.',
+                ],
+                'data-security' => [
+                    'heading' => '4. Data Security',
+                    'paragraph' => 'We use industry-standard security measures, but no system is 100% secure.',
+                ],
+                'your-rights' => [
+                    'heading' => '5. Your Rights',
+                    'paragraph' => 'You can access, update, or request deletion of your data. Contact us at support@classiccarsapp.com.',
+                ],
+                'changes-to-this-policy' => [
+                    'heading' => '6. Changes to This Policy',
+                    'paragraph' => 'We may update this policy. Changes will be posted with the revision date.',
+                ],
+            ],
+        ],
+        'terms' => [
+            'title' => 'Terms & Conditions page',
+            'intro' => 'By accessing or using ClassicCarsApp, you agree to these Terms & Conditions. Please read them carefully.',
+            'sections' => [
+                'user-accounts' => [
+                    'heading' => '1. User Accounts',
+                    'paragraph' => 'You are responsible for maintaining the confidentiality of your login information and all activities under your account.',
+                ],
+                'listings-and-content' => [
+                    'heading' => '2. Listings and Content',
+                    'paragraph' => 'You retain ownership of your listings and content but allow us to display and share it through our platform.',
+                ],
+                'prohibited-activities' => [
+                    'heading' => '3. Prohibited Activities',
+                    'items' => [
+                        'Posting misleading or fraudulent listings',
+                        'Using the site for illegal purposes',
+                        'Accessing restricted areas without permission',
+                    ],
+                ],
+                'limitation-of-liability' => [
+                    'heading' => '4. Limitation of Liability',
+                    'paragraph' => 'We are not responsible for any loss or damages resulting from use of the service. It is provided "as is."',
+                ],
+                'termination' => [
+                    'heading' => '5. Termination',
+                    'paragraph' => 'We reserve the right to suspend or terminate accounts at any time for violations of these terms.',
+                ],
+                'governing-law' => [
+                    'heading' => '6. Governing Law',
+                    'paragraph' => 'These terms are governed by the laws of your local jurisdiction.',
+                ],
+            ],
+        ],
+        'cookies' => [
+            'title' => 'Cookie Policy page',
+            'intro' => 'This page explains the cookies Clásicos Autos sets in your browser and why. We keep them to the minimum the site needs to work.',
+            'sections' => [
+                'cookies-we-set' => [
+                    'heading' => '1. Cookies We Set',
+                    'items' => [
+                        'Session cookie: keeps you signed in and remembers your choices while you browse, such as the two listings you compare.',
+                        'XSRF-TOKEN: a security cookie that protects the forms you submit against cross-site request forgery.',
+                        'Remember-me cookie: set only when you tick "Remember me" at sign-in, so you stay signed in on this device.',
+                        'cookie_consent: remembers that you accepted this notice, so it is not shown again for 12 months.',
+                    ],
+                ],
+                'browser-storage' => [
+                    'heading' => '2. Browser Storage',
+                    'paragraph' => 'Your background music preference is kept in your browser\'s local storage, not in a cookie. It never leaves your device.',
+                ],
+                'no-tracking' => [
+                    'heading' => '3. No Tracking',
+                    'paragraph' => 'We do not use analytics, advertising or any third-party cookies, and we do not track you across other websites.',
+                ],
+                'managing-cookies' => [
+                    'heading' => '4. Managing Cookies',
+                    'paragraph' => 'You can delete or block cookies in your browser settings at any time. Without the session and security cookies you will not be able to sign in or submit forms.',
+                ],
+            ],
+        ],
+    ],
+
     'home' => [
         'hero' => [
             'overlay' => 'Saludos desde La Habana',
