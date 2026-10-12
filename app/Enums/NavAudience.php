@@ -16,6 +16,6 @@ enum NavAudience: string
             return self::Guest;
         }
 
-        return self::Member;
+        return $user->isAdmin() ? self::Admin : self::Member;
     }
 }

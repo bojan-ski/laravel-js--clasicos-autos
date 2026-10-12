@@ -22,6 +22,10 @@ return [
         'admin_tag' => 'Admin',
         'new_count' => ':count NEW',
         'selected_count' => ':count selected',
+        'sign_in' => 'Sign in',
+        'register' => 'Register',
+        'profile' => 'Your profile',
+        'log_out' => 'Log out',
     ],
 
     'music' => [
@@ -178,6 +182,65 @@ return [
         'about' => [
             'title' => 'About Our App',
             'body' => "Welcome to our vintage car marketplace — your trusted destination for discovering classic and timeless vehicles. Our platform is built with passion for automotive heritage, offering carefully curated listings from collectors, enthusiasts, and sellers across the region. Whether you're a buyer looking for your next showpiece, a seller sharing a piece of history, or a casual browser soaking in the nostalgia, our app provides a seamless, enjoyable experience tailored just for you.",
+        ],
+    ],
+
+    'auth' => [
+        'login' => [
+            'title' => 'Login',
+            'kicker' => 'Entrar',
+            'overlay' => 'Bienvenido de nuevo',
+            'stamp' => 'CA',
+            'email' => 'Email',
+            'email_placeholder' => 'Enter your email',
+            'password' => 'Password',
+            'password_placeholder' => 'Enter your password',
+            'remember' => 'Remember me',
+            'submit' => 'Sign in',
+            'switch_prompt' => "Don't have an account?",
+            'switch_link' => 'Register',
+            'failed' => 'Bad credentials',
+            'suspended_until' => 'Your account has been suspended until :date: :reason',
+            'suspended_indefinitely' => 'Your account has been suspended indefinitely: :reason',
+        ],
+        'register' => [
+            'title' => 'Register',
+            'kicker' => 'Registro',
+            'intro' => 'Create an account to list your car, bookmark and compare listings, and message owners.',
+            'stamp_country' => 'Cuba',
+            'stamp_year' => '1950',
+            'stamp_post' => 'Correos',
+            'username' => 'Enter your username *',
+            'username_placeholder' => 'max 64 characters',
+            'email' => 'Enter your email *',
+            'email_placeholder' => 'max 64 characters',
+            'phone_number' => 'Enter your phone number *',
+            'phone_number_placeholder' => 'max 20 characters',
+            'password' => 'Enter your password *',
+            'password_placeholder' => 'min 6 characters',
+            'password_confirmation' => 'Confirm your password *',
+            'password_confirmation_placeholder' => 'min 6 characters',
+            'agree' => 'I agree with the',
+            'terms' => 'Terms & Conditions',
+            'privacy' => 'Privacy Policy',
+            'submit' => 'Register',
+            'switch_prompt' => 'Already have an account?',
+            'switch_link' => 'Sign in',
+        ],
+        'flash' => [
+            'registered' => 'Account created. You can login now.',
+            'logged_in' => 'You have logged in',
+            'logged_out' => 'You have logged out!',
+        ],
+    ],
+
+    'profile' => [
+        'heading' => 'Welcome :username',
+    ],
+
+    'admin' => [
+        'account' => [
+            'title' => 'Account',
         ],
     ],
 
