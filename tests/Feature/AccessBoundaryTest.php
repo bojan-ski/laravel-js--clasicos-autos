@@ -93,29 +93,36 @@ class AccessBoundaryTest extends TestCase
     }
 
     /**
-     * @return array<string, array{string, string, string, string}>
+     * @return array<string, array{string, string, string, array<string, string>, string}>
      */
     public static function guestOnlyRequests(): array
     {
         $cases = [];
 
         foreach (['appUser' => 'profile', 'admin' => 'admin.account'] as $role => $landing) {
-            $cases["{$role} GET login"] = [$role, 'get', 'login', $landing];
-            $cases["{$role} POST login"] = [$role, 'post', 'login.store', $landing];
-            $cases["{$role} GET register"] = [$role, 'get', 'register', $landing];
-            $cases["{$role} POST register"] = [$role, 'post', 'register.store', $landing];
+            $cases["{$role} GET login"] = [$role, 'get', 'login', [], $landing];
+            $cases["{$role} POST login"] = [$role, 'post', 'login.store', [], $landing];
+            $cases["{$role} GET register"] = [$role, 'get', 'register', [], $landing];
+            $cases["{$role} POST register"] = [$role, 'post', 'register.store', [], $landing];
+            $cases["{$role} GET forgot password"] = [$role, 'get', 'password.request', [], $landing];
+            $cases["{$role} POST forgot password"] = [$role, 'post', 'password.email', [], $landing];
+            $cases["{$role} GET reset password"] = [$role, 'get', 'password.reset', ['token' => 'some-token', 'email' => 'someone@example.com'], $landing];
+            $cases["{$role} POST reset password"] = [$role, 'post', 'password.update', [], $landing];
         }
 
         return $cases;
     }
 
+    /**
+     * @param  array<string, string>  $parameters
+     */
     #[DataProvider('guestOnlyRequests')]
-    public function test_signed_in_users_are_sent_from_guest_pages_to_their_landing(string $role, string $method, string $route, string $landing): void
+    public function test_signed_in_users_are_sent_from_guest_pages_to_their_landing(string $role, string $method, string $route, array $parameters, string $landing): void
     {
         $user = $role === 'admin' ? User::factory()->admin()->create() : User::factory()->create();
 
         $this->actingAs($user)
-            ->{$method}(route($route))
+            ->{$method}(route($route, $parameters))
             ->assertRedirect(route($landing));
 
         $this->assertDatabaseCount('users', 1);

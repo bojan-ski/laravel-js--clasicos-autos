@@ -36,13 +36,14 @@ class LoginTest extends TestCase
 
         $response->assertOk()->assertViewIs('pages.auth.login');
 
-        foreach (['email', 'password', 'remember', 'submit', 'switch_prompt'] as $key) {
+        foreach (['email', 'password', 'remember', 'submit', 'switch_prompt', 'reset_prompt', 'reset_link'] as $key) {
             $response->assertSee(__("app.auth.login.{$key}"));
         }
 
         $response->assertSee('action="'.route('login.store').'"', false)
             ->assertSee('name="remember" type="checkbox" value="1"', false)
-            ->assertSee('href="'.route('register').'"', false);
+            ->assertSee('href="'.route('register').'"', false)
+            ->assertSee('href="'.route('password.request').'"', false);
     }
 
     /**
