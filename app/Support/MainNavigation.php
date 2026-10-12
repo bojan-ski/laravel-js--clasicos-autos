@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Enums\HeaderActionStyle;
 use App\Enums\NavAudience;
 use App\Models\User;
 use Illuminate\Contracts\Container\Container;
@@ -54,7 +55,19 @@ class MainNavigation
      */
     public function actionsFor(NavAudience $audience, ?User $user): array
     {
-        return [];
+        $logOut = new HeaderAction('log-out', __('app.header.log_out'), route('logout'), 'POST', HeaderActionStyle::Ghost);
+
+        return match ($audience) {
+            NavAudience::Guest => [
+                new HeaderAction('sign-in', __('app.header.sign_in'), route('login'), 'GET', HeaderActionStyle::Secondary),
+                new HeaderAction('register', __('app.header.register'), route('register'), 'GET', HeaderActionStyle::Primary),
+            ],
+            NavAudience::Member => [
+                new HeaderAction('profile', $user?->initials() ?? '', route('profile'), 'GET', HeaderActionStyle::Avatar, __('app.header.profile')),
+                $logOut,
+            ],
+            NavAudience::Admin => [$logOut],
+        };
     }
 
     /**

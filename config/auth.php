@@ -114,4 +114,22 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Seeded Administrator
+    |--------------------------------------------------------------------------
+    |
+    | The only admin account, created by AdminUserSeeder. The email and the
+    | initial password come from the environment; the seeder refuses to run
+    | without them.
+    |
+    */
+
+    'admin' => [
+        'username' => 'admin user',
+        'email' => env('ADMIN_EMAIL'),
+        'password' => env('ADMIN_PASSWORD'),
+        'phone_number' => '123456789',
+    ],
+
 ];
