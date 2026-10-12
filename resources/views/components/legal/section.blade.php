@@ -10,6 +10,6 @@
             @endforeach
         </ul>
     @else
-        <p class="text-justify text-sm leading-[1.7] hyphens-auto md:text-[15px]">{{ $section->paragraph }}</p>
+        <p class="text-sm leading-[1.7] hyphens-auto md:text-justify md:text-[15px]">{{ $section->paragraph }}</p>
     @endif
 </section>

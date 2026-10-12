@@ -41,6 +41,11 @@ export function initMusic() {
     }
 
     toggle.addEventListener('click', () => {
+        if (enabled && audio.paused) {
+            audio.play().catch(() => {})
+            return
+        }
+
         enabled = !enabled
         writeEnabled(enabled)
         render()

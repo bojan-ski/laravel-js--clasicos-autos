@@ -10,6 +10,7 @@
 
     <form method="POST" action="{{ route('login.store') }}" novalidate class="flex flex-col gap-4.5">
         @csrf
+        <x-forms.required-note />
         <x-forms.field name="email" type="email" autocomplete="email" required
                        :label="__('app.auth.login.email')" :placeholder="__('app.auth.login.email_placeholder')" />
         <x-forms.field name="password" type="password" autocomplete="current-password" required

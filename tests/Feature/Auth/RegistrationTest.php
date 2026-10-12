@@ -45,6 +45,22 @@ class RegistrationTest extends TestCase
             ->assertDontSee('safe_word');
     }
 
+    public function test_required_controls_show_a_hidden_marker_explained_once_and_the_length_hint(): void
+    {
+        $response = $this->get(route('register'))->assertOk();
+        $content = (string) $response->getContent();
+
+        $response->assertSee('>'.__('app.auth.register.username').' <span aria-hidden="true">*</span></label>', false)
+            ->assertSee('</a> <span aria-hidden="true">*</span></span>', false)
+            ->assertSee('<p id="password-hint" class="text-xs text-muted">'.__('app.auth.register.password_placeholder').'</p>', false);
+
+        $this->assertSame(7, substr_count($content, '<span aria-hidden="true">*</span>'));
+        $this->assertSame(1, substr_count($content, '<p aria-hidden="true" class="text-xs text-muted">'.__('app.forms.required_note').'</p>'));
+        $this->assertMatchesRegularExpression('/<input id="password"[^>]*aria-describedby="password-hint"/', $content);
+        $this->assertMatchesRegularExpression('/<input id="email"[^>]*class="[^"]*border-rule-input/', $content);
+        $this->assertDoesNotMatchRegularExpression('/<input[^>]*border-rule-strong/', $content);
+    }
+
     public function test_valid_registration_creates_an_active_app_user_without_signing_in(): void
     {
         $response = $this->post(route('register.store'), $this->validData([
@@ -73,6 +89,8 @@ class RegistrationTest extends TestCase
         return [
             'duplicate username' => [['username' => 'taken'], 'username'],
             'duplicate email' => [['email' => 'taken@example.com'], 'email'],
+            'username of 65 characters' => [['username' => str_repeat('a', 65)], 'username'],
+            'email of 65 characters' => [['email' => str_repeat('a', 53).'@example.com'], 'email'],
             'phone with letters' => [['phone_number' => '555-abc'], 'phone_number'],
             'phone without digits' => [['phone_number' => '---'], 'phone_number'],
             'phone of 21 characters' => [['phone_number' => str_repeat('1', 21)], 'phone_number'],

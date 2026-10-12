@@ -41,7 +41,21 @@ class ResetPasswordTest extends TestCase
             ->assertSee('name="password" type="password"', false)
             ->assertSee('name="password_confirmation" type="password"', false)
             ->assertSee(__('app.auth.reset.submit'))
+            ->assertSee('<title>'.__('app.auth.reset.title').' — ', false)
             ->assertDontSee(__('app.auth.reset.invalid'));
+    }
+
+    #[TestWith(['valid'])]
+    #[TestWith(['invalid'])]
+    public function test_the_link_page_sends_no_referrer_and_is_never_stored(string $state): void
+    {
+        $user = User::factory()->create();
+        $token = $state === 'valid' ? $this->requestLink($user) : 'junk-token';
+
+        $response = $this->get(route('password.reset', ['token' => $token, 'email' => $user->email]));
+
+        $response->assertOk()->assertHeader('Referrer-Policy', 'no-referrer');
+        $this->assertStringContainsString('no-store', (string) $response->headers->get('Cache-Control'));
     }
 
     public function test_an_expired_link_renders_the_invalid_state(): void
@@ -217,9 +231,27 @@ class ResetPasswordTest extends TestCase
         ]);
 
         $this->get(route('password.reset', ['token' => $token, 'email' => $user->email]))
-            ->assertSee('aria-invalid="true" aria-describedby="password-error"', false)
+            ->assertSee('aria-invalid="true" aria-describedby="password-hint password-error"', false)
+            ->assertSee('<p id="password-hint" class="text-xs text-muted">'.__('app.account.password.password_placeholder').'</p>', false)
             ->assertSee('id="password-error"', false)
             ->assertDontSee('value="short"', false);
+    }
+
+    #[TestWith(['not-an-email'])]
+    #[TestWith(['aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@example.com'])]
+    public function test_an_invalid_email_returns_to_the_link_page_with_an_email_error(string $email): void
+    {
+        $user = User::factory()->create();
+        $token = $this->requestLink($user);
+        $hash = $user->password;
+
+        $this->from(self::HOSTILE_REFERER)
+            ->post(route('password.update'), $this->resetPayload($token, $email))
+            ->assertRedirect(route('password.reset', ['token' => $token, 'email' => $email]))
+            ->assertInvalid(['email'])
+            ->assertSessionDoesntHaveErrors('password');
+
+        $this->assertSame($hash, $user->fresh()->password);
     }
 
     public function test_a_submission_without_a_token_redirects_to_the_request_page(): void
@@ -294,7 +326,8 @@ class ResetPasswordTest extends TestCase
     private function assertInvalidLinkPage(TestResponse $response): void
     {
         $response->assertOk()
-            ->assertSee(__('app.auth.reset.invalid'))
+            ->assertSee('<title>'.__('app.auth.reset.invalid_title').' — ', false)
+            ->assertSee('<p role="alert" class="font-heading text-[26px] leading-tight text-red-deep italic">'.__('app.auth.reset.invalid').'</p>', false)
             ->assertSee('href="'.route('password.request').'"', false)
             ->assertSee(__('app.auth.reset.request_new'))
             ->assertDontSee('action="'.route('password.update').'"', false)

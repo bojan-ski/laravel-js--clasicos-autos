@@ -10,6 +10,7 @@
         <form method="POST" action="{{ $action }}" class="mt-5 flex flex-col gap-5">
             @csrf
             @method('DELETE')
+            <x-forms.required-note />
             <x-forms.field name="delete_password" type="password" autocomplete="current-password" required
                            :label="__('app.profile.delete.password')" :placeholder="__('app.profile.delete.password_placeholder')" />
             <div class="flex flex-col-reverse gap-3 md:flex-row md:justify-end">

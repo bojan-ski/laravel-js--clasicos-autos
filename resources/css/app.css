@@ -71,7 +71,7 @@
     --color-muted: #605d5d;
     --color-cream-on-dark: #f3ece0;
 
-    --color-red: #c62f26;
+    --color-red: #c22d24;
     --color-red-deep: #9e241d;
 
     --color-gold: #b68235;
@@ -80,6 +80,7 @@
 
     --color-rule: rgb(32 31 29 / .16);
     --color-rule-strong: rgb(32 31 29 / .26);
+    --color-rule-input: rgb(32 31 29 / .55);
 
     --color-status-pending: #b68235;
     --color-status-approved: #7d5411;

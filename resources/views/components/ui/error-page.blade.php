@@ -13,7 +13,7 @@
     </x-ui.postcard>
 
     <div class="flex flex-col gap-4.5">
-        <span class="font-heading text-[88px] leading-[0.85] text-gold tabular-nums md:text-[120px]">{{ $code }}</span>
+        <span class="font-heading text-[88px] leading-[0.85] text-gold-ink tabular-nums md:text-[120px]">{{ $code }}</span>
         <h1 class="text-[38px] leading-[1.05] md:text-5xl">{{ $title }}</h1>
         <p class="text-base text-ink-2">{{ $message }}</p>
         <div class="mt-1.5 flex flex-wrap gap-2.5">
