@@ -1,9 +1,122 @@
 @import 'tailwindcss';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
+
+@font-face {
+    font-family: 'Cormorant Garamond';
+    font-style: normal;
+    font-weight: 400 600;
+    font-display: swap;
+    src: url('../fonts/cormorant-garamond-latin-ext.woff2') format('woff2');
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+    font-family: 'Cormorant Garamond';
+    font-style: normal;
+    font-weight: 400 600;
+    font-display: swap;
+    src: url('../fonts/cormorant-garamond-latin.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+    font-family: 'Cormorant Garamond';
+    font-style: italic;
+    font-weight: 400 600;
+    font-display: swap;
+    src: url('../fonts/cormorant-garamond-italic-latin-ext.woff2') format('woff2');
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+    font-family: 'Cormorant Garamond';
+    font-style: italic;
+    font-weight: 400 600;
+    font-display: swap;
+    src: url('../fonts/cormorant-garamond-italic-latin.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+    font-family: 'Lora';
+    font-style: normal;
+    font-weight: 400 600;
+    font-display: swap;
+    src: url('../fonts/lora-latin-ext.woff2') format('woff2');
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+    font-family: 'Lora';
+    font-style: normal;
+    font-weight: 400 600;
+    font-display: swap;
+    src: url('../fonts/lora-latin.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-heading: 'Cormorant Garamond', serif;
+    --font-sans: 'Lora', serif;
+
+    --color-paper: #efe7d6;
+    --color-card: #fbf7ee;
+    --color-card-input: #fffdf8;
+    --color-card-unread: #fffaf0;
+    --color-charcoal: #2a2622;
+
+    --color-ink: #201f1d;
+    --color-ink-2: #444141;
+    --color-muted: #605d5d;
+    --color-cream-on-dark: #f3ece0;
+
+    --color-red: #c62f26;
+    --color-red-deep: #9e241d;
+
+    --color-gold: #b68235;
+    --color-gold-light: #e1ad66;
+    --color-gold-ink: #7d5411;
+
+    --color-rule: rgb(32 31 29 / .16);
+    --color-rule-strong: rgb(32 31 29 / .26);
+
+    --color-status-pending: #b68235;
+    --color-status-approved: #7d5411;
+    --color-status-rejected: #9e241d;
+    --color-status-info: #444141;
+
+    --shadow-sm: 0 1px 2px rgba(45,43,43,.14);
+    --shadow-md: 0 3px 10px rgba(45,43,43,.16);
+    --shadow-lg: 0 12px 32px rgba(45,43,43,.22);
+
+    --animate-spin-slow: spin 6s linear infinite;
+}
+
+@layer base {
+    body {
+        @apply bg-paper font-sans text-ink;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        @apply font-heading font-normal;
+    }
+
+    :focus-visible {
+        outline: 2px solid var(--color-gold);
+        outline-offset: 2px;
+    }
+}
+
+@utility photo-grade {
+    filter: sepia(0.22) saturate(0.85) contrast(1.05);
+}
+
+@utility photo-grade-strong {
+    filter: sepia(0.3) saturate(0.75) contrast(1.05);
 }

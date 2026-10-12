@@ -1,0 +1,25 @@
+@props([
+    'title' => null,
+    'audience' => null,
+])
+
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <x-global.head :title="$title">{{ $head ?? '' }}</x-global.head>
+</head>
+<body class="flex min-h-screen flex-col">
+    <a href="#main" class="sr-only z-80 bg-card px-4 py-2 text-sm text-red focus:not-sr-only focus:fixed focus:top-3 focus:left-3">{{ __('app.a11y.skip_to_content') }}</a>
+
+    <x-global.header :audience="$audience" />
+
+    <main id="main" class="flex-1">
+        {{ $slot }}
+    </main>
+
+    <x-global.footer />
+    <x-global.flash />
+    <x-global.loading-overlay />
+    <x-global.back-to-top />
+</body>
+</html>

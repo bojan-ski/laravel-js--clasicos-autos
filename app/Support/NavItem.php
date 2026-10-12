@@ -1,0 +1,34 @@
+<?php
+
+namespace App\Support;
+
+use App\Contracts\NavCounter;
+use App\Enums\NavAudience;
+use App\Enums\NavCountStyle;
+use InvalidArgumentException;
+
+final readonly class NavItem
+{
+    /**
+     * @param  list<NavAudience>  $audiences
+     * @param  class-string<NavCounter>|null  $counter
+     */
+    public function __construct(
+        public string $key,
+        public string $labelKey,
+        public string $route,
+        public string $activePattern,
+        public array $audiences,
+        public ?string $counter = null,
+        public ?NavCountStyle $countStyle = null,
+    ) {
+        if (($counter === null) !== ($countStyle === null)) {
+            throw new InvalidArgumentException("Nav item [{$key}] must set both a counter and a count style, or neither.");
+        }
+    }
+
+    public function isFor(NavAudience $audience): bool
+    {
+        return in_array($audience, $this->audiences, true);
+    }
+}
