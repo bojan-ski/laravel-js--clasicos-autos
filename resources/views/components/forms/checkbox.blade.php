@@ -18,7 +18,7 @@
                @if ($required) aria-required="true" @endif
                @if ($hasError) aria-invalid="true" aria-describedby="{{ $errorId }}" @endif
                {{ $attributes->class(['size-4 shrink-0 accent-red']) }}>
-        <span>{{ $slot }}</span>
+        <span>{{ $slot }}@if ($required) <span aria-hidden="true">*</span>@endif</span>
     </label>
     @if ($hasError)
         <p id="{{ $errorId }}" class="text-xs text-red-deep">{{ $errors->first($name) }}</p>

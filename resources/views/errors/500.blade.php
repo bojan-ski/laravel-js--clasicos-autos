@@ -9,10 +9,10 @@
         body { margin: 0; min-height: 100vh; display: flex; flex-direction: column; background: #efe7d6; color: #201f1d; font-family: Georgia, 'Times New Roman', serif; }
         a:focus-visible { outline: 2px solid #b68235; outline-offset: 2px; }
         .bar { border-bottom: 1px solid rgb(32 31 29 / .16); padding: 16px 20px; }
-        .wordmark { font-style: italic; font-size: 24px; color: #c62f26; text-decoration: none; }
+        .wordmark { font-style: italic; font-size: 24px; color: #c22d24; text-decoration: none; }
         main { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 48px 20px 64px; text-align: center; }
-        .stamp { width: 150px; height: 180px; border: 2px dashed #c62f26; padding: 6px; transform: rotate(-3deg); }
-        .stamp-inner { width: 100%; height: 100%; border: 1px solid #c62f26; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #c62f26; }
+        .stamp { width: 150px; height: 180px; border: 2px dashed #c22d24; padding: 6px; transform: rotate(-3deg); }
+        .stamp-inner { width: 100%; height: 100%; border: 1px solid #c22d24; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #c22d24; }
         .stamp-label { font-size: 11px; letter-spacing: .2em; text-transform: uppercase; }
         .stamp-code { font-size: 64px; line-height: 1; font-variant-numeric: tabular-nums; }
         h1 { margin: 12px 0 0; font-size: 38px; font-weight: 400; }
@@ -20,7 +20,7 @@
         .actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 6px; }
         .btn { display: inline-flex; align-items: center; min-height: 48px; padding: 12px 24px; border: 1px solid rgb(32 31 29 / .16); border-radius: 2px; color: #201f1d; font-size: 16px; text-decoration: none; transition: background-color 150ms; }
         .btn:hover { background: rgb(32 31 29 / .07); }
-        .btn-primary { border-color: #c62f26; color: #c62f26; }
+        .btn-primary { border-color: #c22d24; color: #c22d24; }
         .btn-primary:hover { background: rgb(198 47 38 / .12); }
         @media (min-width: 768px) {
             .bar { padding: 20px 56px; }

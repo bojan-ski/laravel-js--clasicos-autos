@@ -21,10 +21,11 @@
         <hr aria-hidden="true" class="my-7 border-t-2 border-dashed border-gold">
 
         <x-auth.step number="II" :title="__('app.auth.forgot.step_two')">
+            <x-forms.required-note />
             <x-forms.field name="password" type="password" autocomplete="new-password" required
-                           :label="__('app.account.password.password')" :placeholder="__('app.account.password.password_placeholder')" />
+                           :label="__('app.account.password.password')" :hint="__('app.account.password.password_placeholder')" />
             <x-forms.field name="password_confirmation" type="password" autocomplete="new-password" required
-                           :label="__('app.account.password.password_confirmation')" :placeholder="__('app.account.password.password_confirmation_placeholder')" />
+                           :label="__('app.account.password.password_confirmation')" />
             <x-ui.button type="submit" size="lg" class="w-full">{{ __('app.auth.reset.submit') }}</x-ui.button>
         </x-auth.step>
     </form>

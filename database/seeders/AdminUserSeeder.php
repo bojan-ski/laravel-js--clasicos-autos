@@ -34,6 +34,10 @@ class AdminUserSeeder extends Seeder
             return;
         }
 
+        if (User::query()->where('username', $admin['username'])->exists()) {
+            throw new RuntimeException("The username \"{$admin['username']}\" is already taken; refusing to seed the admin.");
+        }
+
         $user = new User([
             'username' => $admin['username'],
             'email' => $email,

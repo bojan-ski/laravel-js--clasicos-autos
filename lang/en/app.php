@@ -48,6 +48,10 @@ return [
 
     'back_link' => 'Back',
 
+    'forms' => [
+        'required_note' => '* Required',
+    ],
+
     'cookie_banner' => [
         'label' => 'Cookie notice',
         'notice' => 'Clásicos Autos uses only the cookies it needs to work: your session, form security and the remember-me option. No analytics, no advertising.',
@@ -213,16 +217,15 @@ return [
             'stamp_country' => 'Cuba',
             'stamp_year' => '1950',
             'stamp_post' => 'Correos',
-            'username' => 'Enter your username *',
+            'username' => 'Enter your username',
             'username_placeholder' => 'max 64 characters',
-            'email' => 'Enter your email *',
+            'email' => 'Enter your email',
             'email_placeholder' => 'max 64 characters',
-            'phone_number' => 'Enter your phone number *',
+            'phone_number' => 'Enter your phone number',
             'phone_number_placeholder' => 'max 20 characters',
-            'password' => 'Enter your password *',
+            'password' => 'Enter your password',
             'password_placeholder' => 'min 6 characters',
-            'password_confirmation' => 'Confirm your password *',
-            'password_confirmation_placeholder' => 'min 6 characters',
+            'password_confirmation' => 'Confirm your password',
             'agree' => 'I agree with the',
             'terms' => 'Terms & Conditions',
             'privacy' => 'Privacy Policy',
@@ -248,6 +251,7 @@ return [
             'title' => 'Reset password',
             'email' => 'Email',
             'submit' => 'Reset password',
+            'invalid_title' => 'Invalid reset link',
             'invalid' => 'This link is invalid or has expired',
             'request_new' => 'Request a new link',
         ],
@@ -279,7 +283,6 @@ return [
             'password' => 'Enter your new password',
             'password_placeholder' => 'min 6 characters',
             'password_confirmation' => 'Confirm your new password',
-            'password_confirmation_placeholder' => 'min 6 characters',
             'submit' => 'Change password',
             'invalid' => 'Invalid password',
             'updated' => 'Password updated',

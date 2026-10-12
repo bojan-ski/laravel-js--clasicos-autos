@@ -18,6 +18,7 @@
 
         <form method="POST" action="{{ route('register.store') }}" novalidate class="flex flex-col gap-4.5">
             @csrf
+            <x-forms.required-note />
             <div class="grid gap-4.5 md:grid-cols-2 md:gap-x-5">
                 <x-forms.field name="username" autocomplete="username" required
                                :label="__('app.auth.register.username')" :placeholder="__('app.auth.register.username_placeholder')" />
@@ -28,17 +29,17 @@
                                    :label="__('app.auth.register.phone_number')" :placeholder="__('app.auth.register.phone_number_placeholder')" />
                 </div>
                 <x-forms.field name="password" type="password" autocomplete="new-password" required
-                               :label="__('app.auth.register.password')" :placeholder="__('app.auth.register.password_placeholder')" />
+                               :label="__('app.auth.register.password')" :hint="__('app.auth.register.password_placeholder')" />
                 <x-forms.field name="password_confirmation" type="password" autocomplete="new-password" required
-                               :label="__('app.auth.register.password_confirmation')" :placeholder="__('app.auth.register.password_confirmation_placeholder')" />
+                               :label="__('app.auth.register.password_confirmation')" />
             </div>
 
             <div class="flex flex-col border-t border-rule pt-3 md:flex-row md:gap-7 md:pt-4">
                 <x-forms.checkbox name="terms_and_conditions" required>
-                    {{ __('app.auth.register.agree') }} <a href="{{ route('legal.terms') }}" class="text-red underline underline-offset-2">{{ __('app.auth.register.terms') }}</a> *
+                    {{ __('app.auth.register.agree') }} <a href="{{ route('legal.terms') }}" class="text-red underline underline-offset-2">{{ __('app.auth.register.terms') }}</a>
                 </x-forms.checkbox>
                 <x-forms.checkbox name="privacy_policy" required>
-                    {{ __('app.auth.register.agree') }} <a href="{{ route('legal.privacy') }}" class="text-red underline underline-offset-2">{{ __('app.auth.register.privacy') }}</a> *
+                    {{ __('app.auth.register.agree') }} <a href="{{ route('legal.privacy') }}" class="text-red underline underline-offset-2">{{ __('app.auth.register.privacy') }}</a>
                 </x-forms.checkbox>
             </div>
 

@@ -58,6 +58,20 @@ class AppShellTest extends TestCase
             ->assertDontSee(__('app.nav.home'));
     }
 
+    public function test_the_wordmark_is_gold_light_on_the_dark_admin_bar_and_red_on_paper(): void
+    {
+        $dark = (string) $this->blade('<x-global.music-toggle :on-dark="true" />');
+        $light = (string) $this->blade('<x-global.music-toggle />');
+
+        $this->assertMatchesRegularExpression('/<button[^>]*data-music-toggle[^>]*class="[^"]*\btext-gold-light\b/', $dark);
+        $this->assertDoesNotMatchRegularExpression('/<button[^>]*data-music-toggle[^>]*class="[^"]*\btext-red\b/', $dark);
+        $this->assertStringContainsString('data-[state=on]:text-gold-light', $dark);
+        $this->assertStringNotContainsString('data-[state=on]:text-red', $dark);
+
+        $this->assertMatchesRegularExpression('/<button[^>]*data-music-toggle[^>]*class="[^"]*\btext-red\b/', $light);
+        $this->assertStringContainsString('data-[state=on]:text-red', $light);
+    }
+
     public function test_admin_layout_forces_the_admin_header(): void
     {
         $this->actingAs(User::factory()->make());

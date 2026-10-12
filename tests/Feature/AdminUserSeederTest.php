@@ -56,28 +56,46 @@ class AdminUserSeederTest extends TestCase
     }
 
     /**
-     * @return array<string, array{?string, ?string}>
+     * @return array<string, array{?string, ?string, string}>
      */
     public static function missingCredentials(): array
     {
+        $noEmail = 'ADMIN_EMAIL is not set; refusing to seed the admin.';
+        $badPassword = 'ADMIN_PASSWORD is missing or shorter than 6 characters; refusing to seed the admin.';
+
         return [
-            'missing email' => [null, 'initial1'],
-            'missing password' => ['boss@example.com', null],
-            'short password' => ['boss@example.com', 'five5'],
+            'missing email' => [null, 'initial1', $noEmail],
+            'missing password' => ['boss@example.com', null, $badPassword],
+            'short password' => ['boss@example.com', 'five5', $badPassword],
         ];
     }
 
     #[DataProvider('missingCredentials')]
-    public function test_it_refuses_to_seed_without_valid_credentials(?string $email, ?string $password): void
+    public function test_it_refuses_to_seed_without_valid_credentials(?string $email, ?string $password, string $message): void
     {
         config(['auth.admin.email' => $email, 'auth.admin.password' => $password]);
 
+        $refusal = null;
+
         try {
             $this->seed(AdminUserSeeder::class);
-            $this->fail('The seeder ran without valid admin credentials.');
-        } catch (RuntimeException) {
+        } catch (RuntimeException $exception) {
+            $refusal = $exception;
         }
 
+        $this->assertNotNull($refusal, 'The seeder ran without valid admin credentials.');
+        $this->assertSame($message, $refusal->getMessage());
         $this->assertDatabaseCount('users', 0);
+    }
+
+    public function test_it_refuses_with_a_clear_message_when_the_admin_username_is_taken(): void
+    {
+        User::factory()->create(['username' => 'admin user']);
+        config(['auth.admin.email' => 'boss@example.com', 'auth.admin.password' => 'initial1']);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('The username "admin user" is already taken; refusing to seed the admin.');
+
+        $this->seed(AdminUserSeeder::class);
     }
 }

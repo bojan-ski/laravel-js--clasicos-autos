@@ -3,6 +3,7 @@
         <form method="POST" action="{{ route('password.email') }}" novalidate>
             @csrf
             <x-auth.step number="I" :title="__('app.auth.forgot.step_one')">
+                <x-forms.required-note />
                 <x-forms.field name="email" type="email" autocomplete="email" required
                                :label="__('app.auth.forgot.email')" :placeholder="__('app.auth.forgot.email_placeholder')" />
                 <x-ui.button type="submit" size="lg" class="w-full">{{ __('app.auth.forgot.submit') }}</x-ui.button>

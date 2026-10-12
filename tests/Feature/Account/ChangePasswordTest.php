@@ -4,6 +4,7 @@ namespace Tests\Feature\Account;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
@@ -131,6 +132,50 @@ class ChangePasswordTest extends TestCase
 
         $this->assertMatchesRegularExpression('/<input id="old_password"[^>]*aria-invalid="true" aria-describedby="old_password-error"/', $content);
         $this->assertDoesNotMatchRegularExpression('/<input id="delete_password"[^>]*aria-invalid/', $content);
+    }
+
+    public function test_a_password_change_ends_an_existing_remember_me_cookie(): void
+    {
+        $user = User::factory()->create();
+        $recaller = Auth::guard('web')->getRecallerName();
+        $cookie = $this->post(route('login.store'), ['email' => $user->email, 'password' => 'password', 'remember' => '1'])
+            ->getCookie($recaller)
+            ->getValue();
+
+        $this->signOutKeepingOnly($recaller, $cookie);
+        $this->get(route('profile'))->assertOk();
+
+        $this->put(route('profile.password.update'), [
+            'old_password' => 'password',
+            'password' => 'new-secret',
+            'password_confirmation' => 'new-secret',
+        ])->assertSessionHasNoErrors();
+
+        $this->signOutKeepingOnly($recaller, $cookie);
+        $this->get(route('profile'))->assertRedirect(route('login'));
+        $this->assertGuest();
+    }
+
+    #[DataProvider('roles')]
+    public function test_the_new_password_carries_a_persistent_length_hint_and_the_form_its_required_note(string $role, string $route, string $page): void
+    {
+        $content = $this->actingAs($this->userFor($role))
+            ->get(route($page))
+            ->assertOk()
+            ->assertSee('<p id="password-hint" class="text-xs text-muted">'.__('app.account.password.password_placeholder').'</p>', false)
+            ->assertSee('<p aria-hidden="true" class="text-xs text-muted">'.__('app.forms.required_note').'</p>', false)
+            ->getContent();
+
+        $this->assertMatchesRegularExpression('/<input id="password"[^>]*aria-describedby="password-hint"/', $content);
+        $this->assertDoesNotMatchRegularExpression('/<input id="password"[^>]*placeholder=/', $content);
+        $this->assertDoesNotMatchRegularExpression('/<input id="password_confirmation"[^>]*placeholder=/', $content);
+    }
+
+    private function signOutKeepingOnly(string $name, string $value): void
+    {
+        $this->app['auth']->forgetGuards();
+        $this->flushSession();
+        $this->withCookie($name, $value);
     }
 
     private function userFor(string $role): User

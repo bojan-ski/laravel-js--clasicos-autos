@@ -14,4 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initLoadingOverlay()
     initDialogs()
     initCookieBanner()
+
+    document.querySelector('[aria-invalid="true"]')?.focus()
 })

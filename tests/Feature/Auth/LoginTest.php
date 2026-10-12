@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
@@ -44,6 +45,14 @@ class LoginTest extends TestCase
             ->assertSee('name="remember" type="checkbox" value="1"', false)
             ->assertSee('href="'.route('register').'"', false)
             ->assertSee('href="'.route('password.request').'"', false);
+    }
+
+    public function test_login_marks_both_required_fields_and_explains_the_marker(): void
+    {
+        $content = (string) $this->get(route('login'))->getContent();
+
+        $this->assertSame(2, substr_count($content, '<span aria-hidden="true">*</span>'));
+        $this->assertStringContainsString('<p aria-hidden="true" class="text-xs text-muted">'.__('app.forms.required_note').'</p>', $content);
     }
 
     /**
@@ -182,6 +191,35 @@ class LoginTest extends TestCase
             ->assertRedirect(route('login'))
             ->assertSessionHasErrors(['email' => __('app.auth.login.suspended_indefinitely', ['reason' => $user->suspension_reason])]);
 
+        $this->assertGuest();
+    }
+
+    /**
+     * @return array<string, array{array<string, string>, string}>
+     */
+    public static function invalidInput(): array
+    {
+        return [
+            'missing email' => [['password' => 'password'], 'email'],
+            'malformed email' => [['email' => 'not-an-email', 'password' => 'password'], 'email'],
+            'email of 65 characters' => [['email' => str_repeat('a', 53).'@example.com', 'password' => 'password'], 'email'],
+            'missing password' => [['email' => 'ada@example.com'], 'password'],
+        ];
+    }
+
+    /**
+     * @param  array<string, string>  $input
+     */
+    #[DataProvider('invalidInput')]
+    public function test_invalid_login_input_fails_on_the_field_without_counting_an_attempt(array $input, string $field): void
+    {
+        $this->from('https://evil.example/phish')
+            ->post(route('login.store'), $input)
+            ->assertRedirect(route('login'))
+            ->assertInvalid([$field])
+            ->assertSessionDoesntHaveErrors($field === 'email' ? 'password' : 'email');
+
+        $this->assertSame(0, RateLimiter::attempts(Str::lower($input['email'] ?? '').'|127.0.0.1'));
         $this->assertGuest();
     }
 
