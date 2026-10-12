@@ -8,7 +8,7 @@
     $onDark = $audience === \App\Enums\NavAudience::Admin;
     $variant = match ($action->style) {
         \App\Enums\HeaderActionStyle::Primary => 'primary',
-        \App\Enums\HeaderActionStyle::Secondary => 'secondary',
+        \App\Enums\HeaderActionStyle::Secondary => $onDark ? 'secondary-dark' : 'secondary',
         \App\Enums\HeaderActionStyle::Ghost => $onDark ? 'ghost-dark' : 'ghost',
         \App\Enums\HeaderActionStyle::Avatar => null,
     };

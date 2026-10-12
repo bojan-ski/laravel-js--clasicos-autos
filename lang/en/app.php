@@ -25,6 +25,7 @@ return [
         'sign_in' => 'Sign in',
         'register' => 'Register',
         'profile' => 'Your profile',
+        'account' => 'Account',
         'log_out' => 'Log out',
     ],
 
@@ -234,12 +235,46 @@ return [
         ],
     ],
 
+    'account' => [
+        'password' => [
+            'title' => 'Password',
+            'old_password' => 'Old password',
+            'old_password_placeholder' => 'Enter your old password',
+            'password' => 'Enter your new password',
+            'password_placeholder' => 'min 6 characters',
+            'password_confirmation' => 'Confirm your new password',
+            'password_confirmation_placeholder' => 'min 6 characters',
+            'submit' => 'Change password',
+            'invalid' => 'Invalid password',
+            'updated' => 'Password updated',
+        ],
+    ],
+
     'profile' => [
+        'kicker' => 'Mi cuenta',
         'heading' => 'Welcome :username',
+        'details' => [
+            'title' => 'Account',
+            'username' => 'Username:',
+            'email' => 'Email:',
+            'phone_number' => 'Phone number:',
+            'created_at' => 'Account created:',
+        ],
+        'delete' => [
+            'open' => 'Delete Account',
+            'title' => 'Are you sure you want to delete your account ?',
+            'password' => 'Password',
+            'password_placeholder' => 'Enter your password to confirm account delete',
+            'cancel' => 'Cancel',
+            'confirm' => 'Delete Account',
+            'failed' => 'Password is incorrect, account deletion failed.',
+            'deleted' => 'Your account has been deleted.',
+        ],
     ],
 
     'admin' => [
         'account' => [
+            'kicker' => 'Mi cuenta',
             'title' => 'Account',
         ],
     ],

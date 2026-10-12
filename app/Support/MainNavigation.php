@@ -66,7 +66,10 @@ class MainNavigation
                 new HeaderAction('profile', $user?->initials() ?? '', route('profile'), 'GET', HeaderActionStyle::Avatar, __('app.header.profile')),
                 $logOut,
             ],
-            NavAudience::Admin => [$logOut],
+            NavAudience::Admin => [
+                new HeaderAction('account', __('app.header.account'), route('admin.account'), 'GET', HeaderActionStyle::Secondary),
+                $logOut,
+            ],
         };
     }
 
