@@ -18,8 +18,12 @@
         <x-ui.button type="submit" size="lg" class="w-full">{{ __('app.auth.login.submit') }}</x-ui.button>
     </form>
 
-    <x-auth.switch-link class="border-t border-rule pt-4"
-                        :prompt="__('app.auth.login.switch_prompt')"
-                        :label="__('app.auth.login.switch_link')"
-                        :href="route('register')" />
+    <div class="flex flex-col gap-2 border-t border-rule pt-4">
+        <x-auth.switch-link :prompt="__('app.auth.login.switch_prompt')"
+                            :label="__('app.auth.login.switch_link')"
+                            :href="route('register')" />
+        <x-auth.switch-link :prompt="__('app.auth.login.reset_prompt')"
+                            :label="__('app.auth.login.reset_link')"
+                            :href="route('password.request')" />
+    </div>
 </div>

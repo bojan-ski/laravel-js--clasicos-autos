@@ -5,6 +5,7 @@ namespace Tests\Feature\Account;
 use App\Models\User;
 use App\Services\AccountDeletionService;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Facades\Password;
 use LogicException;
 use Tests\TestCase;
 
@@ -21,6 +22,19 @@ class AccountDeletionServiceTest extends TestCase
 
         $this->assertModelMissing($user);
         $this->assertModelExists($other);
+    }
+
+    public function test_it_removes_the_users_pending_reset_token(): void
+    {
+        $user = User::factory()->create();
+        $other = User::factory()->create();
+        Password::broker()->createToken($user);
+        Password::broker()->createToken($other);
+
+        app(AccountDeletionService::class)->delete($user);
+
+        $this->assertDatabaseMissing('password_reset_tokens', ['email' => $user->email]);
+        $this->assertDatabaseHas('password_reset_tokens', ['email' => $other->email]);
     }
 
     public function test_it_refuses_to_delete_an_admin(): void
