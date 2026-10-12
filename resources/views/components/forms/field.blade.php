@@ -20,7 +20,7 @@
            @if ($inputValue !== null) value="{{ $inputValue }}" @endif
            @if ($placeholder !== null) placeholder="{{ $placeholder }}" @endif
            @if ($autocomplete !== null) autocomplete="{{ $autocomplete }}" @endif
-           @if ($required) aria-required="true" @endif
+           @if ($required) required aria-required="true" @endif
            @if ($hasError) aria-invalid="true" aria-describedby="{{ $errorId }}" @endif
            {{ $attributes->class([
                'h-12 w-full rounded-xs border bg-card-input px-3 text-base text-ink placeholder:text-muted md:h-10.5 md:text-sm',

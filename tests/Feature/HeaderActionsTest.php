@@ -30,7 +30,7 @@ class HeaderActionsTest extends TestCase
 
         $this->assertSame(['sign-in', 'register'], $this->keys($navigation->actionsFor(NavAudience::Guest, null)));
         $this->assertSame(['profile', 'log-out'], $this->keys($navigation->actionsFor(NavAudience::Member, User::factory()->make())));
-        $this->assertSame(['log-out'], $this->keys($navigation->actionsFor(NavAudience::Admin, User::factory()->admin()->make())));
+        $this->assertSame(['account', 'log-out'], $this->keys($navigation->actionsFor(NavAudience::Admin, User::factory()->admin()->make())));
     }
 
     public function test_guest_header_links_to_sign_in_and_register(): void
@@ -52,12 +52,13 @@ class HeaderActionsTest extends TestCase
             ->assertDontSee('href="'.route('login').'"', false);
     }
 
-    public function test_admin_header_has_only_the_log_out_form(): void
+    public function test_admin_header_has_the_account_link_then_the_log_out_form(): void
     {
         $this->actingAs(User::factory()->admin()->make())
             ->get(route('home'))
             ->assertSee('data-header-variant="admin"', false)
-            ->assertSee('<form method="POST" action="'.route('logout').'"', false)
+            ->assertSeeInOrder(['href="'.route('admin.account').'"', __('app.header.account'), '<form method="POST" action="'.route('logout').'"'], false)
+            ->assertSee('text-cream-on-dark hover:bg-cream-on-dark/10', false)
             ->assertDontSee('href="'.route('profile').'"', false)
             ->assertDontSee('href="'.route('login').'"', false);
     }

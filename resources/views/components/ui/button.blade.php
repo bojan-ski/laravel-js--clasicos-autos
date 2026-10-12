@@ -9,6 +9,7 @@
     $variants = [
         'primary' => 'border-red text-red hover:bg-red/12 active:bg-red/22',
         'secondary' => 'border-rule text-ink hover:bg-ink/7 active:bg-ink/14',
+        'secondary-dark' => 'border-cream-on-dark/50 text-cream-on-dark hover:bg-cream-on-dark/10 active:bg-cream-on-dark/18',
         'ghost' => 'border-transparent text-muted hover:bg-red/10 active:bg-red/18',
         'ghost-dark' => 'border-gold text-cream-on-dark hover:bg-gold/15 active:bg-gold/25',
         'destructive' => 'border-red-deep text-red-deep hover:bg-red-deep/12 active:bg-red-deep/22',
