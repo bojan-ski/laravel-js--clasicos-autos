@@ -3,6 +3,7 @@
 namespace Tests\Support;
 
 use App\Models\CarListing;
+use App\Models\User;
 use Illuminate\Routing\Route;
 use LogicException;
 
@@ -28,6 +29,10 @@ final class RouteParameterMap
 
         if (in_array($name, ['listings.show', 'compare.add', 'compare.remove', 'bookmarks.store', 'bookmarks.destroy'], true)) {
             return ['listing' => (string) CarListing::factory()->approved()->create()->id];
+        }
+
+        if ($name === 'users.listings') {
+            return ['user' => (string) User::factory()->create()->id];
         }
 
         if (! array_key_exists($name, self::MAP)) {
