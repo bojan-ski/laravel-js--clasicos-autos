@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Enums\HeaderActionStyle;
 use App\Enums\NavAudience;
+use App\Enums\NavCountStyle;
 use App\Models\User;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Routing\Router;
@@ -23,6 +24,7 @@ class MainNavigation
         return [
             new NavItem('home', 'app.nav.home', 'home', 'home', [NavAudience::Guest, NavAudience::Member]),
             new NavItem('listings', 'app.nav.listings', 'listings.index', 'listings.*', [NavAudience::Guest, NavAudience::Member]),
+            new NavItem('compare', 'app.nav.compare', 'compare.show', 'compare.*', [NavAudience::Guest, NavAudience::Member], CompareCounter::class, NavCountStyle::Selected),
         ];
     }
 

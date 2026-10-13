@@ -4,6 +4,7 @@ namespace Tests\Feature\Consolidation\StageB;
 
 use App\Models\CarListing;
 use App\Models\User;
+use App\Services\CompareService;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Routing\Route;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -16,7 +17,7 @@ class PublicVisibilitySweepTest extends TestCase
 {
     use LazilyRefreshDatabase;
 
-    private const array LISTING_PAGES = ['home', 'listings.index', 'listings.advanced', 'listings.show'];
+    private const array LISTING_PAGES = ['home', 'listings.index', 'listings.advanced', 'listings.show', 'compare.show'];
 
     private const array PAGES_WITHOUT_LISTINGS = ['legal.privacy', 'legal.terms', 'legal.cookies'];
 
@@ -62,19 +63,23 @@ class PublicVisibilitySweepTest extends TestCase
         CarListing::factory()->approved()->count(3)->create();
         $owner = User::factory()->create();
         $ahead = now()->addDay();
-        CarListing::factory()->for($owner, 'owner')->create(['name' => self::MARKERS['pending'], 'created_at' => $ahead]);
-        CarListing::factory()->rejected()->for($owner, 'owner')->create(['name' => self::MARKERS['rejected'], 'created_at' => $ahead]);
-        CarListing::factory()->approved()->for(User::factory()->suspended(), 'owner')->create(['name' => self::MARKERS['suspended owner'], 'created_at' => $ahead]);
+        $markerIds = [
+            CarListing::factory()->for($owner, 'owner')->create(['name' => self::MARKERS['pending'], 'created_at' => $ahead])->id,
+            CarListing::factory()->rejected()->for($owner, 'owner')->create(['name' => self::MARKERS['rejected'], 'created_at' => $ahead])->id,
+            CarListing::factory()->approved()->for(User::factory()->suspended(), 'owner')->create(['name' => self::MARKERS['suspended owner'], 'created_at' => $ahead])->id,
+        ];
 
         match ($actor) {
             'guest' => null,
             'owner' => $this->actingAs($owner),
             'admin' => $this->actingAs(User::factory()->admin()->create()),
         };
-
         $leaks = [];
 
         foreach ($this->publicGetRoutes() as $name => $route) {
+            $this->withSession([CompareService::SESSION_KEY => $markerIds]);
+            $this->assertSame($markerIds, $this->app['session.store']->get(CompareService::SESSION_KEY));
+
             $response = $this->get(route($name, RouteParameterMap::parametersFor($route)));
 
             if ($response->status() !== 200) {

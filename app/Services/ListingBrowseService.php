@@ -130,7 +130,7 @@ class ListingBrowseService
     {
         return CarListing::query()
             ->publiclyVisible()
-            ->with(['maker', 'primaryImage'])
+            ->with(['owner', 'maker', 'primaryImage'])
             ->orderByDesc('created_at')
             ->orderByDesc('id');
     }

@@ -33,5 +33,8 @@
 
     <div class="mt-auto flex items-center gap-2">
         <x-ui.button variant="primary" size="responsive" class="mr-auto" :href="$detailsUrl()">{{ __('app.listings.card.details') }}<span class="sr-only"> {{ $listing->name }}</span></x-ui.button>
+        @can('compare', $listing)
+            <x-listings.compare-button :listing="$listing" />
+        @endcan
     </div>
 </article>

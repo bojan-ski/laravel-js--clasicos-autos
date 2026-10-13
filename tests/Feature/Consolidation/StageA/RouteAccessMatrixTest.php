@@ -34,7 +34,7 @@ class RouteAccessMatrixTest extends TestCase
     {
         $routes = ApplicationRoutes::named();
 
-        $this->assertCount(22, $routes);
+        $this->assertCount(26, $routes);
 
         $bands = [];
 
@@ -46,7 +46,7 @@ class RouteAccessMatrixTest extends TestCase
         $census = array_count_values($bands);
         ksort($census);
 
-        $this->assertSame(['admin' => 2, 'auth' => 1, 'guest' => 8, 'profile' => 3, 'public' => 8], $census);
+        $this->assertSame(['admin' => 2, 'auth' => 1, 'guest' => 8, 'profile' => 3, 'public' => 12], $census);
         $this->assertSame([], array_filter($bands, fn (string $band, string $name): bool => Str::startsWith($name, 'admin.') !== ($band === RouteBand::Admin->value), ARRAY_FILTER_USE_BOTH));
     }
 
@@ -162,7 +162,7 @@ class RouteAccessMatrixTest extends TestCase
         }
 
         if ($band === RouteBand::Public) {
-            return $response->status() === 204;
+            return $response->status() === 204 || ($response->isRedirect() && ! $response->isRedirect(route('login')));
         }
 
         return $response->status() < 500

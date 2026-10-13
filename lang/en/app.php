@@ -17,6 +17,7 @@ return [
     'nav' => [
         'home' => 'Home',
         'listings' => 'Listings',
+        'compare' => 'Compare',
     ],
 
     'pagination' => [
@@ -510,6 +511,50 @@ return [
                 'fair' => 'Fair',
                 'needs_restoration' => 'Needs Restoration',
             ],
+        ],
+    ],
+
+    'compare' => [
+        'title' => 'Compare Car Listings',
+        'clear_all' => 'Clear All',
+        'versus' => 'vs.',
+        'remove' => 'Remove',
+        'empty' => 'No car listings were selected for comparison',
+        'differs' => 'differs',
+        'button' => [
+            'label' => 'Compare :name',
+        ],
+        'flash' => [
+            'added' => 'Car listings added for compare',
+            'full' => 'Only two listings can be compared!',
+            'removed' => 'Car listings removed from compare',
+            'cleared' => 'Selected listings removed.',
+        ],
+        'rows' => [
+            'model' => 'Model',
+            'car_maker' => 'Car Maker',
+            'year' => 'Year',
+            'mileage' => 'Mileage',
+            'exterior_color' => 'Exterior Color',
+            'interior_color' => 'Interior Color',
+            'transmission' => 'Transmission',
+            'fuel_type' => 'Fuel Type',
+            'engine_size' => 'Engine Size',
+            'engine_type' => 'Engine Type',
+            'odometer' => 'Odometer',
+            'exterior_condition' => 'Exterior Condition',
+            'interior_condition' => 'Interior Condition',
+            'seat_material' => 'Seat Material',
+            'engine_history' => 'Engine History',
+            'engine_condition' => 'Engine Condition',
+            'price' => 'Price',
+            'location_city' => 'Location City',
+            'location_state' => 'Location State',
+            'body_type' => 'Body Type',
+            'restoration_history' => 'Restoration History',
+            'original_parts_percentage' => 'Original Parts (%)',
+            'license_plate_type' => 'License Plate Type',
+            'documentation_status' => 'Documentation',
         ],
     ],
 
