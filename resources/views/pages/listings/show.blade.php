@@ -12,8 +12,13 @@
                     <x-ui.kicker>{{ $specs->kicker() }}</x-ui.kicker>
                     <h1 class="text-[38px] leading-none text-red italic wrap-break-word md:text-[60px]">{{ $listing->name }}</h1>
                 </div>
-                <div class="hidden shrink-0 md:block">
-                    <x-listings.price-stamp :price="$specs->price()" />
+                <div class="flex shrink-0 items-start gap-4">
+                    @can('compare', $listing)
+                        <x-listings.compare-button :listing="$listing" />
+                    @endcan
+                    <div class="hidden shrink-0 md:block">
+                        <x-listings.price-stamp :price="$specs->price()" />
+                    </div>
                 </div>
             </div>
 

@@ -13,6 +13,11 @@ class CarListingPolicy
         return $this->isVisibleTo($user, $listing) ? Response::allow() : Response::denyAsNotFound();
     }
 
+    public function compare(?User $user, CarListing $listing): Response
+    {
+        return $this->isPublic($listing) ? Response::allow() : Response::denyAsNotFound();
+    }
+
     public function create(User $user): bool
     {
         return $user->isAppUser() && ! $user->isSuspended();

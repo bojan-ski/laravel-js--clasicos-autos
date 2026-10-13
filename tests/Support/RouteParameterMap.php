@@ -26,7 +26,7 @@ final class RouteParameterMap
 
         $name = (string) $route->getName();
 
-        if ($name === 'listings.show') {
+        if (in_array($name, ['listings.show', 'compare.add', 'compare.remove'], true)) {
             return ['listing' => (string) CarListing::factory()->approved()->create()->id];
         }
 

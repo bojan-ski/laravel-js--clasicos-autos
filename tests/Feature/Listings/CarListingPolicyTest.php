@@ -34,6 +34,10 @@ class CarListingPolicyTest extends TestCase
                 'pending' => [404, 'allow', 404, 404, 'allow'],
                 'approved' => ['allow', 'allow', 'allow', 'allow', 'allow'],
             ],
+            'compare' => [
+                'pending' => [404, 404, 404, 404, 404],
+                'approved' => ['allow', 'allow', 'allow', 'allow', 'allow'],
+            ],
             'update' => $ownerOrAdmin,
             'delete' => $ownerOrAdmin,
             'approve' => $adminOnly,

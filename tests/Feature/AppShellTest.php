@@ -33,8 +33,8 @@ class AppShellTest extends TestCase
     {
         $navigation = $this->app->make(MainNavigation::class);
 
-        $this->assertSame(['home', 'listings'], array_column($navigation->linksFor(NavAudience::Guest, null), 'key'));
-        $this->assertSame(['home', 'listings'], array_column($navigation->linksFor(NavAudience::Member, User::factory()->make()), 'key'));
+        $this->assertSame(['home', 'listings', 'compare'], array_column($navigation->linksFor(NavAudience::Guest, null), 'key'));
+        $this->assertSame(['home', 'listings', 'compare'], array_column($navigation->linksFor(NavAudience::Member, User::factory()->make()), 'key'));
         $this->assertSame([], $navigation->linksFor(NavAudience::Admin, null));
     }
 
@@ -106,7 +106,7 @@ class AppShellTest extends TestCase
         $currentListingsLink = '/<a href="'.preg_quote(route('listings.index'), '/').'"\s+aria-current="page"/';
 
         $listingsPage = $this->get(route('listings.index'))
-            ->assertSeeInOrder([__('app.nav.home'), __('app.nav.listings')]);
+            ->assertSeeInOrder([__('app.nav.home'), __('app.nav.listings'), __('app.nav.compare')]);
 
         $this->assertMatchesRegularExpression($currentListingsLink, $listingsPage->getContent());
         $this->assertDoesNotMatchRegularExpression($currentListingsLink, $this->get('/')->getContent());
