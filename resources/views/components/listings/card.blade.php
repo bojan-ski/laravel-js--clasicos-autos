@@ -32,6 +32,6 @@
     </div>
 
     <div class="mt-auto flex items-center gap-2">
-        <x-ui.button variant="primary" class="mr-auto" disabled>{{ __('app.listings.card.details') }}</x-ui.button>
+        <x-ui.button variant="primary" class="mr-auto" :href="$detailsUrl()">{{ __('app.listings.card.details') }}<span class="sr-only"> {{ $listing->name }}</span></x-ui.button>
     </div>
 </article>

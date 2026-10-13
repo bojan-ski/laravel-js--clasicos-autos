@@ -3,6 +3,7 @@
 namespace App\View\Components\Listings;
 
 use App\Models\CarListing;
+use App\Support\ListingFormat;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
@@ -15,7 +16,12 @@ class Card extends Component
 
     public function price(): string
     {
-        return '$'.number_format($this->listing->price);
+        return ListingFormat::price($this->listing->price);
+    }
+
+    public function detailsUrl(): string
+    {
+        return route('listings.show', $this->listing);
     }
 
     public function posted(): string

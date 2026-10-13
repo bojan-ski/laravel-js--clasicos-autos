@@ -2,12 +2,14 @@
 
 namespace App\Services;
 
+use App\Enums\ListingStatus;
 use App\Models\CarListing;
 use App\Models\CarMaker;
 use BackedEnum;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ListingBrowseService
 {
@@ -100,6 +102,17 @@ class ListingBrowseService
     public function latest(int $limit): Collection
     {
         return $this->publicListings()->limit($limit)->get();
+    }
+
+    public function detail(CarListing $listing): CarListing
+    {
+        return $listing->load([
+            'owner' => fn (BelongsTo $owner) => $owner->withCount([
+                'listings as approved_listings_count' => fn (Builder $listings) => $listings->where($listings->qualifyColumn('status'), ListingStatus::Approved),
+            ]),
+            'maker',
+            'images',
+        ]);
     }
 
     /**

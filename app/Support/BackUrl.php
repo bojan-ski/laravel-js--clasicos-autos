@@ -14,12 +14,15 @@ final class BackUrl
 
     public function resolve(?string $fallback = null): string
     {
-        $previous = $this->url->previous();
+        $fallback ??= route('home');
+        $previous = $this->url->previous($fallback);
 
-        if (parse_url($previous, PHP_URL_HOST) === $this->request->getHost() && $previous !== $this->request->fullUrl()) {
+        if (in_array(parse_url($previous, PHP_URL_SCHEME), ['http', 'https'], true)
+            && parse_url($previous, PHP_URL_HOST) === $this->request->getHost()
+            && $previous !== $this->request->fullUrl()) {
             return $previous;
         }
 
-        return $fallback ?? route('home');
+        return $fallback;
     }
 }
