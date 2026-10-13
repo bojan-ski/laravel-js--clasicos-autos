@@ -2,12 +2,15 @@
 
 namespace Tests\Feature;
 
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Route;
 use RuntimeException;
 use Tests\TestCase;
 
 class ErrorPagesTest extends TestCase
 {
+    use LazilyRefreshDatabase;
+
     public function test_unknown_url_renders_the_custom_404(): void
     {
         $this->withoutVite()
@@ -15,6 +18,19 @@ class ErrorPagesTest extends TestCase
             ->assertNotFound()
             ->assertSee(__('app.errors.404.title'))
             ->assertSee(__('app.errors.404.stamp'));
+    }
+
+    public function test_the_404_offers_browse_listings_before_home(): void
+    {
+        $this->withoutVite()
+            ->get('/definitely-not-a-page')
+            ->assertNotFound()
+            ->assertSeeInOrder([
+                'href="'.route('listings.index').'"',
+                __('app.errors.browse_listings'),
+                'href="'.route('home').'"',
+                __('app.errors.home'),
+            ], false);
     }
 
     public function test_error_layout_renders_without_the_app_shell(): void

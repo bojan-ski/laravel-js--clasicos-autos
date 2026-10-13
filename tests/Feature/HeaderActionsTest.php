@@ -6,10 +6,13 @@ use App\Enums\NavAudience;
 use App\Models\User;
 use App\Support\HeaderAction;
 use App\Support\MainNavigation;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
 
 class HeaderActionsTest extends TestCase
 {
+    use LazilyRefreshDatabase;
+
     protected function setUp(): void
     {
         parent::setUp();

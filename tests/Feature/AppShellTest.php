@@ -8,11 +8,14 @@ use App\Enums\NavCountStyle;
 use App\Models\User;
 use App\Support\MainNavigation;
 use App\Support\NavItem;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Route;
 use Tests\TestCase;
 
 class AppShellTest extends TestCase
 {
+    use LazilyRefreshDatabase;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -30,8 +33,8 @@ class AppShellTest extends TestCase
     {
         $navigation = $this->app->make(MainNavigation::class);
 
-        $this->assertSame(['home'], array_column($navigation->linksFor(NavAudience::Guest, null), 'key'));
-        $this->assertSame(['home'], array_column($navigation->linksFor(NavAudience::Member, User::factory()->make()), 'key'));
+        $this->assertSame(['home', 'listings'], array_column($navigation->linksFor(NavAudience::Guest, null), 'key'));
+        $this->assertSame(['home', 'listings'], array_column($navigation->linksFor(NavAudience::Member, User::factory()->make()), 'key'));
         $this->assertSame([], $navigation->linksFor(NavAudience::Admin, null));
     }
 
@@ -55,7 +58,8 @@ class AppShellTest extends TestCase
         $this->blade('<x-global.header :audience="\App\Enums\NavAudience::Admin" />')
             ->assertSee('data-header-variant="admin"', false)
             ->assertSee(__('app.header.admin_tag'))
-            ->assertDontSee(__('app.nav.home'));
+            ->assertDontSee(__('app.nav.home'))
+            ->assertDontSee(__('app.nav.listings'));
     }
 
     public function test_the_wordmark_is_gold_light_on_the_dark_admin_bar_and_red_on_paper(): void
@@ -83,10 +87,21 @@ class AppShellTest extends TestCase
 
     public function test_home_link_is_marked_current_only_on_the_home_route(): void
     {
-        Route::middleware('web')->get('/_test/elsewhere', fn () => view('pages.home'));
+        Route::middleware('web')->get('/_test/elsewhere', fn () => view('pages.home', ['latestListings' => collect()]));
 
         $this->get('/')->assertSee('aria-current="page"', false);
         $this->get('/_test/elsewhere')->assertDontSee('aria-current="page"', false);
+    }
+
+    public function test_listings_link_follows_home_and_is_current_on_the_listings_index(): void
+    {
+        $currentListingsLink = '/<a href="'.preg_quote(route('listings.index'), '/').'"\s+aria-current="page"/';
+
+        $listingsPage = $this->get(route('listings.index'))
+            ->assertSeeInOrder([__('app.nav.home'), __('app.nav.listings')]);
+
+        $this->assertMatchesRegularExpression($currentListingsLink, $listingsPage->getContent());
+        $this->assertDoesNotMatchRegularExpression($currentListingsLink, $this->get('/')->getContent());
     }
 
     public function test_count_badge_renders_only_for_a_non_zero_count(): void

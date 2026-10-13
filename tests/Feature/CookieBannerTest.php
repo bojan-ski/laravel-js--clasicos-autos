@@ -3,12 +3,15 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Route;
 use RuntimeException;
 use Tests\TestCase;
 
 class CookieBannerTest extends TestCase
 {
+    use LazilyRefreshDatabase;
+
     private const string BANNER = '<section data-cookie-banner';
 
     protected function setUp(): void

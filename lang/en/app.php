@@ -16,6 +16,14 @@ return [
 
     'nav' => [
         'home' => 'Home',
+        'listings' => 'Listings',
+    ],
+
+    'pagination' => [
+        'label' => 'Pagination',
+        'previous' => 'Prev',
+        'next' => 'Next',
+        'page_of' => 'Page :current of :last',
     ],
 
     'header' => [
@@ -183,10 +191,15 @@ return [
             'title' => 'Find Your Perfect Classic Ride',
             'line' => 'Explore timeless cars, from Volvo to Cadillac',
             'image_alt' => 'Red classic car on a Cuban street',
+            'cta' => 'See offers',
         ],
         'about' => [
             'title' => 'About Our App',
             'body' => "Welcome to our vintage car marketplace — your trusted destination for discovering classic and timeless vehicles. Our platform is built with passion for automotive heritage, offering carefully curated listings from collectors, enthusiasts, and sellers across the region. Whether you're a buyer looking for your next showpiece, a seller sharing a piece of history, or a casual browser soaking in the nostalgia, our app provides a seamless, enjoyable experience tailored just for you.",
+        ],
+        'latest' => [
+            'title' => 'Latest Car Listings',
+            'all' => 'All listings',
         ],
     ],
 
@@ -312,6 +325,24 @@ return [
     ],
 
     'listings' => [
+        'index' => [
+            'title' => 'Listings',
+            'kicker' => 'Clásicos en venta',
+            'search_label' => 'Search listings',
+            'search_placeholder' => 'Enter search term',
+            'search_button' => 'Search',
+            'chips_label' => 'Filter by brand',
+            'all' => 'All',
+            'count' => ':count listing matches|:count listings match',
+            'empty' => 'No car listings available, please come back later',
+            'no_results' => 'No listings match your search.',
+            'reset' => 'Show all listings',
+        ],
+        'card' => [
+            'price' => 'Price',
+            'posted' => 'Posted :diff',
+            'details' => 'Details',
+        ],
         'status' => [
             'pending' => 'Pending',
             'approved' => 'Approved',
@@ -389,6 +420,7 @@ return [
 
     'errors' => [
         'home' => 'Home',
+        'browse_listings' => 'Browse listings',
         '403' => [
             'stamp' => 'Prohibido el paso',
             'title' => 'This road is closed',
