@@ -287,6 +287,17 @@ class ListingDetailPageTest extends TestCase
             ->assertSee(__('app.listings.show.status.owner_suspended'));
     }
 
+    #[DataProvider('statuses')]
+    public function test_a_suspended_owner_sees_the_panel_and_the_suspension_note_on_their_own_listing(ListingStatus $status): void
+    {
+        $owner = User::factory()->suspended()->create();
+        $listing = $this->listingWithStatus($status, $owner);
+
+        $this->show($listing, $owner)
+            ->assertSeeInOrder(['aria-label="'.__('app.listings.show.status.label').'"', $status->label()], false)
+            ->assertSee(__('app.listings.show.status.owner_suspended'));
+    }
+
     public function test_the_panel_has_no_suspension_note_for_an_active_owner(): void
     {
         $owner = User::factory()->create();

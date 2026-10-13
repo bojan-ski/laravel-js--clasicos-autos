@@ -2,9 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Models\CarListing;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Route;
+use PHPUnit\Framework\Attributes\DataProvider;
 use RuntimeException;
 use Tests\TestCase;
 
@@ -36,6 +38,34 @@ class CookieBannerTest extends TestCase
     {
         $this->get(route('home'))
             ->assertSee('<html lang="en" class="has-data-cookie-banner:scroll-pb-60 md:has-data-cookie-banner:scroll-pb-28 ', false);
+    }
+
+    public function test_with_a_sticky_bar_the_scroll_padding_also_clears_the_bar_stacked_above_the_banner(): void
+    {
+        $this->get(route('home'))
+            ->assertSee('max-md:[&:has([data-sticky-bar]):has([data-cookie-banner])]:scroll-pb-[calc(var(--cookie-banner-h,15rem)+6rem)]', false);
+    }
+
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function stickyBarPages(): array
+    {
+        return [
+            'listing detail' => ['listings.show'],
+            'advanced search' => ['listings.advanced'],
+        ];
+    }
+
+    #[DataProvider('stickyBarPages')]
+    public function test_each_sticky_bar_sits_above_the_banner_by_its_published_height(string $page): void
+    {
+        $parameters = $page === 'listings.show' ? [CarListing::factory()->approved()->create()] : [];
+
+        $html = $this->get(route($page, $parameters))->assertSee(self::BANNER, false)->getContent();
+
+        $this->assertMatchesRegularExpression('/data-sticky-bar[^>]*class="sticky bottom-\[var\(--cookie-banner-h,0px\)\] z-10 /', $html);
+        $this->assertDoesNotMatchRegularExpression('/data-sticky-bar[^>]*class="[^"]*bottom-0/', $html);
     }
 
     public function test_banner_is_hidden_once_consent_is_accepted(): void

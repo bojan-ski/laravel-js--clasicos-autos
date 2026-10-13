@@ -85,6 +85,14 @@ class AppShellTest extends TestCase
             ->assertSee('Admin body');
     }
 
+    public function test_the_skip_link_switches_to_the_gold_light_ring_under_the_dark_admin_header(): void
+    {
+        $this->actingAs(User::factory()->make());
+
+        $this->blade('<x-layouts.admin>Admin body</x-layouts.admin>')
+            ->assertSee('<a href="#main" class="sr-only z-80 bg-card px-4 py-2 text-sm text-red focus:not-sr-only focus:fixed focus:top-3 focus:left-3 [body:has([data-header-variant=admin])_&]:outline-gold-light">', false);
+    }
+
     public function test_home_link_is_marked_current_only_on_the_home_route(): void
     {
         Route::middleware('web')->get('/_test/elsewhere', fn () => view('pages.home', ['latestListings' => collect()]));

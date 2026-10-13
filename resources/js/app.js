@@ -1,4 +1,5 @@
 import { initBackToTop } from './modules/back-to-top'
+import { initBrandChips } from './modules/brand-chips'
 import { initCookieBanner } from './modules/cookie-banner'
 import { initDialogs } from './modules/dialog'
 import { initFlash } from './modules/flash'
@@ -16,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initDialogs()
     initCookieBanner()
     initGallery()
+    initBrandChips()
 
     document.querySelector('[aria-invalid="true"]')?.focus()
 })

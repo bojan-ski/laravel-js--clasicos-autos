@@ -4,6 +4,10 @@ export function initCookieBanner() {
     const banner = document.querySelector('[data-cookie-banner]')
     if (!banner) return
 
+    const root = document.documentElement
+    const observer = new ResizeObserver(() => root.style.setProperty('--cookie-banner-h', `${banner.offsetHeight}px`))
+    observer.observe(banner)
+
     const form = banner.querySelector('form')
     if (!form) return
 
@@ -18,6 +22,8 @@ export function initCookieBanner() {
             return
         }
 
+        observer.disconnect()
+        root.style.removeProperty('--cookie-banner-h')
         banner.remove()
         document.getElementById('main')?.focus()
     })

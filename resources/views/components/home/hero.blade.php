@@ -1,4 +1,4 @@
-<section class="mx-auto max-w-7xl px-5 py-6 md:p-14">
+<section {{ $attributes->merge(['class' => 'mx-auto max-w-7xl px-5 py-6 md:p-14']) }}>
     <x-ui.postcard tilt="left" class="grid gap-3.5 pb-4.5 md:grid-cols-[7fr_5fr] md:gap-0 md:p-4.5">
         <div class="relative">
             <img src="{{ asset('assets/images/hero.jpg') }}" alt="{{ __('app.home.hero.image_alt') }}"

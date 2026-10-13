@@ -1,10 +1,11 @@
-@props(['filters'])
+@props(['filters', 'errorsId'])
 
 <form method="GET" action="{{ route('listings.index') }}" role="search" {{ $attributes->merge(['class' => 'flex w-full flex-col gap-2 md:w-auto md:flex-row md:items-center']) }}>
     <label for="search" class="sr-only">{{ __('app.listings.index.search_label') }}</label>
     <div class="flex w-full gap-2 md:w-auto">
         <input id="search" name="search" type="search" maxlength="100"
                value="{{ $filters['search'] }}"
+               @error('search') aria-invalid="true" aria-describedby="{{ $errorsId }}" @enderror
                placeholder="{{ __('app.listings.index.search_placeholder') }}"
                class="h-12 w-full min-w-0 rounded-xs border border-rule-input bg-card px-3 text-base text-ink placeholder:text-muted md:h-10 md:w-80 md:text-sm">
         <a href="{{ route('listings.advanced') }}" class="flex size-12 shrink-0 items-center justify-center rounded-xs border border-rule text-ink-2 md:hidden">

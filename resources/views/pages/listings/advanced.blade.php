@@ -31,7 +31,7 @@
         @else
             <div class="grid grid-cols-1 gap-7 md:grid-cols-3 lg:grid-cols-4">
                 @foreach ($listings as $listing)
-                    <x-listings.card :listing="$listing" />
+                    <x-listings.card :listing="$listing" :heading-level="3" />
                 @endforeach
             </div>
         @endif

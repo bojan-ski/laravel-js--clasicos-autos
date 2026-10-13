@@ -8,6 +8,7 @@ use App\Models\CarModel;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
@@ -211,11 +212,30 @@ class ListingIndexTest extends TestCase
             ->assertSeeInOrder([__('app.listings.index.all'), 'Alfa Romeo', 'Austin'])
             ->assertDontSee('Inactive Motors');
         $this->assertSame(1, substr_count($unfiltered->getContent(), 'aria-current="true"'));
-        $this->assertMatchesRegularExpression('/aria-current="true"[^>]*>'.__('app.listings.index.all').'</', $unfiltered->getContent());
+        $this->assertMatchesRegularExpression('/aria-current="true"[^>]*>\s*<svg[^>]*>.*?<\/svg>\s*'.__('app.listings.index.all').'</s', $unfiltered->getContent());
 
         $filtered = $this->get(route('listings.index', ['maker' => $alfa->id]));
         $this->assertSame(1, substr_count($filtered->getContent(), 'aria-current="true"'));
-        $this->assertMatchesRegularExpression('/aria-current="true"[^>]*>Alfa Romeo</', $filtered->getContent());
+        $this->assertMatchesRegularExpression('/aria-current="true"[^>]*>\s*<svg[^>]*>.*?<\/svg>\s*Alfa Romeo</s', $filtered->getContent());
+    }
+
+    public function test_the_chip_row_carries_the_hook_that_scrolls_the_active_chip_into_view(): void
+    {
+        $this->get(route('listings.index'))
+            ->assertSee('<nav data-brand-chips aria-label="'.__('app.listings.index.chips_label').'"', false);
+    }
+
+    public function test_only_the_active_chip_carries_the_check_icon(): void
+    {
+        $alfa = CarMaker::factory()->create(['name' => 'Alfa Romeo']);
+        CarMaker::factory()->create(['name' => 'Austin']);
+
+        $chips = $this->get(route('listings.index', ['maker' => $alfa->id]))->getContent();
+        $nav = Str::between($chips, 'aria-label="'.__('app.listings.index.chips_label').'"', '</nav>');
+
+        $this->assertSame(1, substr_count($nav, '<svg'));
+        $this->assertMatchesRegularExpression('/aria-current="true"[^>]*>\s*<svg[^>]*aria-hidden="true"/', $nav);
+        $this->assertMatchesRegularExpression('/>Austin</', $nav);
     }
 
     /**
@@ -261,6 +281,26 @@ class ListingIndexTest extends TestCase
             ->assertSee(e(__('validation.max.string', ['attribute' => 'search', 'max' => 100])), false);
     }
 
+    public function test_a_search_error_marks_the_search_input_and_points_it_at_the_alert(): void
+    {
+        $this->followingRedirects()
+            ->get(route('listings.index', ['search' => str_repeat('a', 101)]))
+            ->assertSee('id="listings-index-errors" role="alert"', false)
+            ->assertSee('aria-invalid="true" aria-describedby="listings-index-errors"', false);
+    }
+
+    public function test_the_search_input_is_not_marked_without_a_search_error(): void
+    {
+        $this->get(route('listings.index'))
+            ->assertDontSee('aria-invalid', false)
+            ->assertDontSee('aria-describedby="listings-index-errors"', false);
+
+        $this->followingRedirects()
+            ->get(route('listings.index', ['maker' => 999999]))
+            ->assertSee('id="listings-index-errors"', false)
+            ->assertDontSee('aria-invalid', false);
+    }
+
     public function test_a_non_numeric_page_renders_the_first_page(): void
     {
         $this->approved(['name' => 'Only Car']);
@@ -287,6 +327,36 @@ class ListingIndexTest extends TestCase
 
         $this->get(route('listings.index', ['search' => 'Coupe', 'maker' => $maker->id]))
             ->assertSee(trans_choice('app.listings.index.count', 1, ['count' => 1]));
+    }
+
+    public function test_the_count_line_renders_for_a_maker_filter_alone(): void
+    {
+        $maker = CarMaker::factory()->create();
+        $this->approved(['name' => 'Count Coupe'], CarModel::factory()->for($maker, 'maker')->create());
+
+        $this->get(route('listings.index', ['maker' => $maker->id]))
+            ->assertSee(trans_choice('app.listings.index.count', 1, ['count' => 1]));
+    }
+
+    public function test_a_search_of_exactly_100_characters_is_accepted(): void
+    {
+        $this->get(route('listings.index', ['search' => str_repeat('a', 100)]))
+            ->assertOk()
+            ->assertSessionHasNoErrors();
+    }
+
+    public function test_only_the_all_chip_renders_and_is_active_when_no_maker_is_active(): void
+    {
+        CarMaker::factory()->inactive()->create(['name' => 'Inactive Motors']);
+
+        $nav = Str::between(
+            $this->get(route('listings.index'))->getContent(),
+            'aria-label="'.__('app.listings.index.chips_label').'"',
+            '</nav>',
+        );
+
+        $this->assertSame(1, substr_count($nav, '<li'));
+        $this->assertMatchesRegularExpression('/aria-current="true"[^>]*>\s*<svg[^>]*>.*?<\/svg>\s*'.__('app.listings.index.all').'</s', $nav);
     }
 
     public function test_the_unfiltered_empty_state_uses_the_source_message(): void
