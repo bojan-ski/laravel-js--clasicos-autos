@@ -12,6 +12,7 @@ use Database\Seeders\CarModelSeeder;
 use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\ReviewSeeder;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use LogicException;
 use Tests\TestCase;
 
@@ -78,6 +79,32 @@ class ReviewSeederTest extends TestCase
         $this->assertAuthenticatedAs(User::query()->where('email', 'review@example.com')->sole());
     }
 
+    public function test_the_stranger_is_an_active_app_user_with_a_long_name_and_two_pages_of_listings(): void
+    {
+        $this->seed([DatabaseSeeder::class, ReviewSeeder::class]);
+
+        $stranger = User::query()->where('email', 'stranger@example.com')->sole();
+
+        $this->assertGreaterThanOrEqual(48, mb_strlen($stranger->username));
+        $this->assertLessThanOrEqual(64, mb_strlen($stranger->username));
+        $this->assertGreaterThanOrEqual(13, $stranger->listings()->publiclyVisible()->count());
+        $this->post(route('login.store'), ['email' => 'stranger@example.com', 'password' => 'password'])
+            ->assertRedirect(route('profile'));
+        $this->assertAuthenticatedAs($stranger);
+    }
+
+    public function test_the_review_user_bookmarks_two_pages_of_public_listings_and_the_suspended_owners_listing(): void
+    {
+        $this->seed([DatabaseSeeder::class, ReviewSeeder::class]);
+
+        $reviewer = User::query()->where('email', 'review@example.com')->sole();
+        $suspendedListing = User::query()->where('status', UserStatus::Suspended)->sole()->listings()->sole();
+
+        $this->assertGreaterThanOrEqual(13, $reviewer->bookmarks()->publiclyVisible()->count());
+        $this->assertTrue($reviewer->bookmarks()->whereKey($suspendedListing->id)->exists());
+        $this->assertFalse($reviewer->bookmarks()->where('car_listings.user_id', $reviewer->id)->exists());
+    }
+
     public function test_without_an_admin_the_moderated_listings_have_no_moderator(): void
     {
         $this->seed([CarMakerSeeder::class, CarModelSeeder::class, ReviewSeeder::class]);
@@ -91,11 +118,13 @@ class ReviewSeederTest extends TestCase
         $this->seed([DatabaseSeeder::class, ReviewSeeder::class]);
         $users = User::query()->count();
         $listings = CarListing::query()->count();
+        $bookmarks = DB::table('user_bookmarks')->count();
 
         $this->seed(ReviewSeeder::class);
 
         $this->assertSame($users, User::query()->count());
         $this->assertSame($listings, CarListing::query()->count());
+        $this->assertSame($bookmarks, DB::table('user_bookmarks')->count());
     }
 
     public function test_it_refuses_to_run_without_the_seeded_makers_and_models(): void

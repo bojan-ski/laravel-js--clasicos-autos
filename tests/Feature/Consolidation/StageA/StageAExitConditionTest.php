@@ -145,6 +145,7 @@ class StageAExitConditionTest extends TestCase
             'min_year', 'max_year', 'images.max', 'images.max_upload_kb',
             'images.variants.full', 'images.variants.card', 'images.variants.thumb',
             'per_page.listings', 'per_page.advanced', 'per_page.profile', 'per_page.conversations', 'per_page.admin',
+            'per_page.bookmarks', 'per_page.seller',
             'message.min', 'message.max', 'suspension.durations',
         ] as $key) {
             $this->assertTrue(config()->has("listings.{$key}"), "config('listings.{$key}') is missing");
