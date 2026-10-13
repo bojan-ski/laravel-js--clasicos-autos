@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\ReferenceData;
 
+use App\Models\CarListing;
 use App\Models\CarMaker;
 use App\Models\CarModel;
 use App\Models\User;
@@ -68,6 +69,28 @@ class ReferenceDataPolicyTest extends TestCase
     {
         $admin = User::factory()->admin()->create();
         $maker = CarModel::factory()->create()->maker()->sole();
+
+        $allowed = Gate::forUser($admin)->allows('delete', $maker);
+
+        $this->assertFalse($allowed);
+    }
+
+    public function test_an_admin_cannot_delete_a_model_referenced_by_a_listing(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $model = CarModel::factory()->create();
+        CarListing::factory()->forCarModel($model)->create();
+
+        $allowed = Gate::forUser($admin)->allows('delete', $model);
+
+        $this->assertFalse($allowed);
+    }
+
+    public function test_an_admin_cannot_delete_a_maker_referenced_only_by_a_custom_model_listing(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $maker = CarMaker::factory()->create();
+        CarListing::factory()->customModel()->for($maker, 'maker')->create();
 
         $allowed = Gate::forUser($admin)->allows('delete', $maker);
 

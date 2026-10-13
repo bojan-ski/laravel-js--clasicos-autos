@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\ReferenceData;
 
+use App\Models\CarListing;
 use App\Models\CarMaker;
 use App\Models\CarModel;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
@@ -113,5 +114,21 @@ class ReferenceDataScopesTest extends TestCase
         $model = CarModel::factory()->create();
 
         $this->assertTrue($model->isDeletable());
+    }
+
+    public function test_a_model_referenced_by_a_listing_is_not_deletable(): void
+    {
+        $model = CarModel::factory()->create();
+        CarListing::factory()->forCarModel($model)->create();
+
+        $this->assertFalse($model->isDeletable());
+    }
+
+    public function test_a_maker_referenced_only_by_a_custom_model_listing_is_not_deletable(): void
+    {
+        $maker = CarMaker::factory()->create();
+        CarListing::factory()->customModel()->for($maker, 'maker')->create();
+
+        $this->assertFalse($maker->isDeletable());
     }
 }

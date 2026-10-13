@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['name', 'year_from', 'year_to'])]
 class CarModel extends Model
@@ -44,6 +45,14 @@ class CarModel extends Model
     }
 
     /**
+     * @return HasMany<CarListing, $this>
+     */
+    public function listings(): HasMany
+    {
+        return $this->hasMany(CarListing::class);
+    }
+
+    /**
      * @param  Builder<self>  $query
      */
     #[Scope]
@@ -73,6 +82,6 @@ class CarModel extends Model
 
     public function isDeletable(): bool
     {
-        return true;
+        return ! $this->listings()->exists();
     }
 }
