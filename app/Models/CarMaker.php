@@ -50,6 +50,14 @@ class CarMaker extends Model
     }
 
     /**
+     * @return HasMany<CarListing, $this>
+     */
+    public function listings(): HasMany
+    {
+        return $this->hasMany(CarListing::class);
+    }
+
+    /**
      * @param  Builder<self>  $query
      */
     #[Scope]
@@ -69,6 +77,6 @@ class CarMaker extends Model
 
     public function isDeletable(): bool
     {
-        return ! $this->models()->exists();
+        return ! $this->models()->exists() && ! $this->listings()->exists();
     }
 }

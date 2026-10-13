@@ -311,6 +311,75 @@ return [
         ],
     ],
 
+    'listings' => [
+        'status' => [
+            'pending' => 'Pending',
+            'approved' => 'Approved',
+            'rejected' => 'Rejected',
+        ],
+        'options' => [
+            'transmission' => [
+                'manual' => 'Manual',
+                'automatic' => 'Automatic',
+            ],
+            'fuel_type' => [
+                'gasoline' => 'Gasoline',
+                'diesel' => 'Diesel',
+            ],
+            'engine_history' => [
+                'original_engine' => 'Original Engine',
+                'replaced_engine' => 'Replaced Engine',
+                'rebuilt_engine' => 'Rebuilt Engine',
+            ],
+            'engine_condition' => [
+                'running' => 'Running',
+                'needs_tuning' => 'Needs Tuning',
+                'not_running' => 'Not Running',
+                'rebuilt_engine' => 'Rebuilt Engine',
+                'original_factory_engine' => 'Original Factory Engine',
+            ],
+            'restoration_history' => [
+                'fully_restored' => 'Fully Restored',
+                'partially_restored' => 'Partially Restored',
+                'barn_find' => 'Barn Find',
+                'unrestored_original' => 'Unrestored Original',
+            ],
+            'body_type' => [
+                'coupe' => 'Coupe',
+                'sedan' => 'Sedan',
+                'convertible' => 'Convertible',
+                'wagon' => 'Wagon',
+            ],
+            'seat_material' => [
+                'leather' => 'Leather',
+                'cloth' => 'Cloth',
+                'vinyl' => 'Vinyl',
+                'velour' => 'Velour',
+            ],
+            'odometer' => [
+                'original' => 'Original',
+                'rebuilt' => 'Rebuilt',
+                'unknown' => 'Unknown',
+            ],
+            'license_plate_type' => [
+                'original_plate' => 'Original Plate',
+                'modern_plate' => 'Modern Plate',
+                'no_plate' => 'No Plate',
+            ],
+            'documentation_status' => [
+                'original_papers' => 'Original Papers',
+                'missing_papers' => 'Missing Papers',
+                'custom_registration' => 'Custom Registration',
+            ],
+            'vehicle_condition' => [
+                'showroom_condition' => 'Showroom Condition',
+                'good' => 'Good',
+                'fair' => 'Fair',
+                'needs_restoration' => 'Needs Restoration',
+            ],
+        ],
+    ],
+
     'admin' => [
         'account' => [
             'kicker' => 'Mi cuenta',
