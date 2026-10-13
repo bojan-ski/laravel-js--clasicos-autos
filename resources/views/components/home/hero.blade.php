@@ -25,6 +25,7 @@
             <x-ui.kicker lang="es" class="hidden md:block">{{ __('app.home.hero.kicker') }}</x-ui.kicker>
             <h1 class="text-[38px] leading-[1.02] md:mt-10 md:mr-27.5 md:text-[54px] md:leading-none">{{ __('app.home.hero.title') }}</h1>
             <p class="text-[15px] text-ink-2 md:mt-auto md:border-b md:border-rule-strong md:pb-2.5 md:text-[17px] md:text-ink">{{ __('app.home.hero.line') }}</p>
+            <x-ui.button :href="route('listings.index')" variant="primary" size="hero" class="w-full md:w-auto md:self-start">{{ __('app.home.hero.cta') }}</x-ui.button>
         </div>
     </x-ui.postcard>
 </section>

@@ -11,11 +11,14 @@ use App\Support\HeaderAction;
 use App\Support\MainNavigation;
 use App\Support\NavItem;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use InvalidArgumentException;
 use Tests\TestCase;
 
 class ShellComponentsTest extends TestCase
 {
+    use LazilyRefreshDatabase;
+
     protected function setUp(): void
     {
         parent::setUp();

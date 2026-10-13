@@ -1,7 +1,5 @@
 @import 'tailwindcss';
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-
 @font-face {
     font-family: 'Cormorant Garamond';
     font-style: normal;

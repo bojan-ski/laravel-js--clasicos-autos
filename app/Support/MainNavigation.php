@@ -22,6 +22,7 @@ class MainNavigation
     {
         return [
             new NavItem('home', 'app.nav.home', 'home', 'home', [NavAudience::Guest, NavAudience::Member]),
+            new NavItem('listings', 'app.nav.listings', 'listings.index', 'listings.*', [NavAudience::Guest, NavAudience::Member]),
         ];
     }
 
