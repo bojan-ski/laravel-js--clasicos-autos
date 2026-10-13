@@ -35,7 +35,7 @@ class CookieBannerTest extends TestCase
     public function test_the_page_reserves_bottom_scroll_padding_while_the_banner_is_present(): void
     {
         $this->get(route('home'))
-            ->assertSee('<html lang="en" class="has-data-cookie-banner:scroll-pb-60 md:has-data-cookie-banner:scroll-pb-28">', false);
+            ->assertSee('<html lang="en" class="has-data-cookie-banner:scroll-pb-60 md:has-data-cookie-banner:scroll-pb-28 ', false);
     }
 
     public function test_banner_is_hidden_once_consent_is_accepted(): void

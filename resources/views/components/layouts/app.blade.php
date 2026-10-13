@@ -4,7 +4,7 @@
 ])
 
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="has-data-cookie-banner:scroll-pb-60 md:has-data-cookie-banner:scroll-pb-28">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="has-data-cookie-banner:scroll-pb-60 md:has-data-cookie-banner:scroll-pb-28 max-md:[&:has([data-sticky-bar]):not(:has([data-cookie-banner]))]:scroll-pb-24">
 <head>
     <x-global.head :title="$title">{{ $head ?? '' }}</x-global.head>
 </head>

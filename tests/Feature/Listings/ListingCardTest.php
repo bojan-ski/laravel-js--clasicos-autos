@@ -78,12 +78,34 @@ class ListingCardTest extends TestCase
         $this->assertStringContainsString('<svg', $html);
     }
 
-    public function test_the_details_button_is_disabled_until_the_detail_page_exists(): void
+    public function test_details_links_to_the_detail_page_with_the_listing_name_after_the_visible_text(): void
     {
-        $html = (string) $this->card(CarListing::factory()->approved()->create());
+        $listing = CarListing::factory()->approved()->create(['name' => 'Bel Air']);
 
-        $this->assertMatchesRegularExpression('/<button[^>]*\sdisabled(="disabled")?>'.__('app.listings.card.details').'<\/button>/', $html);
-        $this->assertStringNotContainsString('<a ', $html);
+        $this->card($listing)
+            ->assertSee('href="'.route('listings.show', $listing).'"', false)
+            ->assertSee('>Details<span class="sr-only"> Bel Air</span></a>', false);
+    }
+
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function cardPages(): array
+    {
+        return [
+            'home' => ['home'],
+            'index' => ['listings.index'],
+            'advanced search' => ['listings.advanced'],
+        ];
+    }
+
+    #[DataProvider('cardPages')]
+    public function test_every_card_page_links_its_cards_to_the_detail_page(string $page): void
+    {
+        $this->withoutVite();
+        $listing = CarListing::factory()->approved()->create();
+
+        $this->get(route($page))->assertSee('href="'.route('listings.show', $listing).'"', false);
     }
 
     /**

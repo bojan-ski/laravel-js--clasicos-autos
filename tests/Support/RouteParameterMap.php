@@ -2,6 +2,7 @@
 
 namespace Tests\Support;
 
+use App\Models\CarListing;
 use Illuminate\Routing\Route;
 use LogicException;
 
@@ -24,6 +25,10 @@ final class RouteParameterMap
         }
 
         $name = (string) $route->getName();
+
+        if ($name === 'listings.show') {
+            return ['listing' => (string) CarListing::factory()->approved()->create()->id];
+        }
 
         if (! array_key_exists($name, self::MAP)) {
             throw new LogicException("Route [{$name}] has parameters but no entry in RouteParameterMap.");
