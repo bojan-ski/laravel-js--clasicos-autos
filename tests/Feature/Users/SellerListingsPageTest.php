@@ -120,7 +120,7 @@ class SellerListingsPageTest extends TestCase
             ->assertDontSee('Someone Elses Impala')
             ->assertViewHas('showsStatus', true);
         $html = (string) $response->getContent();
-        $this->assertSame(1, substr_count($html, 'text-status-pending'));
+        $this->assertSame(1, substr_count($html, 'bg-status-pending/10'));
         $this->assertSame(1, substr_count($html, 'text-status-rejected'));
         $this->assertSame(0, substr_count($html, 'text-status-approved'));
     }

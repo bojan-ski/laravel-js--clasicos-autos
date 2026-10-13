@@ -200,7 +200,7 @@ class ListingCardTest extends TestCase
     public static function statusTones(): array
     {
         return [
-            'pending' => [ListingStatus::Pending, 'border-status-pending text-status-pending'],
+            'pending' => [ListingStatus::Pending, 'border-status-pending text-gold-ink bg-status-pending/10'],
             'approved' => [ListingStatus::Approved, 'border-status-approved text-status-approved'],
             'rejected' => [ListingStatus::Rejected, 'border-status-rejected text-status-rejected'],
         ];
