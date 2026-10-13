@@ -4,12 +4,51 @@ namespace App\Services;
 
 use App\Models\CarListing;
 use App\Models\CarMaker;
+use BackedEnum;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
 class ListingBrowseService
 {
+    private const array ADVANCED_EQUALITY = [
+        'car_maker' => 'car_maker_id',
+        'transmission' => 'transmission',
+        'fuel_type' => 'fuel_type',
+        'body_type' => 'body_type',
+        'engine_size' => 'engine_size',
+        'engine_type' => 'engine_type',
+        'engine_history' => 'engine_history',
+        'engine_condition' => 'engine_condition',
+        'restoration_history' => 'restoration_history',
+        'odometer' => 'odometer',
+        'license_plate_type' => 'license_plate_type',
+        'documentation_status' => 'documentation_status',
+        'exterior_condition' => 'exterior_condition',
+        'interior_condition' => 'interior_condition',
+        'seat_material' => 'seat_material',
+    ];
+
+    private const array ADVANCED_SUBSTRING = [
+        'model' => 'model',
+        'exterior_color' => 'exterior_color',
+        'interior_color' => 'interior_color',
+        'city' => 'location_city',
+        'state' => 'location_state',
+        'zipcode' => 'location_zipcode',
+    ];
+
+    /**
+     * @var array<string, array{string, string}>
+     */
+    private const array ADVANCED_BOUNDS = [
+        'year_from' => ['year', '>='],
+        'year_to' => ['year', '<='],
+        'price_from' => ['price', '>='],
+        'price_to' => ['price', '<='],
+        'mileage' => ['mileage', '<='],
+    ];
+
     /**
      * @param  array{search: string, maker: int|null}  $filters
      * @return LengthAwarePaginator<int, CarListing>
@@ -27,6 +66,31 @@ class ListingBrowseService
             })
             ->when($filters['maker'] !== null, fn (Builder $query) => $query->where('car_maker_id', $filters['maker']))
             ->paginate(config('listings.per_page.listings'))
+            ->withQueryString();
+    }
+
+    /**
+     * @param  array<string, string|int|BackedEnum|null>  $filters
+     * @return LengthAwarePaginator<int, CarListing>
+     */
+    public function advanced(array $filters): LengthAwarePaginator
+    {
+        $query = $this->publicListings();
+
+        foreach (self::ADVANCED_EQUALITY as $key => $column) {
+            $query->when($this->isFilled($filters[$key]), fn (Builder $listings) => $listings->where($column, $filters[$key]));
+        }
+
+        foreach (self::ADVANCED_SUBSTRING as $key => $column) {
+            $query->when($this->isFilled($filters[$key]), fn (Builder $listings) => $listings->where($column, 'like', '%'.$this->escapeLike($filters[$key]).'%'));
+        }
+
+        foreach (self::ADVANCED_BOUNDS as $key => [$column, $operator]) {
+            $query->when($this->isFilled($filters[$key]), fn (Builder $listings) => $listings->where($column, $operator, $filters[$key]));
+        }
+
+        return $query
+            ->paginate(config('listings.per_page.advanced'))
             ->withQueryString();
     }
 
@@ -56,6 +120,11 @@ class ListingBrowseService
             ->with(['maker', 'primaryImage'])
             ->orderByDesc('created_at')
             ->orderByDesc('id');
+    }
+
+    private function isFilled(string|int|BackedEnum|null $value): bool
+    {
+        return $value !== null && $value !== '';
     }
 
     private function escapeLike(string $term): string

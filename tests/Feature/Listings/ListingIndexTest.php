@@ -324,6 +324,17 @@ class ListingIndexTest extends TestCase
             ->assertSee('value="Bel Air"', false);
     }
 
+    public function test_the_index_links_to_the_advanced_search_with_a_text_and_an_icon_link(): void
+    {
+        $html = $this->get(route('listings.index', ['search' => 'Bel']))->getContent();
+        $advanced = preg_quote(route('listings.advanced'), '/');
+        $label = preg_quote(__('app.listings.index.advanced_link'), '/');
+
+        $this->assertMatchesRegularExpression('/<a href="'.$advanced.'" class="[^"]*md:inline">'.$label.'<\/a>/', $html);
+        $this->assertMatchesRegularExpression('/<a href="'.$advanced.'" class="[^"]*md:hidden">\s*<svg[^>]*aria-hidden="true"[\s\S]*?<\/svg>\s*<span class="sr-only">'.$label.'<\/span>\s*<\/a>/', $html);
+        $this->assertSame(2, substr_count($html, 'href="'.route('listings.advanced').'"'));
+    }
+
     public function test_the_index_renders_cards_without_lazy_loading(): void
     {
         CarListing::factory()->count(3)->approved()->withImages(2)->create();
