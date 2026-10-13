@@ -22,6 +22,7 @@
             @can('message', $listing)
                 <x-ui.button variant="primary" size="lg" class="w-full" disabled>{{ __('app.listings.show.owner.send_message') }}</x-ui.button>
             @endcan
+            <p class="text-sm text-ink-2 wrap-break-word"><a href="{{ route('users.listings', $listing->owner) }}" class="text-red underline">{{ __('app.listings.show.owner.see_all', ['username' => $listing->owner->username]) }}</a></p>
         @endif
     @endguest
 </section>

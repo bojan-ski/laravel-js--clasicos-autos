@@ -76,6 +76,11 @@ class User extends Authenticatable
         return $this->status === UserStatus::Suspended;
     }
 
+    public function seesEveryListingOf(User $seller): bool
+    {
+        return $this->is($seller) || $this->isAdmin();
+    }
+
     public function initials(): string
     {
         $parts = preg_split('/[\s\-_.]+/u', trim($this->username), -1, PREG_SPLIT_NO_EMPTY) ?: [];

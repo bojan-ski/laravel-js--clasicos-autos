@@ -428,6 +428,7 @@ return [
                 'login' => 'Login to contact the seller.',
                 'own' => 'This is your listing.',
                 'send_message' => 'Send message',
+                'see_all' => "See all :username's listings",
             ],
             'status' => [
                 'label' => 'Listing status',
@@ -572,6 +573,14 @@ return [
             'added' => 'Bookmark added',
             'removed' => 'Bookmark removed',
         ],
+    ],
+
+    'sellers' => [
+        'title' => ":username's car listings",
+        'kicker' => 'Vendedor',
+        'joined' => 'Joined :date · :count listing|Joined :date · :count listings',
+        'empty' => 'No car listings available, please come back later',
+        'send_message' => 'Send message',
     ],
 
     'admin' => [

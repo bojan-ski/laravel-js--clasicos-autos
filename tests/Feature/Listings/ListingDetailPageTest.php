@@ -211,6 +211,44 @@ class ListingDetailPageTest extends TestCase
     }
 
     /**
+     * @return array<string, array{string, ListingStatus, int}>
+     */
+    public static function seeAllViewers(): array
+    {
+        return [
+            'guest on a public listing' => ['guest', ListingStatus::Approved, 0],
+            'owner on a public listing' => ['owner', ListingStatus::Approved, 0],
+            'owner on a pending listing' => ['owner', ListingStatus::Pending, 0],
+            'app user on a public listing' => ['app user', ListingStatus::Approved, 1],
+            'suspended app user on a public listing' => ['suspended', ListingStatus::Approved, 1],
+            'admin on a public listing' => ['admin', ListingStatus::Approved, 1],
+            'admin on a pending listing' => ['admin', ListingStatus::Pending, 1],
+            'admin on a rejected listing' => ['admin', ListingStatus::Rejected, 1],
+        ];
+    }
+
+    #[DataProvider('seeAllViewers')]
+    public function test_the_owner_card_links_signed_in_non_owners_to_the_sellers_listings(string $viewer, ListingStatus $status, int $links): void
+    {
+        $owner = User::factory()->create(['username' => 'jdoe']);
+        $listing = $this->listingWithStatus($status, $owner);
+
+        $html = $this->show($listing, $this->viewer($viewer, $owner))->getContent();
+
+        $this->assertSame($links, preg_match_all('/<a href="'.preg_quote(route('users.listings', $owner), '/').'"[^>]*>'.preg_quote(e(__('app.listings.show.owner.see_all', ['username' => 'jdoe'])), '/').'<\/a>/', $html));
+    }
+
+    public function test_an_admins_see_all_link_on_a_suspended_owners_listing_opens_that_sellers_page(): void
+    {
+        $owner = User::factory()->suspended()->create(['username' => 'jdoe']);
+        $listing = CarListing::factory()->approved()->for($owner, 'owner')->create();
+
+        $this->show($listing, User::factory()->admin()->create())
+            ->assertSee('href="'.route('users.listings', $owner).'"', false);
+        $this->get(route('users.listings', $owner))->assertOk();
+    }
+
+    /**
      * @return array<string, array{string, ListingStatus}>
      */
     public static function panelViewersAndStatuses(): array

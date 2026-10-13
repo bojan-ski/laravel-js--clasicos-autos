@@ -23,6 +23,7 @@ return [
         'conversations' => 18,
         'admin' => 12,
         'bookmarks' => 12,
+        'seller' => 12,
     ],
 
     'message' => [

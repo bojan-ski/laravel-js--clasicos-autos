@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\ListingStatus;
 use App\Models\CarListing;
 use App\Models\CarMaker;
+use App\Models\User;
 use BackedEnum;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
@@ -102,6 +103,21 @@ class ListingBrowseService
     public function latest(int $limit): Collection
     {
         return $this->publicListings()->limit($limit)->get();
+    }
+
+    /**
+     * @return LengthAwarePaginator<int, CarListing>
+     */
+    public function sellerListings(User $seller, bool $everyStatus): LengthAwarePaginator
+    {
+        $query = CarListing::query()->whereBelongsTo($seller, 'owner');
+
+        return $query
+            ->when(! $everyStatus, fn (Builder $listings) => $listings->publiclyVisible())
+            ->with(['owner', 'maker', 'primaryImage'])
+            ->orderByDesc($query->qualifyColumn('created_at'))
+            ->orderByDesc($query->qualifyColumn('id'))
+            ->paginate(config('listings.per_page.seller'));
     }
 
     public function detail(CarListing $listing): CarListing
