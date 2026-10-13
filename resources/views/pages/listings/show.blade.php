@@ -16,6 +16,9 @@
                     @can('compare', $listing)
                         <x-listings.compare-button :listing="$listing" />
                     @endcan
+                    @can('bookmark', $listing)
+                        <x-listings.bookmark-button :listing="$listing" />
+                    @endcan
                     <div class="hidden shrink-0 md:block">
                         <x-listings.price-stamp :price="$specs->price()" />
                     </div>

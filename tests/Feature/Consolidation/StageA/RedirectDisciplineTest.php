@@ -102,6 +102,8 @@ class RedirectDisciplineTest extends TestCase
     private function hasValidPayload(string $name): bool
     {
         return in_array($name, [
+            'bookmarks.destroy',
+            'bookmarks.store',
             'compare.add',
             'compare.clear',
             'compare.remove',

@@ -28,6 +28,7 @@ class ListingsConfigTest extends TestCase
                 'profile' => 8,
                 'conversations' => 18,
                 'admin' => 12,
+                'bookmarks' => 12,
             ],
             'message' => [
                 'min' => 5,

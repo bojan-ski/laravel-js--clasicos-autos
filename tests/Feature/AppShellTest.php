@@ -34,7 +34,7 @@ class AppShellTest extends TestCase
         $navigation = $this->app->make(MainNavigation::class);
 
         $this->assertSame(['home', 'listings', 'compare'], array_column($navigation->linksFor(NavAudience::Guest, null), 'key'));
-        $this->assertSame(['home', 'listings', 'compare'], array_column($navigation->linksFor(NavAudience::Member, User::factory()->make()), 'key'));
+        $this->assertSame(['home', 'listings', 'compare', 'bookmarks'], array_column($navigation->linksFor(NavAudience::Member, User::factory()->make()), 'key'));
         $this->assertSame([], $navigation->linksFor(NavAudience::Admin, null));
     }
 
@@ -50,7 +50,7 @@ class AppShellTest extends TestCase
         $this->actingAs(User::factory()->make())
             ->get('/')
             ->assertSee('data-header-variant="member"', false)
-            ->assertSee(__('app.nav.home'));
+            ->assertSeeInOrder([__('app.nav.home'), __('app.nav.listings'), __('app.nav.compare'), __('app.nav.bookmarks')]);
     }
 
     public function test_admin_audience_renders_the_admin_header_without_home(): void

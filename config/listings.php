@@ -22,6 +22,7 @@ return [
         'profile' => 8,
         'conversations' => 18,
         'admin' => 12,
+        'bookmarks' => 12,
     ],
 
     'message' => [

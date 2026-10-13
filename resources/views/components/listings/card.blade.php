@@ -36,5 +36,8 @@
         @can('compare', $listing)
             <x-listings.compare-button :listing="$listing" />
         @endcan
+        @can('bookmark', $listing)
+            <x-listings.bookmark-button :listing="$listing" />
+        @endcan
     </div>
 </article>

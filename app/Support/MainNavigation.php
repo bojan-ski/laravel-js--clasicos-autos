@@ -25,6 +25,7 @@ class MainNavigation
             new NavItem('home', 'app.nav.home', 'home', 'home', [NavAudience::Guest, NavAudience::Member]),
             new NavItem('listings', 'app.nav.listings', 'listings.index', 'listings.*', [NavAudience::Guest, NavAudience::Member]),
             new NavItem('compare', 'app.nav.compare', 'compare.show', 'compare.*', [NavAudience::Guest, NavAudience::Member], CompareCounter::class, NavCountStyle::Selected),
+            new NavItem('bookmarks', 'app.nav.bookmarks', 'bookmarks.index', 'bookmarks.*', [NavAudience::Member]),
         ];
     }
 

@@ -18,6 +18,7 @@ return [
         'home' => 'Home',
         'listings' => 'Listings',
         'compare' => 'Compare',
+        'bookmarks' => 'Bookmarks',
     ],
 
     'pagination' => [
@@ -555,6 +556,21 @@ return [
             'original_parts_percentage' => 'Original Parts (%)',
             'license_plate_type' => 'License Plate Type',
             'documentation_status' => 'Documentation',
+        ],
+    ],
+
+    'bookmarks' => [
+        'title' => 'Bookmarked Car Listings',
+        'kicker' => 'Tus favoritos',
+        'saved' => ':count saved',
+        'empty' => 'You have no bookmarked car listings',
+        'browse' => 'Browse listings',
+        'button' => [
+            'label' => 'Bookmark :name',
+        ],
+        'flash' => [
+            'added' => 'Bookmark added',
+            'removed' => 'Bookmark removed',
         ],
     ],
 

@@ -9,6 +9,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -50,6 +51,14 @@ class User extends Authenticatable
     public function listings(): HasMany
     {
         return $this->hasMany(CarListing::class);
+    }
+
+    /**
+     * @return BelongsToMany<CarListing, $this>
+     */
+    public function bookmarks(): BelongsToMany
+    {
+        return $this->belongsToMany(CarListing::class, 'user_bookmarks', 'user_id', 'car_listing_id')->withTimestamps();
     }
 
     public function isAdmin(): bool
