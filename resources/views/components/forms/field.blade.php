@@ -13,7 +13,8 @@
     $errorId = $name.'-error';
     $hintId = $name.'-hint';
     $hasError = $errors->has($name);
-    $inputValue = $type === 'password' ? null : old($name, $value);
+    $oldValue = old($name, $value);
+    $inputValue = $type === 'password' ? null : (is_array($oldValue) ? $value : $oldValue);
     $describedBy = trim(($hint !== null ? $hintId : '').' '.($hasError ? $errorId : ''));
 @endphp
 
