@@ -87,6 +87,14 @@ class ListingCardTest extends TestCase
             ->assertSee('>Details<span class="sr-only"> Bel Air</span></a>', false);
     }
 
+    public function test_details_is_a_48_px_touch_target_below_md(): void
+    {
+        $html = (string) $this->card(CarListing::factory()->approved()->create());
+
+        $this->assertMatchesRegularExpression('/<a href="[^"]*listings\/\d+" class="[^"]*min-h-12 [^"]*md:min-h-9[^"]*"/', $html);
+        $this->assertStringNotContainsString('min-h-9 px-3.5 py-2 text-sm mr-auto', $html);
+    }
+
     /**
      * @return array<string, array{string}>
      */
@@ -106,6 +114,44 @@ class ListingCardTest extends TestCase
         $listing = CarListing::factory()->approved()->create();
 
         $this->get(route($page))->assertSee('href="'.route('listings.show', $listing).'"', false);
+    }
+
+    public function test_the_card_name_is_a_level_two_heading_by_default(): void
+    {
+        $html = (string) $this->card(CarListing::factory()->approved()->create(['name' => 'Bel Air']));
+
+        $this->assertMatchesRegularExpression('/<h2 [^>]*>Bel Air<\/h2>/', $html);
+    }
+
+    public function test_the_heading_level_prop_sets_the_card_heading_tag(): void
+    {
+        $listing = CarListing::factory()->approved()->create(['name' => 'Bel Air'])->load(['maker', 'primaryImage']);
+
+        $html = (string) $this->blade('<x-listings.card :listing="$listing" :heading-level="3" />', ['listing' => $listing]);
+
+        $this->assertMatchesRegularExpression('/<h3 [^>]*>Bel Air<\/h3>/', $html);
+        $this->assertStringNotContainsString('<h2', $html);
+    }
+
+    /**
+     * @return array<string, array{string, int}>
+     */
+    public static function cardHeadingLevels(): array
+    {
+        return [
+            'home under its latest-listings heading' => ['home', 3],
+            'index under the page heading' => ['listings.index', 2],
+            'advanced search under its results heading' => ['listings.advanced', 3],
+        ];
+    }
+
+    #[DataProvider('cardHeadingLevels')]
+    public function test_each_card_page_nests_the_card_heading_under_its_own(string $page, int $level): void
+    {
+        $this->withoutVite();
+        CarListing::factory()->approved()->create(['name' => 'Bel Air']);
+
+        $this->assertMatchesRegularExpression("/<h{$level} [^>]*>Bel Air<\/h{$level}>/", $this->get(route($page))->getContent());
     }
 
     /**

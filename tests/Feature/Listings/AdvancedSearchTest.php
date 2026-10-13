@@ -301,6 +301,18 @@ class AdvancedSearchTest extends TestCase
             'negative mileage' => [['mileage' => -1], 'mileage'],
             'unknown option' => [['transmission' => 'Hover'], 'transmission'],
             'unknown maker' => [['car_maker' => 999999], 'car_maker'],
+            'year_from after the cutoff' => [['year_from' => 1990], 'year_from'],
+            'year_to before the minimum' => [['year_to' => 1899], 'year_to'],
+            'negative price_from' => [['price_from' => -1], 'price_from'],
+            'negative price_to' => [['price_to' => -1], 'price_to'],
+            'model over 255 characters' => [['model' => str_repeat('a', 256)], 'model'],
+            'engine_size over 50 characters' => [['engine_size' => str_repeat('a', 51)], 'engine_size'],
+            'engine_type over 100 characters' => [['engine_type' => str_repeat('a', 101)], 'engine_type'],
+            'exterior_color over 50 characters' => [['exterior_color' => str_repeat('a', 51)], 'exterior_color'],
+            'interior_color over 50 characters' => [['interior_color' => str_repeat('a', 51)], 'interior_color'],
+            'city over 100 characters' => [['city' => str_repeat('a', 101)], 'city'],
+            'state over 100 characters' => [['state' => str_repeat('a', 101)], 'state'],
+            'unknown body type' => [['body_type' => 'Hovercraft'], 'body_type'],
             'zipcode over 20 characters' => [['zipcode' => str_repeat('1', 21)], 'zipcode'],
             'array text value' => [['model' => ['Bel Air']], 'model'],
             'array option value' => [['transmission' => ['Manual']], 'transmission'],
@@ -318,6 +330,26 @@ class AdvancedSearchTest extends TestCase
         $this->get(route('listings.advanced', $query))
             ->assertRedirect(route('listings.advanced'))
             ->assertSessionHasErrors($field);
+    }
+
+    public function test_values_on_every_boundary_are_accepted(): void
+    {
+        $this->get(route('listings.advanced', [
+            'year_from' => 1900,
+            'year_to' => 1989,
+            'price_from' => 0,
+            'model' => str_repeat('a', 255),
+            'engine_size' => str_repeat('a', 50),
+            'engine_type' => str_repeat('a', 100),
+            'city' => str_repeat('a', 100),
+            'zipcode' => str_repeat('1', 20),
+        ]))->assertOk()->assertSessionHasNoErrors();
+    }
+
+    public function test_a_zero_value_counts_as_an_active_filter(): void
+    {
+        $this->assertTrue($this->get(route('listings.advanced', ['mileage' => 0]))->viewData('filtered'));
+        $this->assertFalse($this->get(route('listings.advanced'))->viewData('filtered'));
     }
 
     public function test_an_inactive_maker_is_invalid_and_not_offered(): void

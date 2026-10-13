@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
 use LogicException;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\Support\ApplicationRoutes;
 use Tests\Support\RouteBand;
 use Tests\Support\RouteParameterMap;
 use Tests\TestCase;
@@ -31,7 +32,7 @@ class RouteAccessMatrixTest extends TestCase
 
     public function test_every_named_application_route_has_a_band_and_its_parameters(): void
     {
-        $routes = $this->applicationRoutes();
+        $routes = ApplicationRoutes::named();
 
         $this->assertCount(22, $routes);
 
@@ -75,7 +76,7 @@ class RouteAccessMatrixTest extends TestCase
         $expected = [];
         $actual = [];
 
-        foreach ($this->applicationRoutes() as $name => $route) {
+        foreach (ApplicationRoutes::named() as $name => $route) {
             $band = RouteBand::fromRoute($route);
             $outcome = $this->expectedOutcome($band, $user);
             $response = $this->requestRoute($route, $band, $user);
@@ -95,7 +96,7 @@ class RouteAccessMatrixTest extends TestCase
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage('[test.unbanded]');
 
-        foreach ($this->applicationRoutes() as $route) {
+        foreach (ApplicationRoutes::named() as $route) {
             RouteBand::fromRoute($route);
         }
     }
@@ -108,20 +109,9 @@ class RouteAccessMatrixTest extends TestCase
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage('[test.thing]');
 
-        foreach ($this->applicationRoutes() as $route) {
+        foreach (ApplicationRoutes::named() as $route) {
             RouteParameterMap::parametersFor($route);
         }
-    }
-
-    /**
-     * @return array<string, RoutingRoute>
-     */
-    private function applicationRoutes(): array
-    {
-        $routes = Route::getRoutes()->getRoutesByName();
-        ksort($routes);
-
-        return array_filter($routes, fn (RoutingRoute $route, string $name): bool => ! Str::startsWith($name, 'storage.'), ARRAY_FILTER_USE_BOTH);
     }
 
     private function expectedOutcome(RouteBand $band, ?User $user): string

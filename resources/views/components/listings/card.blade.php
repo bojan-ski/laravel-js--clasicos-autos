@@ -14,7 +14,7 @@
 
     <div class="grid grid-cols-2 gap-3.5">
         <div class="flex min-w-0 flex-col gap-1.5">
-            <h2 class="line-clamp-2 font-heading text-[22px] leading-tight text-red italic wrap-break-word">{{ $listing->name }}</h2>
+            <h{{ $headingLevel }} class="line-clamp-2 font-heading text-[22px] leading-tight text-red italic wrap-break-word">{{ $listing->name }}</h{{ $headingLevel }}>
             <p class="text-xs text-muted">{{ $posted() }}</p>
             @if ($showsStatus())
                 <x-listings.status-stamp :status="$listing->status" class="self-start" />
@@ -32,6 +32,6 @@
     </div>
 
     <div class="mt-auto flex items-center gap-2">
-        <x-ui.button variant="primary" class="mr-auto" :href="$detailsUrl()">{{ __('app.listings.card.details') }}<span class="sr-only"> {{ $listing->name }}</span></x-ui.button>
+        <x-ui.button variant="primary" size="responsive" class="mr-auto" :href="$detailsUrl()">{{ __('app.listings.card.details') }}<span class="sr-only"> {{ $listing->name }}</span></x-ui.button>
     </div>
 </article>

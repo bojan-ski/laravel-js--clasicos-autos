@@ -12,6 +12,7 @@ class Card extends Component
     public function __construct(
         public CarListing $listing,
         public bool $showStatus = false,
+        public int $headingLevel = 2,
     ) {}
 
     public function price(): string
