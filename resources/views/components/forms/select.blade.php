@@ -31,7 +31,15 @@
             <option value="">{{ $placeholder }}</option>
         @endif
         @foreach ($options as $optionValue => $optionLabel)
-            <option value="{{ $optionValue }}" @selected((string) $optionValue === $selectedValue)>{{ $optionLabel }}</option>
+            @if (is_array($optionLabel))
+                <optgroup label="{{ $optionValue }}">
+                    @foreach ($optionLabel as $groupValue => $groupLabel)
+                        <option value="{{ $groupValue }}" @selected((string) $groupValue === $selectedValue)>{{ $groupLabel }}</option>
+                    @endforeach
+                </optgroup>
+            @else
+                <option value="{{ $optionValue }}" @selected((string) $optionValue === $selectedValue)>{{ $optionLabel }}</option>
+            @endif
         @endforeach
     </select>
     @if ($hint !== null)

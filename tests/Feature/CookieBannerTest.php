@@ -64,7 +64,7 @@ class CookieBannerTest extends TestCase
 
         $html = $this->get(route($page, $parameters))->assertSee(self::BANNER, false)->getContent();
 
-        $this->assertMatchesRegularExpression('/data-sticky-bar[^>]*class="sticky bottom-\[var\(--cookie-banner-h,0px\)\] z-10 /', $html);
+        $this->assertMatchesRegularExpression('/data-sticky-bar[^>]*class="sticky bottom-\(--cookie-banner-h,0px\) z-10 /', $html);
         $this->assertDoesNotMatchRegularExpression('/data-sticky-bar[^>]*class="[^"]*bottom-0/', $html);
     }
 

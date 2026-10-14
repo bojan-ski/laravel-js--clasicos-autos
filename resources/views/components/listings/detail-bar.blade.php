@@ -1,7 +1,7 @@
 @props(['listing', 'price'])
 
 <div data-sticky-bar role="region" aria-label="{{ __('app.listings.show.bar.label') }}"
-     {{ $attributes->merge(['class' => 'sticky bottom-[var(--cookie-banner-h,0px)] z-10 -mx-5 -mb-6 flex items-center gap-4 border-t border-rule bg-paper px-5 py-3 md:hidden']) }}>
+     {{ $attributes->merge(['class' => 'sticky bottom-(--cookie-banner-h,0px) z-10 -mx-5 -mb-6 flex items-center gap-4 border-t border-rule bg-paper px-5 py-3 md:hidden']) }}>
     <div class="flex shrink-0 flex-col gap-0.5">
         <x-ui.kicker lang="es">{{ __('app.listings.show.price_kicker') }}</x-ui.kicker>
         <span class="font-heading text-3xl leading-none tabular-nums">{{ $price }}</span>

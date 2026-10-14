@@ -34,7 +34,7 @@ class RouteAccessMatrixTest extends TestCase
     {
         $routes = ApplicationRoutes::named();
 
-        $this->assertCount(30, $routes);
+        $this->assertCount(32, $routes);
 
         $bands = [];
 
@@ -46,7 +46,7 @@ class RouteAccessMatrixTest extends TestCase
         $census = array_count_values($bands);
         ksort($census);
 
-        $this->assertSame(['admin' => 2, 'auth' => 5, 'guest' => 8, 'profile' => 3, 'public' => 12], $census);
+        $this->assertSame(['admin' => 2, 'auth' => 5, 'guest' => 8, 'profile' => 3, 'public' => 12, 'seller' => 2], $census);
         $this->assertSame([], array_filter($bands, fn (string $band, string $name): bool => Str::startsWith($name, 'admin.') !== ($band === RouteBand::Admin->value), ARRAY_FILTER_USE_BOTH));
     }
 
@@ -127,6 +127,7 @@ class RouteAccessMatrixTest extends TestCase
             RouteBand::Public, RouteBand::Auth => self::REACHES,
             RouteBand::Guest => '→ '.$user->landingRoute(),
             RouteBand::Profile => $user->isAppUser() ? self::REACHES : self::FORBIDDEN,
+            RouteBand::Seller => $user->isAppUser() && ! $user->isSuspended() ? self::REACHES : self::FORBIDDEN,
             RouteBand::Admin => $user->isAdmin() ? self::REACHES : self::FORBIDDEN,
         };
     }

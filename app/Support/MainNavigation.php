@@ -23,7 +23,7 @@ class MainNavigation
     {
         return [
             new NavItem('home', 'app.nav.home', 'home', 'home', [NavAudience::Guest, NavAudience::Member]),
-            new NavItem('listings', 'app.nav.listings', 'listings.index', 'listings.*', [NavAudience::Guest, NavAudience::Member]),
+            new NavItem('listings', 'app.nav.listings', 'listings.index', ['listings.index', 'listings.advanced', 'listings.show'], [NavAudience::Guest, NavAudience::Member]),
             new NavItem('compare', 'app.nav.compare', 'compare.show', 'compare.*', [NavAudience::Guest, NavAudience::Member], CompareCounter::class, NavCountStyle::Selected),
             new NavItem('bookmarks', 'app.nav.bookmarks', 'bookmarks.index', 'bookmarks.*', [NavAudience::Member]),
         ];
@@ -45,7 +45,7 @@ class MainNavigation
                 key: $item->key,
                 label: __($item->labelKey),
                 url: route($item->route),
-                active: $this->router->currentRouteNamed($item->activePattern),
+                active: $this->router->currentRouteNamed(...(array) $item->activePattern),
                 count: $this->countFor($item, $user),
                 countStyle: $item->countStyle,
             );
@@ -67,6 +67,7 @@ class MainNavigation
                 new HeaderAction('register', __('app.header.register'), route('register'), 'GET', HeaderActionStyle::Primary),
             ],
             NavAudience::Member => [
+                new HeaderAction('list-car', __('app.header.list_car'), route('listings.create'), 'GET', HeaderActionStyle::Primary),
                 new HeaderAction('profile', $user?->initials() ?? '', route('profile'), 'GET', HeaderActionStyle::Avatar, __('app.header.profile')),
                 $logOut,
             ],
