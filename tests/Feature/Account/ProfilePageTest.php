@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Account;
 
+use App\Enums\ListingStatus;
+use App\Models\CarListing;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
@@ -83,12 +85,122 @@ class ProfilePageTest extends TestCase
         $this->assertDoesNotMatchRegularExpression('/<form[^>]*action="'.preg_quote(route('profile.destroy'), '/').'"[^>]*novalidate/', $content);
     }
 
-    public function test_profile_has_no_listings_section_and_no_safe_word(): void
+    public function test_profile_has_no_safe_word(): void
     {
         $this->actingAs(User::factory()->create())
             ->get(route('profile'))
-            ->assertDontSee('My car listings')
             ->assertDontSee('safe word', false)
             ->assertDontSee('safe_word', false);
+    }
+
+    public function test_my_car_listings_stamps_pending_and_rejected_and_shows_the_reason(): void
+    {
+        $user = User::factory()->create();
+        CarListing::factory()->for($user, 'owner')->create(['name' => 'Pending Bel Air']);
+        CarListing::factory()->approved()->for($user, 'owner')->create(['name' => 'Approved Impala']);
+        CarListing::factory()->rejected('Please add interior photos.')->for($user, 'owner')->create(['name' => 'Rejected Fairlane']);
+
+        $html = $this->actingAs($user)->get(route('profile'))->assertOk()->getContent();
+
+        $this->assertStringContainsString(__('app.listings.status.pending'), $this->card($html, 'Pending Bel Air'));
+        $this->assertStringContainsString(__('app.listings.status.rejected'), $this->card($html, 'Rejected Fairlane'));
+        $this->assertStringContainsString('Please add interior photos.', $this->card($html, 'Rejected Fairlane'));
+        $approved = $this->card($html, 'Approved Impala');
+        foreach (ListingStatus::cases() as $status) {
+            $this->assertStringNotContainsString('>'.$status->label().'<', $approved);
+        }
+    }
+
+    public function test_my_car_listings_never_shows_another_users_listing(): void
+    {
+        $user = User::factory()->create();
+        CarListing::factory()->approved()->for($user, 'owner')->create(['name' => 'My Thunderbird']);
+        CarListing::factory()->approved()->create(['name' => 'Someone Elses Corvette']);
+
+        $this->actingAs($user)->get(route('profile'))
+            ->assertSee('My Thunderbird')
+            ->assertDontSee('Someone Elses Corvette');
+    }
+
+    public function test_my_car_listings_is_newest_first_eight_per_page(): void
+    {
+        $user = User::factory()->create();
+        foreach (range(1, 9) as $number) {
+            CarListing::factory()->for($user, 'owner')->create(['name' => "Classic {$number}", 'created_at' => now()->subDays(10 - $number)]);
+        }
+
+        $first = $this->actingAs($user)->get(route('profile'))->assertViewHas('listings', fn ($listings): bool => $listings->perPage() === 8);
+        $first->assertSeeInOrder(array_map(fn (int $number): string => "Classic {$number}<", range(9, 2)), false)
+            ->assertDontSee('Classic 1<', false);
+
+        $this->actingAs($user)->get(route('profile', ['page' => 2]))
+            ->assertSee('Classic 1<', false)
+            ->assertDontSee('Classic 2<', false);
+    }
+
+    public function test_my_car_listings_shows_the_empty_state_without_listings(): void
+    {
+        $this->actingAs(User::factory()->create())->get(route('profile'))
+            ->assertSeeInOrder([__('app.profile.listings.heading'), __('app.profile.listings.empty')]);
+    }
+
+    public function test_a_page_past_the_last_shows_neither_cards_nor_the_empty_state(): void
+    {
+        $user = User::factory()->create();
+        CarListing::factory()->for($user, 'owner')->create();
+
+        $this->actingAs($user)->get(route('profile', ['page' => 3]))
+            ->assertOk()
+            ->assertDontSee(__('app.profile.listings.empty'))
+            ->assertDontSee('<article', false);
+    }
+
+    public function test_the_section_header_links_list_your_car_and_cards_use_h3(): void
+    {
+        $user = User::factory()->create();
+        CarListing::factory()->for($user, 'owner')->create(['name' => 'Bel Air']);
+
+        $html = $this->actingAs($user)->get(route('profile'))->getContent();
+
+        $this->assertMatchesRegularExpression('/<div class="flex flex-wrap items-baseline justify-between gap-4 border-b border-rule pb-2.5">\s*<h2 id="my-listings-heading"[^>]*>'.preg_quote(__('app.profile.listings.heading'), '/').'<\/h2>\s*<a href="'.preg_quote(route('listings.create'), '/').'"[^>]*border-red text-red[^>]*min-h-12[^>]*>'.preg_quote(__('app.profile.listings.create'), '/').'<\/a>/', $html);
+        $this->assertStringContainsString('<div class="grid gap-9 md:grid-cols-3">', $html);
+        $this->assertMatchesRegularExpression('/<h3 class="[^"]*">Bel Air<\/h3>/', $html);
+    }
+
+    public function test_a_suspended_user_does_not_see_list_your_car(): void
+    {
+        $user = User::factory()->suspended()->create();
+
+        $html = $this->actingAs($user)->get(route('profile'))->assertOk()->getContent();
+
+        $this->assertStringContainsString('id="my-listings-heading"', $html);
+        $this->assertDoesNotMatchRegularExpression('/my-listings-heading.*'.preg_quote(route('listings.create'), '/').'/s', $html);
+    }
+
+    public function test_own_cards_have_no_bookmark_button(): void
+    {
+        $user = User::factory()->create();
+        $listing = CarListing::factory()->approved()->for($user, 'owner')->create();
+
+        $this->actingAs($user)->get(route('profile'))
+            ->assertSee(route('compare.add', $listing), false)
+            ->assertDontSee(route('bookmarks.store', $listing), false);
+    }
+
+    public function test_the_section_eager_loads_its_cards(): void
+    {
+        $user = User::factory()->create();
+        CarListing::factory()->count(3)->for($user, 'owner')->withImages(1)->create();
+
+        $this->actingAs($user)->get(route('profile'))->assertOk();
+    }
+
+    private function card(string $html, string $name): string
+    {
+        preg_match('/<article\b(?:(?!<\/article>).)*>'.preg_quote($name, '/').'<.*?<\/article>/s', $html, $match);
+
+        $this->assertNotEmpty($match, "No card for {$name}.");
+
+        return $match[0];
     }
 }

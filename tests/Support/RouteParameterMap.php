@@ -42,6 +42,10 @@ final class RouteParameterMap
             return ['listing' => (string) $listing->id, 'image' => (string) $listing->images()->where('position', 1)->sole()->id];
         }
 
+        if (in_array($name, ['admin.listings.approve', 'admin.listings.reject'], true)) {
+            return ['listing' => (string) CarListing::factory()->create()->id];
+        }
+
         if ($name === 'users.listings') {
             return ['user' => (string) User::factory()->create()->id];
         }

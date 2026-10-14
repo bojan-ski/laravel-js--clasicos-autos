@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Account\DeleteAccountRequest;
 use App\Http\Requests\Account\UpdatePasswordRequest;
 use App\Services\AccountDeletionService;
+use App\Services\ListingBrowseService;
 use App\Services\PasswordService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -15,7 +16,7 @@ use Illuminate\Support\Str;
 
 class ProfileController extends Controller
 {
-    public function show(Request $request): View
+    public function show(Request $request, ListingBrowseService $browse): View
     {
         $user = $request->user();
 
@@ -23,6 +24,7 @@ class ProfileController extends Controller
             'user' => $user,
             'heading' => __('app.profile.heading', ['username' => Str::upper($user->username)]),
             'accountCreated' => $user->created_at->format('d.m.Y'),
+            'listings' => $browse->ownListings($user),
         ]);
     }
 

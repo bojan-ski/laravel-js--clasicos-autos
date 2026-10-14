@@ -198,4 +198,9 @@ class CarListing extends Model
     {
         return $this->isApproved() || $this->isRejected();
     }
+
+    public function moderationVersion(): int
+    {
+        return (int) $this->updated_at?->getTimestamp();
+    }
 }

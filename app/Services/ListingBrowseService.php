@@ -110,14 +110,17 @@ class ListingBrowseService
      */
     public function sellerListings(User $seller, bool $everyStatus): LengthAwarePaginator
     {
-        $query = CarListing::query()->whereBelongsTo($seller, 'owner');
-
-        return $query
+        return $this->ownedBy($seller)
             ->when(! $everyStatus, fn (Builder $listings) => $listings->publiclyVisible())
-            ->with(['owner', 'maker', 'primaryImage'])
-            ->orderByDesc($query->qualifyColumn('created_at'))
-            ->orderByDesc($query->qualifyColumn('id'))
             ->paginate(config('listings.per_page.seller'));
+    }
+
+    /**
+     * @return LengthAwarePaginator<int, CarListing>
+     */
+    public function ownListings(User $owner): LengthAwarePaginator
+    {
+        return $this->ownedBy($owner)->paginate(config('listings.per_page.profile'));
     }
 
     public function detail(CarListing $listing): CarListing
@@ -149,6 +152,19 @@ class ListingBrowseService
             ->with(['owner', 'maker', 'primaryImage'])
             ->orderByDesc('created_at')
             ->orderByDesc('id');
+    }
+
+    /**
+     * @return Builder<CarListing>
+     */
+    private function ownedBy(User $owner): Builder
+    {
+        $query = CarListing::query()->whereBelongsTo($owner, 'owner');
+
+        return $query
+            ->with(['owner', 'maker', 'primaryImage'])
+            ->orderByDesc($query->qualifyColumn('created_at'))
+            ->orderByDesc($query->qualifyColumn('id'));
     }
 
     private function isFilled(string|int|BackedEnum|null $value): bool

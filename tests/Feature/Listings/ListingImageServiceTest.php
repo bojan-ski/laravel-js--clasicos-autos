@@ -407,11 +407,12 @@ class ListingImageServiceTest extends TestCase
     }
 
     #[DataProvider('imageChanges')]
-    public function test_an_image_change_leaves_a_pending_listing_untouched(string $operation): void
+    public function test_an_image_change_keeps_a_pending_listing_pending_and_bumps_its_version(string $operation): void
     {
         $this->freezeSecond();
         $listing = CarListing::factory()->withImages(2)->create();
         $submittedAt = $listing->submitted_at;
+        $version = $listing->moderationVersion();
         $this->travel(1)->hours();
 
         $this->performImageChange($operation, $listing);
@@ -419,6 +420,19 @@ class ListingImageServiceTest extends TestCase
         $listing->refresh();
         $this->assertSame(ListingStatus::Pending, $listing->status);
         $this->assertEquals($submittedAt, $listing->submitted_at);
+        $this->assertSame($version + 3600, $listing->moderationVersion());
+    }
+
+    public function test_set_primary_on_the_primary_keeps_a_pending_listings_version(): void
+    {
+        $this->freezeSecond();
+        $listing = CarListing::factory()->withImages(2)->create();
+        $version = $listing->moderationVersion();
+        $this->travel(1)->hours();
+
+        $this->service->setPrimary($listing, $listing->primaryImage()->sole());
+
+        $this->assertSame($version, $listing->fresh()->moderationVersion());
     }
 
     public function test_delete_listing_directories_removes_only_the_given_listings(): void

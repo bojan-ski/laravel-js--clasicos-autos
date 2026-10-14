@@ -326,6 +326,11 @@ return [
             'failed' => 'Password is incorrect, account deletion failed.',
             'deleted' => 'Your account has been deleted.',
         ],
+        'listings' => [
+            'heading' => 'My car listings',
+            'create' => 'List your car',
+            'empty' => 'You have no car listings',
+        ],
     ],
 
     'listings' => [
@@ -558,6 +563,23 @@ return [
                 'title' => 'Are you sure you want to delete the car listing ?',
                 'cancel' => 'Cancel',
                 'confirm' => 'Delete',
+            ],
+        ],
+        'moderation' => [
+            'approve' => 'Approve',
+            'reject' => 'Reject',
+            'reject_title' => 'Reject this listing?',
+            'reason_label' => 'Reason for rejection',
+            'reason_hint' => 'Up to 1000 characters. The seller sees this reason on the listing and on their profile.',
+            'cancel' => 'Cancel',
+            'confirm_reject' => 'Reject',
+            'approved' => 'Car listing approved.',
+            'rejected' => 'Car listing rejected.',
+            'not_pending' => 'Only a pending listing can be approved or rejected.',
+            'changed' => 'This listing changed after you opened it. Review it again.',
+            'attributes' => [
+                'rejection_reason' => 'reason for rejection',
+                'version' => 'listing version',
             ],
         ],
         'options' => [
