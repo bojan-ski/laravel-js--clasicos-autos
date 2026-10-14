@@ -113,6 +113,8 @@ class RedirectDisciplineTest extends TestCase
             'compare.remove',
             'cookie-consent.store',
             'listings.destroy',
+            'listings.images.destroy',
+            'listings.images.primary',
             'listings.update',
             'register.store',
             'login.store',

@@ -76,6 +76,11 @@ class ListingService
         return $listing->load('primaryImage');
     }
 
+    public function forImages(CarListing $listing): CarListing
+    {
+        return $listing->load('images');
+    }
+
     public function formOptions(?CarListing $current = null): ListingFormOptions
     {
         $makers = CarMaker::query()

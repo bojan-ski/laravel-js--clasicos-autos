@@ -305,14 +305,14 @@ class ListingDetailPageTest extends TestCase
     }
 
     #[DataProvider('listingManagers')]
-    public function test_the_owner_and_an_admin_see_edit_and_the_delete_dialog_in_the_back_link_row(string $viewer): void
+    public function test_the_owner_and_an_admin_see_edit_edit_images_and_the_delete_dialog_in_the_back_link_row(string $viewer): void
     {
         $owner = User::factory()->create();
         $listing = CarListing::factory()->approved()->for($owner, 'owner')->create();
 
         $html = $this->show($listing, $this->viewer($viewer, $owner))->getContent();
 
-        $this->assertMatchesRegularExpression('/<div class="ml-auto flex flex-wrap items-center justify-end gap-2">\s*<a href="'.preg_quote(route('listings.edit', $listing), '/').'"[^>]*border-rule[^>]*>\s*Edit listing\s*<\/a>/', $html);
+        $this->assertMatchesRegularExpression('/<div class="ml-auto flex flex-wrap items-center justify-end gap-2">\s*<a href="'.preg_quote(route('listings.edit', $listing), '/').'"[^>]*border-rule[^>]*>\s*Edit listing\s*<\/a>\s*<a href="'.preg_quote(route('listings.images.edit', $listing), '/').'"[^>]*border-rule[^>]*>\s*Edit images\s*<\/a>\s*<div\s*>\s*<button type="button"[^>]*data-dialog-open="delete-listing"/', $html);
         $this->assertMatchesRegularExpression('/<button type="button"[^>]*border-red-deep[^>]*data-dialog-open="delete-listing" commandfor="delete-listing" command="show-modal">\s*Delete\s*<\/button>/', $html);
         $this->assertMatchesRegularExpression('/<dialog id="delete-listing" aria-labelledby="delete-listing-title"/', $html);
         $this->assertStringContainsString('<h2 id="delete-listing-title" class="text-[26px] leading-tight text-red italic">Are you sure you want to delete the car listing ?</h2>', $html);
@@ -330,6 +330,7 @@ class ListingDetailPageTest extends TestCase
         $html = $this->show($listing, $this->viewer($viewer, $owner))->getContent();
 
         $this->assertStringNotContainsString(route('listings.edit', $listing), $html);
+        $this->assertStringNotContainsString(route('listings.images.edit', $listing), $html);
         $this->assertStringNotContainsString('delete-listing', $html);
         $this->assertStringNotContainsString('ml-auto flex flex-wrap', $html);
     }

@@ -4,6 +4,7 @@ namespace Tests\Support;
 
 use App\Models\CarListing;
 use App\Models\User;
+use Database\Factories\CarListingFactory;
 use Illuminate\Routing\Route;
 use LogicException;
 
@@ -31,15 +32,14 @@ final class RouteParameterMap
             return ['listing' => (string) CarListing::factory()->approved()->create()->id];
         }
 
-        if (in_array($name, ['listings.edit', 'listings.update', 'listings.destroy'], true)) {
-            $user = auth()->user();
-            $factory = CarListing::factory()->approved();
+        if (in_array($name, ['listings.edit', 'listings.update', 'listings.destroy', 'listings.images.edit', 'listings.images.store'], true)) {
+            return ['listing' => (string) self::listingForActor()->create()->id];
+        }
 
-            if ($user instanceof User && $user->isAppUser()) {
-                $factory = $factory->for($user, 'owner');
-            }
+        if (in_array($name, ['listings.images.primary', 'listings.images.destroy'], true)) {
+            $listing = self::listingForActor()->withImages(2)->create();
 
-            return ['listing' => (string) $factory->create()->id];
+            return ['listing' => (string) $listing->id, 'image' => (string) $listing->images()->where('position', 1)->sole()->id];
         }
 
         if ($name === 'users.listings') {
@@ -51,5 +51,17 @@ final class RouteParameterMap
         }
 
         return self::MAP[$name];
+    }
+
+    private static function listingForActor(): CarListingFactory
+    {
+        $user = auth()->user();
+        $factory = CarListing::factory()->approved();
+
+        if ($user instanceof User && $user->isAppUser()) {
+            $factory = $factory->for($user, 'owner');
+        }
+
+        return $factory;
     }
 }

@@ -1,5 +1,5 @@
 <x-layouts.app :title="__('app.listings.edit.title')">
-    <x-ui.back-link :href="$backUrl">
+    <x-ui.back-link :href="$backUrl" slot-class="max-md:basis-full">
         <x-listings.edit-nav :listing="$listing" current="data" />
     </x-ui.back-link>
 

@@ -4,6 +4,9 @@
             <x-ui.button variant="secondary" size="responsive" :href="route('listings.edit', $listing)">
                 {{ __('app.listings.edit.edit_control') }}
             </x-ui.button>
+            <x-ui.button variant="secondary" size="responsive" :href="route('listings.images.edit', $listing)">
+                {{ __('app.listings.edit.edit_images_control') }}
+            </x-ui.button>
         @endcan
         @can('delete', $listing)
             <x-listings.delete-dialog :action="route('listings.destroy', $listing)" />
