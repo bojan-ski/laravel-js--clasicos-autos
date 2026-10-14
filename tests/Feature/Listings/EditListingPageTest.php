@@ -111,7 +111,7 @@ class EditListingPageTest extends TestCase
         $html = $this->page($listing)->getContent();
 
         $this->assertMatchesRegularExpression('/<a href="'.preg_quote(route('listings.show', $listing), '/').'" class="inline-flex size-11/', $html);
-        $this->assertMatchesRegularExpression('/<nav aria-label="Edit listing sections"[^>]*>\s*<a href="'.preg_quote(route('listings.edit', $listing), '/').'"\s+aria-current="page"[^>]*>Edit Listing<\/a>/', $html);
+        $this->assertMatchesRegularExpression('/<nav aria-label="Edit listing sections"[^>]*>\s*<a href="'.preg_quote(route('listings.edit', $listing), '/').'"\s+aria-current="page"[^>]*>Edit Listing<\/a>\s*<a href="'.preg_quote(route('listings.images.edit', $listing), '/').'"\s+class="[^"]*"\s*>Edit Images<\/a>\s*<\/nav>/', $html);
         $this->assertSame(1, substr_count($html, 'aria-current="page"'));
         $this->assertMatchesRegularExpression('/<[^>]+>\s*Sunset Bel Air\s*<\/[a-z]+>\s*<h1[^>]*>Edit Car Listing Data<\/h1>/', $html);
         $this->assertStringContainsString('<img src="'.e($listing->primaryImage->thumbUrl()).'" alt="" width="320" height="240"', $html);

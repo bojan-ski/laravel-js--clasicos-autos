@@ -1,3 +1,8 @@
+@props([
+    'label' => null,
+    'labelClass' => 'text-xs text-ink/70',
+])
+
 @php
     $max = config('listings.images.max');
     $hasError = $errors->has('images') || $errors->has('images.*');
@@ -11,13 +16,13 @@
      data-count-other="{{ __('app.listings.form.photos.count_other') }}"
      role="group" aria-labelledby="images-label"
      {{ $attributes->merge(['class' => 'flex flex-col gap-3']) }}>
-    <p id="images-label" class="text-xs text-ink/70">{{ __('app.listings.form.fields.images.label', ['max' => $max]) }} <span aria-hidden="true">*</span><span class="sr-only">({{ __('app.forms.required') }})</span></p>
+    <p id="images-label" class="{{ $labelClass }}">{{ $label ?? __('app.listings.form.fields.images.label', ['max' => $max]) }} <span aria-hidden="true">*</span><span class="sr-only">({{ __('app.forms.required') }})</span></p>
 
     @if ($errors->any())
         <p class="text-sm text-ink-2">{{ __('app.listings.form.photos.reselect') }}</p>
     @endif
 
-    <div data-photo-drop class="hidden flex-col items-center gap-3 rounded-xs border-2 border-dashed border-gold bg-card px-6 py-8 text-center data-dragging:bg-gold/10 md:flex">
+    <div data-photo-drop class="hidden flex-col items-center gap-3 rounded-xs border-2 border-dashed border-gold bg-card px-6 py-8 text-center data-dragging:bg-gold/10 md:flex md:flex-1 md:justify-center">
         <x-icons.image class="size-8 text-gold-ink" />
         <p class="font-heading text-xl">{{ __('app.listings.form.photos.drop') }}</p>
         <label class="{{ $button }} min-h-9 px-3.5 py-2 text-sm">

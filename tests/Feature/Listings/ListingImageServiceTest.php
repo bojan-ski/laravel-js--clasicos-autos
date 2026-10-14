@@ -269,6 +269,22 @@ class ListingImageServiceTest extends TestCase
         Storage::disk('public')->assertExists([$first->path, $third->path]);
     }
 
+    public function test_a_deleted_images_files_are_removed_only_after_the_commit(): void
+    {
+        $listing = CarListing::factory()->create();
+        [, $second] = $this->service->storeForNewListing($listing, $this->uploads(2))->all();
+
+        $exception = $this->thrown(fn () => DB::transaction(function () use ($listing, $second): void {
+            $this->service->delete($listing, $second);
+
+            throw new RuntimeException('Caller rolled back.');
+        }));
+
+        $this->assertInstanceOf(RuntimeException::class, $exception);
+        $this->assertModelExists($second);
+        Storage::disk('public')->assertExists([$second->path, $second->card_path, $second->thumb_path]);
+    }
+
     public function test_deleting_the_primary_promotes_the_next_image(): void
     {
         $listing = CarListing::factory()->withImages(3)->create();

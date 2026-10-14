@@ -1,6 +1,7 @@
 @props([
     'href',
     'label' => null,
+    'slotClass' => '',
 ])
 
 <div {{ $attributes->merge(['class' => 'border-b border-rule md:border-b-0']) }}>
@@ -16,7 +17,7 @@
             <span class="font-heading text-[22px] md:hidden">{{ $label }}</span>
         @endif
         @if ($slot->isNotEmpty())
-            <div class="ml-auto flex flex-wrap items-center justify-end gap-2">
+            <div @class(['ml-auto flex flex-wrap items-center justify-end gap-2', $slotClass => $slotClass !== ''])>
                 {{ $slot }}
             </div>
         @endif
