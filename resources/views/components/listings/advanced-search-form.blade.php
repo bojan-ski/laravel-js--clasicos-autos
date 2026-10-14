@@ -23,7 +23,7 @@
         </div>
     </div>
 
-    <div data-sticky-bar class="sticky bottom-[var(--cookie-banner-h,0px)] z-10 -mx-5 mt-5 -mb-5 border-t border-rule bg-paper p-5 md:hidden">
+    <div data-sticky-bar class="sticky bottom-(--cookie-banner-h,0px) z-10 -mx-5 mt-5 -mb-5 border-t border-rule bg-paper p-5 md:hidden">
         <x-ui.button variant="primary" type="submit" size="lg" class="w-full">{{ trans_choice('app.listings.advanced.show', $total, ['count' => $total]) }}</x-ui.button>
     </div>
 </form>

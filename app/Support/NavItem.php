@@ -10,6 +10,7 @@ use InvalidArgumentException;
 final readonly class NavItem
 {
     /**
+     * @param  string|list<string>  $activePattern
      * @param  list<NavAudience>  $audiences
      * @param  class-string<NavCounter>|null  $counter
      */
@@ -17,7 +18,7 @@ final readonly class NavItem
         public string $key,
         public string $labelKey,
         public string $route,
-        public string $activePattern,
+        public string|array $activePattern,
         public array $audiences,
         public ?string $counter = null,
         public ?NavCountStyle $countStyle = null,

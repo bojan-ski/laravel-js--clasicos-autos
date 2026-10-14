@@ -79,7 +79,7 @@ class RedirectDisciplineTest extends TestCase
     {
         $user = match (RouteBand::fromRoute($route)) {
             RouteBand::Public, RouteBand::Guest => null,
-            RouteBand::Auth, RouteBand::Profile => User::factory()->create(),
+            RouteBand::Auth, RouteBand::Profile, RouteBand::Seller => User::factory()->create(),
             RouteBand::Admin => User::factory()->admin()->create(),
         };
 

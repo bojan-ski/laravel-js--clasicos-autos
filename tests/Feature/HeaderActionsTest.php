@@ -32,7 +32,7 @@ class HeaderActionsTest extends TestCase
         $navigation = app(MainNavigation::class);
 
         $this->assertSame(['sign-in', 'register'], $this->keys($navigation->actionsFor(NavAudience::Guest, null)));
-        $this->assertSame(['profile', 'log-out'], $this->keys($navigation->actionsFor(NavAudience::Member, User::factory()->make())));
+        $this->assertSame(['list-car', 'profile', 'log-out'], $this->keys($navigation->actionsFor(NavAudience::Member, User::factory()->make())));
         $this->assertSame(['account', 'log-out'], $this->keys($navigation->actionsFor(NavAudience::Admin, User::factory()->admin()->make())));
     }
 

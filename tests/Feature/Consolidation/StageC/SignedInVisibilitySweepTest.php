@@ -110,7 +110,7 @@ class SignedInVisibilitySweepTest extends TestCase
         return array_filter(
             ApplicationRoutes::named(),
             fn (Route $route): bool => in_array('GET', $route->methods(), true)
-                && in_array(RouteBand::fromRoute($route), [RouteBand::Auth, RouteBand::Profile], true),
+                && in_array(RouteBand::fromRoute($route), [RouteBand::Auth, RouteBand::Profile, RouteBand::Seller], true),
         );
     }
 }

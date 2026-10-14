@@ -99,6 +99,30 @@ class FormSelectTest extends TestCase
         $this->assertMatchesRegularExpression('/<select[^>]*data-probe="select"/', $html);
     }
 
+    public function test_an_array_entry_renders_as_an_optgroup_and_flat_entries_stay_options(): void
+    {
+        $html = $this->render('<x-forms.select name="car_model_id" label="Model" :options="$options" placeholder="Select car model" />', [
+            'options' => ['Buick' => [3 => 'Roadmaster'], 'Chevrolet' => [7 => 'Bel Air', 9 => 'Impala'], 'other' => 'Other (specify)'],
+        ]);
+
+        $this->assertMatchesRegularExpression(
+            '/<option value="">Select car model<\/option>\s*<optgroup label="Buick">\s*<option value="3">Roadmaster<\/option>\s*<\/optgroup>\s*<optgroup label="Chevrolet">\s*<option value="7">Bel Air<\/option>\s*<option value="9">Impala<\/option>\s*<\/optgroup>\s*<option value="other">Other \(specify\)<\/option>/',
+            $html,
+        );
+    }
+
+    public function test_old_input_selects_an_option_inside_a_group(): void
+    {
+        $this->withOldInput(['car_model_id' => '9']);
+
+        $html = $this->render('<x-forms.select name="car_model_id" label="Model" :options="$options" :value="$value" />', [
+            'options' => ['Chevrolet' => [7 => 'Bel Air', 9 => 'Impala'], 'other' => 'Other (specify)'],
+            'value' => 'other',
+        ]);
+
+        $this->assertSame(['9'], $this->selectedValues($html));
+    }
+
     public function test_the_field_ignores_an_array_old_input_and_keeps_a_scalar_one(): void
     {
         $field = '<x-forms.field name="model" label="Model" :value="$value" />';
