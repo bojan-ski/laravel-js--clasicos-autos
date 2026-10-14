@@ -14,7 +14,7 @@
     <x-ui.spec-list :rows="$rows" />
 
     @guest
-        <p class="text-sm text-ink-2"><a href="{{ route('login') }}" class="text-red underline">{{ __('app.listings.show.owner.login') }}</a></p>
+        <p class="text-sm text-ink-2"><a href="{{ route('login') }}" class="inline-flex min-h-11 items-center text-red underline md:min-h-0">{{ __('app.listings.show.owner.login') }}</a></p>
     @else
         @if ($viewerIsOwner)
             <p class="text-sm text-ink-2">{{ __('app.listings.show.owner.own') }}</p>

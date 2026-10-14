@@ -267,6 +267,18 @@ class UpdateListingTest extends TestCase
         $this->assertSame('Impala', $fresh->model);
     }
 
+    public function test_a_custom_model_listing_cannot_switch_to_an_inactive_model(): void
+    {
+        $nomad = CarModel::factory()->for($this->maker, 'maker')->inactive()->create(['name' => 'Nomad', 'year_from' => 1955, 'year_to' => 1961]);
+        $listing = CarListing::factory()->customModel()->create(['car_maker_id' => $this->maker->id, 'model' => 'Custom Special', 'year' => 1960]);
+
+        $this->save($listing, ['car_model_id' => $nomad->id])->assertSessionHasErrors('car_model_id');
+
+        $fresh = $listing->fresh();
+        $this->assertNull($fresh->car_model_id);
+        $this->assertSame('Custom Special', $fresh->model);
+    }
+
     public function test_switching_to_other_stores_the_typed_model_without_a_model_id(): void
     {
         $listing = $this->listing();

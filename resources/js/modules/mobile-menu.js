@@ -1,4 +1,4 @@
-const DESKTOP_QUERY = '(min-width: 768px)'
+const DESKTOP_QUERY = '(min-width: 1024px)'
 
 export function initMobileMenu() {
     const menu = document.querySelector('[data-mobile-menu]')

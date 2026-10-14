@@ -114,6 +114,10 @@
     .bg-charcoal :focus-visible {
         outline-color: var(--color-gold-light);
     }
+
+    :is(input, select, textarea, [data-photo-input])[id] {
+        @apply scroll-mt-16;
+    }
 }
 
 @utility photo-grade {

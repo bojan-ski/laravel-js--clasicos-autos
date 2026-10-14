@@ -62,6 +62,7 @@ return [
     'forms' => [
         'required_note' => '* Required',
         'required' => 'required',
+        'error_summary' => 'There is :count problem with this form|There are :count problems with this form',
     ],
 
     'cookie_banner' => [
@@ -477,6 +478,7 @@ return [
             'delete' => 'Delete',
             'image_number' => 'image :number',
             'alt' => ':name — image :number',
+            'primary_alt' => ':name — primary image',
             'gallery_heading' => 'All images',
             'dialog_title' => 'Are you sure you want to delete this image?',
             'cancel' => 'Cancel',

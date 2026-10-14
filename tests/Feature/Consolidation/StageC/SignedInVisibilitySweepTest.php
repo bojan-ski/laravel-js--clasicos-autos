@@ -21,6 +21,8 @@ class SignedInVisibilitySweepTest extends TestCase
 
     private const array LISTING_PAGES = ['bookmarks.index', 'users.listings'];
 
+    private const array STAGE_D_PAGES = ['profile', 'listings.create', 'listings.edit', 'listings.images.edit'];
+
     private const string CONTROL = 'Sweep Control Public';
 
     private const array MARKERS = [
@@ -63,6 +65,17 @@ class SignedInVisibilitySweepTest extends TestCase
             $this->visit($name, $swept[$name])
                 ->assertOk()
                 ->assertSee(self::CONTROL);
+        }
+    }
+
+    public function test_the_sweep_covers_the_stage_d_pages_and_each_answers_200(): void
+    {
+        $swept = $this->signedInGetRoutes();
+
+        foreach (self::STAGE_D_PAGES as $name) {
+            $this->assertArrayHasKey($name, $swept);
+
+            $this->visit($name, $swept[$name])->assertOk();
         }
     }
 

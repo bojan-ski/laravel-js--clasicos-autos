@@ -13,7 +13,7 @@
 
     <div class="mt-3 flex flex-wrap gap-2">
         @if ($primary)
-            <p class="flex min-h-12 w-full items-center justify-center border border-red px-3 text-center text-xs text-red md:min-h-9">
+            <p class="flex min-h-12 w-full items-center justify-center bg-gold/10 px-3 text-center text-[11px] tracking-[0.16em] text-gold-ink uppercase md:min-h-9">
                 {{ __('app.listings.images.primary_tag') }}
             </p>
         @else

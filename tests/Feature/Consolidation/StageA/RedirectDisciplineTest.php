@@ -24,6 +24,14 @@ class RedirectDisciplineTest extends TestCase
 
     private const string HOSTILE_REFERER = 'https://evil.example/';
 
+    private const array STAGE_D_PINNED_TARGETS = [
+        'listings.store' => 'listings.create',
+        'listings.update' => 'listings.edit',
+        'listings.images.store' => 'listings.images.edit',
+        'admin.listings.approve' => 'listings.show',
+        'admin.listings.reject' => 'listings.show',
+    ];
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -59,6 +67,19 @@ class RedirectDisciplineTest extends TestCase
         $this->assertArrayHasKey('cookie-consent.store (empty)', $locations);
         $this->assertSame([], $rejectedValidPayloads);
         $this->assertSame([], $offenders);
+    }
+
+    public function test_empty_stage_d_writes_land_on_their_pinned_targets(): void
+    {
+        $writes = $this->writeRoutes();
+        $landed = [];
+
+        foreach (self::STAGE_D_PINNED_TARGETS as $name => $target) {
+            $location = $this->send($writes[$name], fn (?User $user): array => [])->headers->get('Location');
+            $landed[$name] = $location === route($target, $target === 'listings.create' ? [] : CarListing::query()->latest('id')->value('id'));
+        }
+
+        $this->assertSame(array_fill_keys(array_keys(self::STAGE_D_PINNED_TARGETS), true), $landed);
     }
 
     /**

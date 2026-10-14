@@ -12,7 +12,7 @@
     $rule = $onDark ? 'border-cream-on-dark/20' : 'border-rule';
 @endphp
 
-<details data-mobile-menu class="group md:hidden">
+<details data-mobile-menu class="group lg:hidden">
     <summary aria-label="{{ __('app.a11y.menu') }}"
              class="relative grid size-11 cursor-pointer list-none place-items-center rounded-xs [&::-webkit-details-marker]:hidden">
         <x-icons.menu class="size-5.5 group-open:hidden" />

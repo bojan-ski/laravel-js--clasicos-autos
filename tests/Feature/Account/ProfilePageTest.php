@@ -104,7 +104,7 @@ class ProfilePageTest extends TestCase
 
         $this->assertStringContainsString(__('app.listings.status.pending'), $this->card($html, 'Pending Bel Air'));
         $this->assertStringContainsString(__('app.listings.status.rejected'), $this->card($html, 'Rejected Fairlane'));
-        $this->assertStringContainsString('Please add interior photos.', $this->card($html, 'Rejected Fairlane'));
+        $this->assertStringContainsString('<span class="sr-only">'.__('app.listings.show.status.reason').' </span>Please add interior photos.', $this->card($html, 'Rejected Fairlane'));
         $approved = $this->card($html, 'Approved Impala');
         foreach (ListingStatus::cases() as $status) {
             $this->assertStringNotContainsString('>'.$status->label().'<', $approved);

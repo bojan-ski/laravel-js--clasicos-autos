@@ -18,7 +18,7 @@
         </div>
 
         @if ($links !== [])
-            <nav aria-label="{{ __('app.a11y.main_navigation') }}" class="hidden items-center gap-7 text-sm md:flex">
+            <nav aria-label="{{ __('app.a11y.main_navigation') }}" class="hidden items-center gap-7 text-sm lg:flex">
                 @foreach ($links as $link)
                     <x-global.nav-link :link="$link" :audience="$audience" />
                 @endforeach
@@ -26,7 +26,7 @@
         @endif
 
         @if ($actions !== [])
-            <div class="hidden items-center gap-2.5 md:flex">
+            <div class="hidden items-center gap-2.5 lg:flex">
                 @foreach ($actions as $action)
                     <x-global.header-action :action="$action" :audience="$audience" />
                 @endforeach

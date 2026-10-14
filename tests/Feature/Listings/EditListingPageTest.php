@@ -257,6 +257,30 @@ class EditListingPageTest extends TestCase
         );
     }
 
+    public function test_the_inactive_current_model_is_offered_only_under_its_maker_in_name_order(): void
+    {
+        $hudson = CarMaker::factory()->create(['name' => 'Hudson']);
+        $ambassador = CarModel::factory()->for($hudson, 'maker')->inactive()->create(['name' => 'ambassador', 'year_from' => 1951, 'year_to' => 1957]);
+        $commodore = CarModel::factory()->for($hudson, 'maker')->create(['name' => 'Commodore']);
+        $chevrolet = CarMaker::factory()->create(['name' => 'Chevrolet']);
+        $belAir = CarModel::factory()->for($chevrolet, 'maker')->create(['name' => 'Bel Air']);
+        $listing = CarListing::factory()->forCarModel($ambassador)->create();
+
+        $html = $this->page($listing)->getContent();
+
+        $models = $this->select($html, 'car_model_id');
+        $this->assertSame(1, substr_count($models, '>ambassador<'));
+        $this->assertMatchesRegularExpression(
+            '/<optgroup label="Hudson">\s*<option value="'.$ambassador->id.'" selected>ambassador<\/option>\s*<option value="'.$commodore->id.'">Commodore<\/option>\s*<\/optgroup>/',
+            $models,
+        );
+
+        preg_match('/<script type="application\/json" data-model-select-config>(.*?)<\/script>/s', $html, $match);
+        $config = json_decode($match[1], true)['models'];
+        $this->assertSame([['id' => $ambassador->id, 'name' => 'ambassador'], ['id' => $commodore->id, 'name' => 'Commodore']], $config[(string) $hudson->id]);
+        $this->assertSame([['id' => $belAir->id, 'name' => 'Bel Air']], $config[(string) $chevrolet->id]);
+    }
+
     public function test_an_active_current_model_is_not_duplicated(): void
     {
         $listing = CarListing::factory()->create();
