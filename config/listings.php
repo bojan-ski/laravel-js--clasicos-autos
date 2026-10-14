@@ -9,6 +9,7 @@ return [
     'images' => [
         'max' => 8,
         'max_upload_kb' => 10240,
+        'webp_quality' => 85,
         'variants' => [
             'full' => ['width' => 2000, 'height' => 2000],
             'card' => ['width' => 800, 'height' => 600],

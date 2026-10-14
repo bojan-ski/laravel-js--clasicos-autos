@@ -37,11 +37,14 @@ class ProfileController extends Controller
     {
         $user = $request->user();
 
-        Auth::guard('web')->logout();
-        $deletion->delete($user);
+        Auth::guard('web')->logoutCurrentDevice();
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        try {
+            $deletion->delete($user);
+        } finally {
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        }
 
         return redirect()->route('home')->with('success', __('app.profile.delete.deleted'));
     }

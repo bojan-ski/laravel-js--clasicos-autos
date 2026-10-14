@@ -453,6 +453,14 @@ return [
             'approved' => 'Approved',
             'rejected' => 'Rejected',
         ],
+        'images' => [
+            'limit_reached' => 'The limit is 8 images!',
+            'would_exceed_limit' => 'Adding new images will exceed the limit of 8 images!',
+            'last_image_required' => 'There needs to be at least one image!',
+            'primary_changed' => 'Primary image changed!',
+            'deleted' => 'Image deleted.',
+            'gallery_updated' => 'Images gallery updated',
+        ],
         'options' => [
             'transmission' => [
                 'manual' => 'Manual',
