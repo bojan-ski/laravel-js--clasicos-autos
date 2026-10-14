@@ -296,6 +296,44 @@ class ListingDetailPageTest extends TestCase
             ->assertDontSee(__('app.listings.show.status.label'));
     }
 
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function listingManagers(): array
+    {
+        return ['owner' => ['owner'], 'admin' => ['admin']];
+    }
+
+    #[DataProvider('listingManagers')]
+    public function test_the_owner_and_an_admin_see_edit_and_the_delete_dialog_in_the_back_link_row(string $viewer): void
+    {
+        $owner = User::factory()->create();
+        $listing = CarListing::factory()->approved()->for($owner, 'owner')->create();
+
+        $html = $this->show($listing, $this->viewer($viewer, $owner))->getContent();
+
+        $this->assertMatchesRegularExpression('/<div class="ml-auto flex flex-wrap items-center justify-end gap-2">\s*<a href="'.preg_quote(route('listings.edit', $listing), '/').'"[^>]*border-rule[^>]*>\s*Edit listing\s*<\/a>/', $html);
+        $this->assertMatchesRegularExpression('/<button type="button"[^>]*border-red-deep[^>]*data-dialog-open="delete-listing" commandfor="delete-listing" command="show-modal">\s*Delete\s*<\/button>/', $html);
+        $this->assertMatchesRegularExpression('/<dialog id="delete-listing" aria-labelledby="delete-listing-title"/', $html);
+        $this->assertStringContainsString('<h2 id="delete-listing-title" class="text-[26px] leading-tight text-red italic">Are you sure you want to delete the car listing ?</h2>', $html);
+        $this->assertMatchesRegularExpression('/<form method="POST" action="'.preg_quote(route('listings.destroy', $listing), '/').'"[^>]*>\s*<input type="hidden" name="_token"[^>]*>\s*<input type="hidden" name="_method" value="DELETE">/', $html);
+        $this->assertMatchesRegularExpression('/data-dialog-close="data-dialog-close" commandfor="delete-listing" command="close">\s*Cancel\s*<\/button>/', $html);
+        $this->assertMatchesRegularExpression('/<button type="submit"[^>]*border-red-deep[^>]*>\s*Delete\s*<\/button>/', $html);
+    }
+
+    #[DataProvider('nonModerators')]
+    public function test_nobody_else_sees_the_edit_or_delete_controls(string $viewer): void
+    {
+        $owner = User::factory()->create();
+        $listing = CarListing::factory()->approved()->for($owner, 'owner')->create();
+
+        $html = $this->show($listing, $this->viewer($viewer, $owner))->getContent();
+
+        $this->assertStringNotContainsString(route('listings.edit', $listing), $html);
+        $this->assertStringNotContainsString('delete-listing', $html);
+        $this->assertStringNotContainsString('ml-auto flex flex-wrap', $html);
+    }
+
     public function test_a_rejected_listing_shows_its_reason_in_the_panel(): void
     {
         $owner = User::factory()->create();

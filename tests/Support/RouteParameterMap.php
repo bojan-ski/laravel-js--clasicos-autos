@@ -31,6 +31,17 @@ final class RouteParameterMap
             return ['listing' => (string) CarListing::factory()->approved()->create()->id];
         }
 
+        if (in_array($name, ['listings.edit', 'listings.update', 'listings.destroy'], true)) {
+            $user = auth()->user();
+            $factory = CarListing::factory()->approved();
+
+            if ($user instanceof User && $user->isAppUser()) {
+                $factory = $factory->for($user, 'owner');
+            }
+
+            return ['listing' => (string) $factory->create()->id];
+        }
+
         if ($name === 'users.listings') {
             return ['user' => (string) User::factory()->create()->id];
         }

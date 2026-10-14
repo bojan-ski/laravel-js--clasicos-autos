@@ -14,11 +14,43 @@ use App\Enums\SeatMaterial;
 use App\Enums\Transmission;
 use App\Enums\VehicleCondition;
 use App\Models\CarMaker;
+use App\Models\CarModel;
 use Illuminate\Support\Collection;
 
 final readonly class ListingFormOptions
 {
     public const string OTHER_MODEL = 'other';
+
+    public const array FIELDS = [
+        'name',
+        'car_maker_id',
+        'car_model_id',
+        'model',
+        'price',
+        'year',
+        'mileage',
+        'transmission',
+        'fuel_type',
+        'engine_size',
+        'engine_type',
+        'engine_history',
+        'engine_condition',
+        'restoration_history',
+        'original_parts_percentage',
+        'odometer',
+        'license_plate_type',
+        'documentation_status',
+        'body_type',
+        'exterior_color',
+        'exterior_condition',
+        'interior_color',
+        'interior_condition',
+        'seat_material',
+        'location_city',
+        'location_state',
+        'location_zipcode',
+        'description',
+    ];
 
     public const array ENUM_FIELDS = [
         'transmission' => Transmission::class,
@@ -51,7 +83,7 @@ final readonly class ListingFormOptions
     /**
      * @param  Collection<int, CarMaker>  $makers
      */
-    public static function fromMakers(Collection $makers): self
+    public static function fromMakers(Collection $makers, ?CarModel $current = null): self
     {
         $makerOptions = [];
         $modelGroups = [];
@@ -60,8 +92,13 @@ final readonly class ListingFormOptions
         foreach ($makers as $maker) {
             $makerOptions[$maker->id] = $maker->name;
             $configModels[$maker->id] = [];
+            $models = $maker->activeModels;
 
-            foreach ($maker->activeModels as $model) {
+            if ($current !== null && $current->car_maker_id === $maker->id && ! $models->contains($current)) {
+                $models = $models->concat([$current])->sortBy('name', SORT_STRING | SORT_FLAG_CASE)->values();
+            }
+
+            foreach ($models as $model) {
                 $modelGroups[$maker->name][$model->id] = $model->name;
                 $configModels[$maker->id][] = ['id' => $model->id, 'name' => $model->name];
             }

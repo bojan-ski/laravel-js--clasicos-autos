@@ -526,6 +526,25 @@ return [
             'submit' => 'Add Car Listing',
             'success' => 'Car listing created successfully! It will be public once an admin approves it.',
         ],
+        'edit' => [
+            'title' => 'Edit Car Listing Data',
+            'description_section' => 'Description',
+            'reapproval_warning' => 'Saving sends this listing for approval again',
+            'last_updated' => 'Last updated :date',
+            'cancel' => 'Cancel',
+            'submit' => 'Update Car Listing',
+            'updated' => 'Car listing updated successfully.',
+            'deleted' => 'Car listing deleted.',
+            'nav_label' => 'Edit listing sections',
+            'nav_data' => 'Edit Listing',
+            'edit_control' => 'Edit listing',
+            'delete' => [
+                'open' => 'Delete',
+                'title' => 'Are you sure you want to delete the car listing ?',
+                'cancel' => 'Cancel',
+                'confirm' => 'Delete',
+            ],
+        ],
         'options' => [
             'transmission' => [
                 'manual' => 'Manual',

@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Routing\Route as RoutingRoute;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
 use LogicException;
@@ -28,13 +29,14 @@ class RouteAccessMatrixTest extends TestCase
         parent::setUp();
 
         $this->withoutVite();
+        Storage::fake('public');
     }
 
     public function test_every_named_application_route_has_a_band_and_its_parameters(): void
     {
         $routes = ApplicationRoutes::named();
 
-        $this->assertCount(32, $routes);
+        $this->assertCount(35, $routes);
 
         $bands = [];
 
@@ -46,7 +48,7 @@ class RouteAccessMatrixTest extends TestCase
         $census = array_count_values($bands);
         ksort($census);
 
-        $this->assertSame(['admin' => 2, 'auth' => 5, 'guest' => 8, 'profile' => 3, 'public' => 12, 'seller' => 2], $census);
+        $this->assertSame(['admin' => 2, 'auth' => 8, 'guest' => 8, 'profile' => 3, 'public' => 12, 'seller' => 2], $census);
         $this->assertSame([], array_filter($bands, fn (string $band, string $name): bool => Str::startsWith($name, 'admin.') !== ($band === RouteBand::Admin->value), ARRAY_FILTER_USE_BOTH));
     }
 

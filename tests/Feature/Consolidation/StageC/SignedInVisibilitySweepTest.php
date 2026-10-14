@@ -6,6 +6,7 @@ use App\Models\CarListing;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Routing\Route;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Testing\TestResponse;
 use Tests\Support\ApplicationRoutes;
 use Tests\Support\RouteBand;
@@ -37,6 +38,7 @@ class SignedInVisibilitySweepTest extends TestCase
         parent::setUp();
 
         $this->withoutVite();
+        Storage::fake('public');
 
         $this->markersOwner = User::factory()->create();
         $ahead = now()->addDay();
@@ -93,13 +95,14 @@ class SignedInVisibilitySweepTest extends TestCase
 
     private function visit(string $name, Route $route): TestResponse
     {
+        $this->actingAs($this->actor);
         $parameters = RouteParameterMap::parametersFor($route);
 
         if ($name === self::MARKERS_OWNER_PAGE) {
             $parameters['user'] = (string) $this->markersOwner->id;
         }
 
-        return $this->actingAs($this->actor)->get(route($name, $parameters));
+        return $this->get(route($name, $parameters));
     }
 
     /**

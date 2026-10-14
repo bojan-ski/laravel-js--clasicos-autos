@@ -10,7 +10,10 @@ class FormFields extends Component
 {
     private const int UNSIGNED_INT_MAX = 4294967295;
 
-    public function __construct(public ListingFormOptions $options) {}
+    /**
+     * @param  array<string, int|string|null>  $values
+     */
+    public function __construct(public ListingFormOptions $options, public array $values = []) {}
 
     /**
      * @return list<array{id: string, number: string, title: string, note: string|null, fields: list<array{name: string, label: string, placeholder: string, type: string, required: bool, options: array<string, string>, min: int|null, max: int|null, maxlength: int|null, inputmode: string|null}>}>

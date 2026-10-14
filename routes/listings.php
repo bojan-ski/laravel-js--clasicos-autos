@@ -14,3 +14,9 @@ Route::middleware(['auth', 'can:access-profile'])->group(function () {
 });
 
 Route::get('/listings/{listing}', [ListingController::class, 'show'])->whereNumber('listing')->name('listings.show');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/listings/{listing}/edit', [ListingManagementController::class, 'edit'])->whereNumber('listing')->name('listings.edit');
+    Route::put('/listings/{listing}', [ListingManagementController::class, 'update'])->whereNumber('listing')->name('listings.update');
+    Route::delete('/listings/{listing}', [ListingManagementController::class, 'destroy'])->whereNumber('listing')->name('listings.destroy');
+});
