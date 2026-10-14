@@ -68,7 +68,7 @@ class ListingImageService
             }
 
             $images = $this->storeBatch($locked, $files, $count);
-            $this->moderation->returnToPending($locked);
+            $this->recordImageChange($locked);
 
             return $images;
         });
@@ -86,7 +86,7 @@ class ListingImageService
 
             $image->delete();
             $locked->images()->where('position', '>', $image->position)->decrement('position');
-            $this->moderation->returnToPending($locked);
+            $this->recordImageChange($locked);
 
             DB::afterCommit(fn () => $this->deleteFiles([$image->path, $image->card_path, $image->thumb_path]));
         });
@@ -104,7 +104,7 @@ class ListingImageService
 
             $locked->images()->where('position', '<', $image->position)->increment('position');
             $image->update(['position' => 0]);
-            $this->moderation->returnToPending($locked);
+            $this->recordImageChange($locked);
         });
     }
 
@@ -126,6 +126,17 @@ class ListingImageService
         if ($files === []) {
             throw new InvalidArgumentException('At least one image is required.');
         }
+    }
+
+    private function recordImageChange(CarListing $locked): void
+    {
+        if ($locked->shouldReturnToPendingOnEdit()) {
+            $this->moderation->returnToPending($locked);
+
+            return;
+        }
+
+        $locked->touch();
     }
 
     private function lock(CarListing $listing): CarListing

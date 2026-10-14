@@ -12,5 +12,28 @@
             <x-account.details-card :user="$user" :account-created="$accountCreated" />
             <x-account.password-form :action="route('profile.password.update')" />
         </div>
+
+        <section aria-labelledby="my-listings-heading" class="flex flex-col gap-6">
+            <div class="flex flex-wrap items-baseline justify-between gap-4 border-b border-rule pb-2.5">
+                <h2 id="my-listings-heading" class="text-[30px] leading-tight md:text-[34px]">{{ __('app.profile.listings.heading') }}</h2>
+                @can('create', App\Models\CarListing::class)
+                    <x-ui.button variant="primary" size="responsive" :href="route('listings.create')">{{ __('app.profile.listings.create') }}</x-ui.button>
+                @endcan
+            </div>
+
+            @if ($listings->total() === 0)
+                <x-listings.empty-state :message="__('app.profile.listings.empty')" />
+            @else
+                @if ($listings->isNotEmpty())
+                    <div class="grid gap-9 md:grid-cols-3">
+                        @foreach ($listings as $listing)
+                            <x-listings.card :listing="$listing" :show-status="true" :heading-level="3" />
+                        @endforeach
+                    </div>
+                @endif
+
+                {{ $listings->links() }}
+            @endif
+        </section>
     </div>
 </x-layouts.app>

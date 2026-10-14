@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Consolidation\StageA;
 
+use App\Models\CarListing;
 use App\Models\User;
 use App\Support\ListingFormOptions;
 use App\Support\ListingFormValues;
@@ -124,6 +125,8 @@ class RedirectDisciplineTest extends TestCase
             'profile.password.update',
             'profile.destroy',
             'admin.account.password.update',
+            'admin.listings.approve',
+            'admin.listings.reject',
         ], true);
     }
 
@@ -166,6 +169,11 @@ class RedirectDisciplineTest extends TestCase
                 ...ListingFormValues::for($user->listings()->latest('id')->firstOrFail()),
                 'car_model_id' => ListingFormOptions::OTHER_MODEL,
                 'model' => 'Typed model',
+            ],
+            'admin.listings.approve' => ['version' => CarListing::query()->latest('id')->firstOrFail()->moderationVersion()],
+            'admin.listings.reject' => [
+                'version' => CarListing::query()->latest('id')->firstOrFail()->moderationVersion(),
+                'rejection_reason' => 'Photos do not match the description.',
             ],
             default => [],
         };

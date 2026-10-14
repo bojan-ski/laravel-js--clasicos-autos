@@ -335,6 +335,58 @@ class ListingDetailPageTest extends TestCase
         $this->assertStringNotContainsString('ml-auto flex flex-wrap', $html);
     }
 
+    public function test_an_admin_sees_approve_and_the_reject_dialog_on_a_pending_listing(): void
+    {
+        $listing = CarListing::factory()->create();
+        $version = $listing->moderationVersion();
+
+        $html = $this->show($listing, User::factory()->admin()->create())->getContent();
+
+        $panel = preg_quote('aria-label="'.__('app.listings.show.status.label').'"', '/');
+        $approve = preg_quote(route('admin.listings.approve', $listing), '/');
+        $reject = preg_quote(route('admin.listings.reject', $listing), '/');
+        $this->assertMatchesRegularExpression('/'.$panel.'.*<div class="ml-auto flex w-full flex-wrap items-center gap-2 md:w-auto">\s*<form method="POST" action="'.$approve.'" class="w-full md:w-auto">/s', $html);
+        $this->assertMatchesRegularExpression('/action="'.$approve.'"[^>]*>\s*<input type="hidden" name="_token"[^>]*>\s*<input type="hidden" name="_method" value="PATCH">\s*<input type="hidden" name="version" value="'.$version.'">\s*<button type="submit"[^>]*border-red text-red[^>]*min-h-12[^>]*md:min-h-9[^>]*w-full md:w-auto">\s*Approve\s*<\/button>/', $html);
+        $this->assertMatchesRegularExpression('/<button type="button"[^>]*border-red-deep[^>]*w-full md:w-auto" data-dialog-open="reject-listing" commandfor="reject-listing" command="show-modal">\s*Reject\s*<\/button>/', $html);
+        $this->assertMatchesRegularExpression('/<dialog id="reject-listing" aria-labelledby="reject-listing-title"/', $html);
+        $this->assertStringContainsString('<h2 id="reject-listing-title" class="text-[26px] leading-tight text-red italic">'.e(__('app.listings.moderation.reject_title')).'</h2>', $html);
+        $this->assertMatchesRegularExpression('/<form method="POST" action="'.$reject.'"[^>]*>\s*<input type="hidden" name="_token"[^>]*>\s*<input type="hidden" name="_method" value="PATCH">\s*<input type="hidden" name="version" value="'.$version.'">\s*<p aria-hidden="true" class="text-xs text-muted">\* Required<\/p>/', $html);
+        $this->assertMatchesRegularExpression('/<textarea id="rejection_reason" name="rejection_reason"\s*required aria-required="true"\s*aria-describedby="rejection_reason-hint"[^>]*maxlength="1000"/', $html);
+        $this->assertStringContainsString('<p id="rejection_reason-hint" class="text-xs text-muted">'.e(__('app.listings.moderation.reason_hint')).'</p>', $html);
+        $this->assertMatchesRegularExpression('/<div class="flex flex-col-reverse gap-3 md:flex-row md:justify-end">\s*<button type="button"[^>]*border-rule[^>]*data-dialog-close="data-dialog-close" commandfor="reject-listing" command="close">\s*Cancel\s*<\/button>\s*<button type="submit"[^>]*border-red-deep[^>]*>\s*Reject\s*<\/button>/', $html);
+    }
+
+    /**
+     * @return array<string, array{string, ListingStatus}>
+     */
+    public static function viewersWithoutModerationControls(): array
+    {
+        $cases = [
+            'admin × approved' => ['admin', ListingStatus::Approved],
+            'admin × rejected' => ['admin', ListingStatus::Rejected],
+        ];
+
+        foreach (ListingStatus::cases() as $status) {
+            $cases["owner × {$status->value}"] = ['owner', $status];
+        }
+
+        return $cases;
+    }
+
+    #[DataProvider('viewersWithoutModerationControls')]
+    public function test_moderation_controls_appear_only_to_an_admin_on_a_pending_listing(string $viewer, ListingStatus $status): void
+    {
+        $owner = User::factory()->create();
+        $listing = $this->listingWithStatus($status, $owner);
+
+        $html = $this->show($listing, $this->viewer($viewer, $owner))->getContent();
+
+        $this->assertStringNotContainsString(route('admin.listings.approve', $listing), $html);
+        $this->assertStringNotContainsString(route('admin.listings.reject', $listing), $html);
+        $this->assertStringNotContainsString('reject-listing', $html);
+        $this->assertStringNotContainsString('name="version"', $html);
+    }
+
     public function test_a_rejected_listing_shows_its_reason_in_the_panel(): void
     {
         $owner = User::factory()->create();
