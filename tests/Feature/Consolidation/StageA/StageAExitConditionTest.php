@@ -142,7 +142,7 @@ class StageAExitConditionTest extends TestCase
     public function test_config_listings_holds_every_tunable(): void
     {
         foreach ([
-            'min_year', 'max_year', 'images.max', 'images.max_upload_kb',
+            'min_year', 'max_year', 'images.max', 'images.max_upload_kb', 'images.webp_quality',
             'images.variants.full', 'images.variants.card', 'images.variants.thumb',
             'per_page.listings', 'per_page.advanced', 'per_page.profile', 'per_page.conversations', 'per_page.admin',
             'per_page.bookmarks', 'per_page.seller',
