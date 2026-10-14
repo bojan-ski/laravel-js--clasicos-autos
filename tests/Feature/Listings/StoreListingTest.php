@@ -140,6 +140,15 @@ class StoreListingTest extends TestCase
         $this->assertDatabaseCount('car_listings', 0);
     }
 
+    public function test_a_model_error_suppresses_the_production_years_check(): void
+    {
+        $buick = CarMaker::factory()->create(['name' => 'Buick']);
+
+        $this->store($this->payload(['car_maker_id' => $buick->id, 'year' => 1985]))
+            ->assertSessionHasErrors('car_model_id')
+            ->assertSessionDoesntHaveErrors('year');
+    }
+
     public function test_an_inactive_model_is_an_error_on_the_model(): void
     {
         $nomad = CarModel::factory()->for($this->maker, 'maker')->inactive()->create(['year_from' => 1950, 'year_to' => 1980]);
@@ -317,7 +326,7 @@ class StoreListingTest extends TestCase
         $html = $this->followingRedirects()->store(['car_model_id' => ''])->getContent();
 
         preg_match('/role="alert".*?<\/ul>/s', $html, $summary);
-        preg_match_all('/<li>The (.+?) field is required\.<\/li>/', $summary[0], $labels);
+        preg_match_all('/<li><a href="#[a-z_]+"[^>]*>The (.+?) field is required\.<\/a><\/li>/', $summary[0], $labels);
 
         $this->assertSame(['Name', 'Car Maker', 'Model', 'Price', 'Year', 'Mileage', 'Transmission', 'Fuel type'], array_slice($labels[1], 0, 8));
         $this->assertSame('Car description', $labels[1][count($labels[1]) - 2]);

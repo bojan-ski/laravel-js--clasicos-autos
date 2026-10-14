@@ -19,7 +19,7 @@
             @if ($showsStatus())
                 <x-listings.status-stamp :status="$listing->status" class="self-start" />
                 @if ($listing->isRejected() && $listing->rejection_reason !== null)
-                    <p class="text-xs text-red-deep wrap-break-word">{{ $listing->rejection_reason }}</p>
+                    <p class="text-xs text-red-deep wrap-break-word"><span class="sr-only">{{ __('app.listings.show.status.reason') }} </span>{{ $listing->rejection_reason }}</p>
                 @endif
             @endif
         </div>

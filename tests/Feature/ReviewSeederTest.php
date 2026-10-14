@@ -6,6 +6,7 @@ use App\Enums\ListingStatus;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
 use App\Models\CarListing;
+use App\Models\ListingImage;
 use App\Models\User;
 use Database\Seeders\CarMakerSeeder;
 use Database\Seeders\CarModelSeeder;
@@ -13,6 +14,7 @@ use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\ReviewSeeder;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use LogicException;
 use Tests\TestCase;
 
@@ -25,6 +27,56 @@ class ReviewSeederTest extends TestCase
         parent::setUp();
 
         config(['auth.admin.email' => 'boss@example.com', 'auth.admin.password' => 'initial1']);
+        Storage::fake('public');
+    }
+
+    public function test_the_reviewers_approved_pending_and_rejected_listings_carry_8_2_and_1_images_in_order(): void
+    {
+        $this->seed([DatabaseSeeder::class, ReviewSeeder::class]);
+
+        $reviewer = User::query()->where('email', 'review@example.com')->sole();
+        $counts = $reviewer->listings()->whereHas('images')->withCount('images')->get()
+            ->mapWithKeys(fn (CarListing $listing): array => [$listing->status->value => $listing->images_count])
+            ->sortKeys()
+            ->all();
+
+        $this->assertSame(['approved' => 8, 'pending' => 2, 'rejected' => 1], $counts);
+        $this->assertSame(11, ListingImage::query()->count());
+
+        foreach ($reviewer->listings()->whereHas('images')->with('images')->get() as $listing) {
+            $this->assertSame(range(0, $listing->images->count() - 1), $listing->images->pluck('position')->sort()->values()->all());
+        }
+    }
+
+    public function test_every_seeded_image_has_its_three_webp_files_on_the_public_disk(): void
+    {
+        $this->seed([DatabaseSeeder::class, ReviewSeeder::class]);
+
+        $images = ListingImage::query()->get();
+
+        $this->assertCount(11, $images);
+        $this->assertCount(33, Storage::disk('public')->allFiles('listings'));
+
+        foreach ($images as $image) {
+            foreach ([$image->path, $image->card_path, $image->thumb_path] as $path) {
+                $this->assertStringEndsWith('.webp', $path);
+                Storage::disk('public')->assertExists($path);
+            }
+        }
+    }
+
+    public function test_seeding_images_leaves_the_pending_and_rejected_listings_as_seeded(): void
+    {
+        $this->seed([DatabaseSeeder::class, ReviewSeeder::class]);
+
+        $reviewer = User::query()->where('email', 'review@example.com')->sole();
+        $pending = $reviewer->listings()->where('status', ListingStatus::Pending)->sole();
+        $rejected = $reviewer->listings()->where('status', ListingStatus::Rejected)->sole();
+
+        $this->assertNull($pending->approved_at);
+        $this->assertNull($pending->rejected_at);
+        $this->assertSame('The photos do not show the car clearly.', $rejected->rejection_reason);
+        $this->assertNotNull($rejected->rejected_at);
     }
 
     public function test_it_seeds_two_pages_of_public_listings_across_several_seeded_makers(): void
@@ -119,12 +171,16 @@ class ReviewSeederTest extends TestCase
         $users = User::query()->count();
         $listings = CarListing::query()->count();
         $bookmarks = DB::table('user_bookmarks')->count();
+        $images = ListingImage::query()->count();
+        $files = Storage::disk('public')->allFiles();
 
         $this->seed(ReviewSeeder::class);
 
         $this->assertSame($users, User::query()->count());
         $this->assertSame($listings, CarListing::query()->count());
         $this->assertSame($bookmarks, DB::table('user_bookmarks')->count());
+        $this->assertSame($images, ListingImage::query()->count());
+        $this->assertSame($files, Storage::disk('public')->allFiles());
     }
 
     public function test_it_refuses_to_run_without_the_seeded_makers_and_models(): void

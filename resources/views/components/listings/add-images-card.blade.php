@@ -11,7 +11,7 @@
             <x-listings.photo-input class="md:flex-1" :label="__('app.listings.images.add_label')"
                                     label-class="font-heading text-[26px] leading-tight text-red italic" />
 
-            <x-ui.button type="submit" class="w-full md:w-auto md:self-start">
+            <x-ui.button type="submit" size="responsive" class="w-full md:w-auto md:self-start">
                 {{ __('app.listings.images.add_submit') }}
             </x-ui.button>
         </form>

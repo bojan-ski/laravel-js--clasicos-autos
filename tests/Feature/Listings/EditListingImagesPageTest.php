@@ -118,7 +118,7 @@ class EditListingImagesPageTest extends TestCase
         $html = $this->page($listing)->getContent();
 
         $this->assertMatchesRegularExpression(
-            '/<img src="'.preg_quote(e($primary->url()), '/').'" alt="Sunset Bel Air — image 1" width="1600" height="900"\s+class="photo-grade h-52.5 w-full object-cover md:h-100">\s*<span[^>]*border-red text-red absolute[^>]*>\s*<span[^>]*><span[^>]*>PRIMARY<\/span>/',
+            '/<img src="'.preg_quote(e($primary->url()), '/').'" alt="Sunset Bel Air — primary image" width="1600" height="900"\s+class="photo-grade h-52.5 w-full object-cover md:h-100">\s*<span[^>]*border-red text-red absolute[^>]*>\s*<span[^>]*><span[^>]*>PRIMARY<\/span>/',
             $html,
         );
     }
@@ -201,7 +201,7 @@ class EditListingImagesPageTest extends TestCase
             $this->assertMatchesRegularExpression('/width="320" height="240" loading="lazy" class="photo-grade h-25 w-full object-cover md:h-45"/', $item);
 
             if ($index === 0) {
-                $this->assertMatchesRegularExpression('/<p[^>]*border-red[^>]*>\s*Primary image\s*<\/p>/', $item);
+                $this->assertMatchesRegularExpression('/<p class="(?![^"]*border)[^"]*bg-gold\/10[^"]*text-gold-ink[^"]*">\s*Primary image\s*<\/p>/', $item);
                 $this->assertStringNotContainsString('<form', $item);
                 $this->assertStringNotContainsString('<dialog', $item);
 

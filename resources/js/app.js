@@ -2,6 +2,7 @@ import { initBackToTop } from './modules/back-to-top'
 import { initBrandChips } from './modules/brand-chips'
 import { initCookieBanner } from './modules/cookie-banner'
 import { initDialogs } from './modules/dialog'
+import { initErrorFocus } from './modules/error-focus'
 import { initFlash } from './modules/flash'
 import { initFormProgress } from './modules/form-progress'
 import { initGallery } from './modules/gallery'
@@ -24,6 +25,5 @@ document.addEventListener('DOMContentLoaded', () => {
     initModelSelect()
     initPhotoInput()
     initFormProgress()
-
-    document.querySelector('[aria-invalid="true"]')?.focus()
+    initErrorFocus()
 })

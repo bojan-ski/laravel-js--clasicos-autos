@@ -11,7 +11,7 @@
     $button = 'inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-xs border border-rule font-heading leading-tight text-ink transition-colors duration-150 hover:bg-ink/7 active:bg-ink/14 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-gold-ink';
 @endphp
 
-<div data-photo-input
+<div id="images" tabindex="-1" data-photo-input
      data-count-one="{{ __('app.listings.form.photos.count_one') }}"
      data-count-other="{{ __('app.listings.form.photos.count_other') }}"
      role="group" aria-labelledby="images-label"

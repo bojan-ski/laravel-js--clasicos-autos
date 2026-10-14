@@ -18,7 +18,7 @@
 
 @if ($variant === null)
     <a href="{{ $action->url }}"
-       class="grid size-11 place-items-center rounded-full border border-gold font-heading text-base text-gold-ink md:size-9">
+       class="grid size-11 place-items-center rounded-full border border-gold font-heading text-base text-gold-ink lg:size-9">
         {{ $action->label }}
         @if ($action->ariaLabel !== null)
             <span class="sr-only">{{ $action->ariaLabel }}</span>

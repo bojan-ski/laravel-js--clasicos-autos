@@ -6,6 +6,7 @@ use App\Models\CarListing;
 use App\Models\User;
 use App\Services\AccountDeletionService;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -117,10 +118,13 @@ class DeleteAccountTest extends TestCase
     public function test_deleting_a_user_with_a_remember_token_does_not_reinsert_the_row(): void
     {
         $user = User::factory()->create(['remember_token' => Str::random(60)]);
+        $recaller = Auth::guard('web')->getRecallerName();
 
         $this->actingAs($user)
+            ->withCookie($recaller, "{$user->id}|{$user->remember_token}|{$user->password}")
             ->delete(route('profile.destroy'), ['delete_password' => 'password'])
-            ->assertRedirect(route('home'));
+            ->assertRedirect(route('home'))
+            ->assertCookieExpired($recaller);
 
         $this->assertModelMissing($user);
         $this->assertDatabaseCount('users', 0);

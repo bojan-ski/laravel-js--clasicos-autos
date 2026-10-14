@@ -127,7 +127,7 @@ class BookmarksPageTest extends TestCase
 
         $response->assertSee(__('app.bookmarks.title'))
             ->assertSee(__('app.bookmarks.empty'))
-            ->assertSee('<a href="'.route('listings.index').'" class="text-red underline underline-offset-4 hover:no-underline">'.__('app.bookmarks.browse').'</a>', false)
+            ->assertSee('<a href="'.route('listings.index').'" class="inline-flex min-h-11 items-center text-red underline underline-offset-4 hover:no-underline md:min-h-0">'.__('app.bookmarks.browse').'</a>', false)
             ->assertDontSee(__('app.bookmarks.saved', ['count' => 0]))
             ->assertDontSee('md:grid-cols-3', false)
             ->assertDontSee(__('app.pagination.label'));
