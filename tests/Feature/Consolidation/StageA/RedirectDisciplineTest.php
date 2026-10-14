@@ -3,11 +3,14 @@
 namespace Tests\Feature\Consolidation\StageA;
 
 use App\Models\User;
+use App\Support\ListingFormOptions;
+use App\Support\ListingFormValues;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Routing\Route as RoutingRoute;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
 use Tests\Support\RouteBand;
@@ -26,6 +29,7 @@ class RedirectDisciplineTest extends TestCase
 
         $this->withoutVite();
         Notification::fake();
+        Storage::fake('public');
     }
 
     public function test_no_write_follows_a_hostile_referer(): void
@@ -108,6 +112,8 @@ class RedirectDisciplineTest extends TestCase
             'compare.clear',
             'compare.remove',
             'cookie-consent.store',
+            'listings.destroy',
+            'listings.update',
             'register.store',
             'login.store',
             'logout',
@@ -154,6 +160,11 @@ class RedirectDisciplineTest extends TestCase
                 'password_confirmation' => 'secret12',
             ],
             'profile.destroy' => ['delete_password' => 'password'],
+            'listings.update' => [
+                ...ListingFormValues::for($user->listings()->latest('id')->firstOrFail()),
+                'car_model_id' => ListingFormOptions::OTHER_MODEL,
+                'model' => 'Typed model',
+            ],
             default => [],
         };
     }

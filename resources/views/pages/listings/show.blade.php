@@ -1,5 +1,14 @@
 <x-layouts.app :title="$listing->name">
-    <x-ui.back-link :href="$backUrl" />
+    <x-ui.back-link :href="$backUrl">
+        @can('update', $listing)
+            <x-ui.button variant="secondary" size="responsive" :href="route('listings.edit', $listing)">
+                {{ __('app.listings.edit.edit_control') }}
+            </x-ui.button>
+        @endcan
+        @can('delete', $listing)
+            <x-listings.delete-dialog :action="route('listings.destroy', $listing)" />
+        @endcan
+    </x-ui.back-link>
 
     <section class="mx-auto flex max-w-7xl flex-col gap-6 px-5 py-6 md:gap-8 md:px-14 md:py-12">
         @can('update', $listing)
