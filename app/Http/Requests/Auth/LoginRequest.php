@@ -3,6 +3,8 @@
 namespace App\Http\Requests\Auth;
 
 use App\Models\User;
+use App\Services\SuspensionService;
+use App\Support\SuspensionText;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\Attributes\RedirectToRoute;
 use Illuminate\Foundation\Http\FormRequest;
@@ -53,8 +55,10 @@ class LoginRequest extends FormRequest
         /** @var User $user */
         $user = Auth::getLastAttempted();
 
+        app(SuspensionService::class)->liftIfExpired($user);
+
         if ($user->isSuspended()) {
-            $this->refuse(['email' => $this->suspensionNotice($user)]);
+            $this->refuse(['email' => SuspensionText::notice($user)]);
         }
 
         if (config('hashing.rehash_on_login', true)) {
@@ -88,18 +92,6 @@ class LoginRequest extends FormRequest
 
         $this->refuse([
             'email' => __('auth.throttle', ['seconds' => $seconds, 'minutes' => (int) ceil($seconds / 60)]),
-        ]);
-    }
-
-    private function suspensionNotice(User $user): string
-    {
-        if ($user->suspended_until === null) {
-            return __('app.auth.login.suspended_indefinitely', ['reason' => $user->suspension_reason]);
-        }
-
-        return __('app.auth.login.suspended_until', [
-            'date' => $user->suspended_until->format('d.m.Y'),
-            'reason' => $user->suspension_reason,
         ]);
     }
 

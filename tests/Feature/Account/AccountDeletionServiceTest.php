@@ -11,10 +11,12 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Storage;
 use LogicException;
 use RuntimeException;
+use Tests\Support\InsertsSessionRows;
 use Tests\TestCase;
 
 class AccountDeletionServiceTest extends TestCase
 {
+    use InsertsSessionRows;
     use LazilyRefreshDatabase;
 
     public function test_it_deletes_an_app_user(): void
@@ -39,6 +41,37 @@ class AccountDeletionServiceTest extends TestCase
 
         $this->assertDatabaseMissing('password_reset_tokens', ['email' => $user->email]);
         $this->assertDatabaseHas('password_reset_tokens', ['email' => $other->email]);
+    }
+
+    public function test_it_deletes_the_users_session_rows_and_keeps_everyone_elses(): void
+    {
+        $user = User::factory()->create();
+        $this->insertSessionRow($user);
+        $this->insertSessionRow($user);
+        $kept = [$this->insertSessionRow(User::factory()->create()), $this->insertSessionRow(null)];
+        sort($kept);
+
+        app(AccountDeletionService::class)->delete($user);
+
+        $this->assertSame($kept, $this->sessionRowIds());
+    }
+
+    public function test_a_rolled_back_deletion_keeps_the_session_rows(): void
+    {
+        $user = User::factory()->create();
+        $session = $this->insertSessionRow($user);
+
+        try {
+            DB::transaction(function () use ($user): void {
+                app(AccountDeletionService::class)->delete($user);
+
+                throw new RuntimeException('The enclosing transaction failed.');
+            });
+        } catch (RuntimeException) {
+        }
+
+        $this->assertModelExists($user);
+        $this->assertSame([$session], $this->sessionRowIds());
     }
 
     public function test_it_removes_the_users_listing_directories_and_keeps_other_users_files(): void

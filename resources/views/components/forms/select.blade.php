@@ -1,6 +1,7 @@
 @props([
     'name',
     'label',
+    'id' => null,
     'options' => [],
     'placeholder' => null,
     'value' => null,
@@ -9,8 +10,9 @@
 ])
 
 @php
-    $errorId = $name.'-error';
-    $hintId = $name.'-hint';
+    $fieldId = $id ?? $name;
+    $errorId = $fieldId.'-error';
+    $hintId = $fieldId.'-hint';
     $hasError = $errors->has($name);
     $oldValue = old($name, $value);
     $selectedValue = (string) (is_array($oldValue) ? $value : $oldValue);
@@ -18,8 +20,8 @@
 @endphp
 
 <div class="flex flex-col gap-1.5">
-    <label for="{{ $name }}" class="text-xs text-ink/70">{{ $label }}@if ($required) <span aria-hidden="true">*</span>@endif</label>
-    <select id="{{ $name }}" name="{{ $name }}"
+    <label for="{{ $fieldId }}" class="text-xs text-ink/70">{{ $label }}@if ($required) <span aria-hidden="true">*</span>@endif</label>
+    <select id="{{ $fieldId }}" name="{{ $name }}"
             @if ($required) required aria-required="true" @endif
             @if ($hasError) aria-invalid="true" aria-describedby="{{ $describedBy }}" @elseif ($describedBy !== '') aria-describedby="{{ $describedBy }}" @endif
             {{ $attributes->class([

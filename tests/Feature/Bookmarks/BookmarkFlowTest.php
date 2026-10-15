@@ -20,7 +20,6 @@ class BookmarkFlowTest extends TestCase
     {
         return [
             'app user' => ['appUser'],
-            'suspended app user' => ['suspended'],
             'admin' => ['admin'],
         ];
     }
@@ -86,7 +85,7 @@ class BookmarkFlowTest extends TestCase
     {
         $cases = [];
 
-        foreach (['approved', 'pending', 'rejected', 'suspended owner'] as $state) {
+        foreach (['approved', 'pending', 'rejected'] as $state) {
             foreach (['POST', 'DELETE'] as $method) {
                 $cases["{$method} on own {$state} listing"] = [$state, $method];
             }
@@ -162,6 +161,20 @@ class BookmarkFlowTest extends TestCase
     }
 
     #[DataProvider('writes')]
+    public function test_a_suspended_app_user_in_a_live_session_is_signed_out_by_each_write(string $method, string $name): void
+    {
+        $user = User::factory()->suspended()->create();
+        $listing = CarListing::factory()->approved()->create();
+        $user->bookmarks()->attach($listing->id, ['created_at' => '2026-01-01 10:00:00', 'updated_at' => '2026-01-01 10:00:00']);
+        $other = CarListing::factory()->approved()->create();
+
+        $this->actingAs($user)->call($method, route($name, $method === 'POST' ? $other : $listing))->assertRedirect(route('login'));
+
+        $this->assertGuest();
+        $this->assertSame([$listing->id], DB::table('user_bookmarks')->pluck('car_listing_id')->all());
+    }
+
+    #[DataProvider('writes')]
     public function test_a_guest_is_sent_to_login_by_each_write(string $method, string $name): void
     {
         $listing = CarListing::factory()->approved()->create();
@@ -195,7 +208,6 @@ class BookmarkFlowTest extends TestCase
     {
         return match ($viewer) {
             'appUser' => User::factory()->create(),
-            'suspended' => User::factory()->suspended()->create(),
             'admin' => User::factory()->admin()->create(),
         };
     }

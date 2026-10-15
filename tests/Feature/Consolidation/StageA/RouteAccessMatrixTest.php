@@ -24,6 +24,8 @@ class RouteAccessMatrixTest extends TestCase
 
     private const string FORBIDDEN = '403 page';
 
+    private const string UNAUTHORIZED = '401 json';
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -36,7 +38,7 @@ class RouteAccessMatrixTest extends TestCase
     {
         $routes = ApplicationRoutes::named();
 
-        $this->assertCount(48, $routes);
+        $this->assertCount(52, $routes);
 
         $bands = [];
 
@@ -48,7 +50,7 @@ class RouteAccessMatrixTest extends TestCase
         $census = array_count_values($bands);
         ksort($census);
 
-        $this->assertSame(['admin' => 4, 'auth' => 16, 'guest' => 8, 'messaging' => 3, 'profile' => 3, 'public' => 12, 'seller' => 2], $census);
+        $this->assertSame(['admin' => 8, 'auth' => 16, 'guest' => 8, 'messaging' => 3, 'profile' => 3, 'public' => 12, 'seller' => 2], $census);
         $this->assertSame([], array_filter($bands, fn (string $band, string $name): bool => Str::startsWith($name, 'admin.') !== ($band === RouteBand::Admin->value), ARRAY_FILTER_USE_BOTH));
     }
 
@@ -80,7 +82,7 @@ class RouteAccessMatrixTest extends TestCase
 
         foreach (ApplicationRoutes::named() as $name => $route) {
             $band = RouteBand::fromRoute($route);
-            $outcome = $this->expectedOutcome($band, $user);
+            $outcome = $this->expectedOutcome($route, $band, $user);
             $response = $this->requestRoute($route, $band, $user);
 
             $expected[$name] = $outcome;
@@ -116,7 +118,7 @@ class RouteAccessMatrixTest extends TestCase
         }
     }
 
-    private function expectedOutcome(RouteBand $band, ?User $user): string
+    private function expectedOutcome(RoutingRoute $route, RouteBand $band, ?User $user): string
     {
         if ($user === null) {
             return match ($band) {
@@ -125,11 +127,15 @@ class RouteAccessMatrixTest extends TestCase
             };
         }
 
+        if ($user->isSuspended()) {
+            return $band === RouteBand::Public && $route->methods()[0] !== 'GET' ? self::UNAUTHORIZED : '→ login';
+        }
+
         return match ($band) {
             RouteBand::Public, RouteBand::Auth => self::REACHES,
             RouteBand::Guest => '→ '.$user->landingRoute(),
             RouteBand::Profile => $user->isAppUser() ? self::REACHES : self::FORBIDDEN,
-            RouteBand::Seller, RouteBand::Messaging => $user->isAppUser() && ! $user->isSuspended() ? self::REACHES : self::FORBIDDEN,
+            RouteBand::Seller, RouteBand::Messaging => $user->isAppUser() ? self::REACHES : self::FORBIDDEN,
             RouteBand::Admin => $user->isAdmin() ? self::REACHES : self::FORBIDDEN,
         };
     }
@@ -152,6 +158,10 @@ class RouteAccessMatrixTest extends TestCase
 
     private function satisfies(TestResponse $response, string $outcome, RoutingRoute $route, RouteBand $band): bool
     {
+        if ($outcome === self::UNAUTHORIZED) {
+            return $response->status() === 401;
+        }
+
         if ($outcome === self::FORBIDDEN) {
             return $response->status() === 403 && str_contains((string) $response->getContent(), e(__('app.errors.403.title')));
         }

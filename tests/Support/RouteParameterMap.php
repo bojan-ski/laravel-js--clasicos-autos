@@ -59,6 +59,14 @@ final class RouteParameterMap
             return ['listing' => (string) CarListing::factory()->create()->id];
         }
 
+        if (in_array($name, ['admin.users.suspend', 'admin.users.destroy'], true)) {
+            return ['user' => (string) User::factory()->create()->id];
+        }
+
+        if ($name === 'admin.users.unsuspend') {
+            return ['user' => (string) User::factory()->suspended(now()->addDays(30))->create()->id];
+        }
+
         if ($name === 'users.listings') {
             return ['user' => (string) User::factory()->create()->id];
         }

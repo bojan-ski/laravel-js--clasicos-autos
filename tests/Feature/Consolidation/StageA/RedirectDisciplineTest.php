@@ -39,6 +39,12 @@ class RedirectDisciplineTest extends TestCase
         'conversations.messages.store' => 'conversations.show',
     ];
 
+    private const array STAGE_F_PINNED_TARGETS = [
+        'admin.users.destroy' => 'admin.users',
+        'admin.users.suspend' => 'admin.users',
+        'admin.users.unsuspend' => 'admin.users',
+    ];
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -109,6 +115,18 @@ class RedirectDisciplineTest extends TestCase
         $this->assertSame(array_fill_keys(array_keys(self::STAGE_E_PINNED_TARGETS), true), $landed);
     }
 
+    public function test_empty_stage_f_writes_land_on_their_pinned_targets(): void
+    {
+        $writes = $this->writeRoutes();
+        $landed = [];
+
+        foreach (self::STAGE_F_PINNED_TARGETS as $name => $target) {
+            $landed[$name] = $this->send($writes[$name], fn (?User $user): array => [])->headers->get('Location') === route($target);
+        }
+
+        $this->assertSame(array_fill_keys(array_keys(self::STAGE_F_PINNED_TARGETS), true), $landed);
+    }
+
     /**
      * @return array<string, RoutingRoute>
      */
@@ -175,6 +193,9 @@ class RedirectDisciplineTest extends TestCase
             'admin.account.password.update',
             'admin.listings.approve',
             'admin.listings.reject',
+            'admin.users.destroy',
+            'admin.users.suspend',
+            'admin.users.unsuspend',
             'conversations.read',
             'conversations.store',
             'conversations.messages.store',
@@ -227,6 +248,7 @@ class RedirectDisciplineTest extends TestCase
                 'version' => CarListing::query()->latest('id')->firstOrFail()->moderationVersion(),
                 'rejection_reason' => 'Photos do not match the description.',
             ],
+            'admin.users.suspend' => ['reason' => 'Repeated abusive messages.', 'duration' => '30_days'],
             'conversations.store', 'conversations.messages.store' => ['message' => 'Is this car still available?'],
             default => [],
         };

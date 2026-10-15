@@ -30,7 +30,6 @@ class AdvancedSearchTest extends TestCase
         return [
             'guest' => ['guest'],
             'app user' => ['app_user'],
-            'suspended app user' => ['suspended'],
             'admin' => ['admin'],
         ];
     }
@@ -43,6 +42,15 @@ class AdvancedSearchTest extends TestCase
         $this->get(route('listings.advanced'))
             ->assertOk()
             ->assertViewIs('pages.listings.advanced');
+    }
+
+    public function test_a_suspended_viewer_in_a_live_session_is_signed_out(): void
+    {
+        $this->actAs('suspended');
+
+        $this->get(route('listings.advanced'))->assertRedirect(route('login'));
+
+        $this->assertGuest();
     }
 
     public function test_the_route_resolves_to_the_advanced_action(): void

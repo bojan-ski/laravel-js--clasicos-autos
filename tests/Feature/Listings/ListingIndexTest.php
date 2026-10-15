@@ -31,7 +31,6 @@ class ListingIndexTest extends TestCase
         return [
             'guest' => ['guest'],
             'app user' => ['app_user'],
-            'suspended app user' => ['suspended'],
             'admin' => ['admin'],
         ];
     }
@@ -44,6 +43,15 @@ class ListingIndexTest extends TestCase
         $this->get(route('listings.index'))
             ->assertOk()
             ->assertViewIs('pages.listings.index');
+    }
+
+    public function test_a_suspended_viewer_in_a_live_session_is_signed_out(): void
+    {
+        $this->actAs('suspended');
+
+        $this->get(route('listings.index'))->assertRedirect(route('login'));
+
+        $this->assertGuest();
     }
 
     public function test_the_spanish_kicker_is_marked_as_spanish(): void

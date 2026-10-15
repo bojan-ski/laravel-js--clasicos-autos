@@ -38,14 +38,9 @@ class ConversationsListPageTest extends TestCase
         $this->get(route('conversations.index'))->assertRedirect(route('login'));
     }
 
-    public function test_an_active_and_a_suspended_app_user_and_an_admin_reach_the_page(): void
+    public function test_an_active_app_user_and_an_admin_reach_the_page(): void
     {
-        $suspended = User::factory()->suspended()->create();
-        $conversation = Conversation::factory()->for($suspended, 'sender')->create();
-        $this->message($conversation, $conversation->receiver, 'Still interested in it?');
-
         $this->list(User::factory()->create())->assertSee('My Conversations');
-        $this->list($suspended)->assertSee('1 unread');
         $this->list(User::factory()->admin()->create())->assertSee('All conversations');
     }
 
@@ -211,7 +206,7 @@ class ConversationsListPageTest extends TestCase
         $this->assertStringNotContainsString('<img', $buyerCard);
         $this->assertStringContainsString('Regarding: Hidden Bel Air', $buyerCard);
         $this->assertStringContainsString('This listing is no longer available.', $buyerCard);
-        foreach ([$conversation->receiver, $admin] as $viewer) {
+        foreach ($state === 'suspended owner' ? [$admin] : [$conversation->receiver, $admin] as $viewer) {
             $card = $this->cards($this->list($viewer))[0];
             $this->assertStringContainsString('<img', $card);
             $this->assertStringNotContainsString('This listing is no longer available.', $card);
@@ -383,16 +378,15 @@ class ConversationsListPageTest extends TestCase
             ->assertDontSee('<p role="status"', false);
     }
 
-    public function test_a_suspended_participants_list_keeps_the_unread_line_without_live_hooks(): void
+    public function test_a_suspended_participant_in_a_live_session_is_signed_out_of_the_list(): void
     {
         $suspended = User::factory()->suspended()->create();
         $conversation = Conversation::factory()->for($suspended, 'sender')->create();
         $this->message($conversation, $conversation->receiver, 'Still interested in it?');
 
-        $this->list($suspended)
-            ->assertSee('<p role="status" class="text-sm text-ink-2 tabular-nums">1 unread</p>', false)
-            ->assertDontSee('data-live-', false)
-            ->assertDontSee('<template data-live-notice>', false);
+        $this->actingAs($suspended)->get(route('conversations.index'))->assertRedirect(route('login'));
+
+        $this->assertGuest();
     }
 
     public function test_a_member_without_conversations_is_invited_to_browse_listings(): void

@@ -219,18 +219,29 @@ class StartConversationTest extends TestCase
     {
         return [
             'admin' => ['admin'],
-            'suspended app user' => ['suspended'],
         ];
     }
 
     #[DataProvider('gatedViewers')]
-    public function test_admins_and_suspended_users_get_the_403_page(string $viewerKind): void
+    public function test_admins_get_the_403_page(string $viewerKind): void
     {
         $listing = CarListing::factory()->approved()->create();
-        $this->actingAs($viewerKind === 'admin' ? User::factory()->admin()->create() : User::factory()->suspended()->create());
+        $this->actingAs(User::factory()->admin()->create());
 
         $this->get(route('conversations.create', $listing))->assertForbidden();
         $this->post(route('conversations.store', $listing), [])->assertForbidden()->assertSessionDoesntHaveErrors();
+    }
+
+    public function test_a_suspended_user_in_a_live_session_is_signed_out_on_both_routes(): void
+    {
+        $listing = CarListing::factory()->approved()->create();
+        $user = User::factory()->suspended()->create();
+
+        $this->actingAs($user)->get(route('conversations.create', $listing))->assertRedirect(route('login'));
+        $this->actingAs($user)->post(route('conversations.store', $listing), ['message' => 'Is it still available?'])->assertRedirect(route('login'));
+
+        $this->assertGuest();
+        $this->assertDatabaseCount('conversations', 0);
     }
 
     public function test_an_unknown_or_non_numeric_listing_is_404(): void

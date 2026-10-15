@@ -227,16 +227,15 @@ class ConversationThreadPageTest extends TestCase
     {
         return [
             'admin' => ['admin'],
-            'suspended participant' => ['suspended participant'],
         ];
     }
 
     #[DataProvider('readOnlyViewers')]
-    public function test_admins_and_suspended_participants_read_without_a_composer(string $viewerKind): void
+    public function test_admins_read_without_a_composer(string $viewerKind): void
     {
         $conversation = Conversation::factory()->create();
         $this->message($conversation, $conversation->receiver, 'A message to read');
-        $viewer = $viewerKind === 'admin' ? User::factory()->admin()->create() : $this->suspend($conversation->sender);
+        $viewer = User::factory()->admin()->create();
 
         $this->show($conversation, $viewer)
             ->assertViewHas('composerAction', null)
@@ -244,6 +243,19 @@ class ConversationThreadPageTest extends TestCase
             ->assertDontSee('data-composer', false)
             ->assertDontSee('role="log"', false)
             ->assertDontSee('data-live-', false);
+    }
+
+    public function test_a_suspended_participant_in_a_live_session_is_signed_out_of_the_thread(): void
+    {
+        $conversation = Conversation::factory()->create();
+        $this->message($conversation, $conversation->receiver, 'A message to read');
+
+        $this->actingAs($this->suspend($conversation->sender))
+            ->get(route('conversations.show', $conversation))
+            ->assertRedirect(route('login'));
+
+        $this->assertGuest();
+        $this->assertNull(Message::query()->sole()->read_at);
     }
 
     public function test_a_participant_who_may_reply_gets_the_live_thread_hooks(): void

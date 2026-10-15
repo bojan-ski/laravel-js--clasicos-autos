@@ -82,7 +82,6 @@ class EditListingPageTest extends TestCase
             'owner, pending' => ['owner', ListingStatus::Pending],
             'owner, approved' => ['owner', ListingStatus::Approved],
             'owner, rejected' => ['owner', ListingStatus::Rejected],
-            'suspended owner' => ['suspended owner', ListingStatus::Approved],
             'admin, pending' => ['admin', ListingStatus::Pending],
             'admin, approved' => ['admin', ListingStatus::Approved],
         ];
@@ -91,13 +90,23 @@ class EditListingPageTest extends TestCase
     #[DataProvider('allowedViewers')]
     public function test_the_owner_and_an_admin_reach_the_page(string $viewer, ListingStatus $status): void
     {
-        $owner = $viewer === 'suspended owner' ? User::factory()->suspended()->create() : User::factory()->create();
+        $owner = User::factory()->create();
         $listing = $this->listing($status, $owner);
         $actor = $viewer === 'admin' ? User::factory()->admin()->create() : $owner;
 
         $this->actingAs($actor)->get(route('listings.edit', $listing))
             ->assertOk()
             ->assertViewIs('pages.listings.edit');
+    }
+
+    public function test_a_suspended_owner_in_a_live_session_is_signed_out(): void
+    {
+        $owner = User::factory()->suspended()->create();
+        $listing = $this->listing(ListingStatus::Approved, $owner);
+
+        $this->actingAs($owner)->get(route('listings.edit', $listing))->assertRedirect(route('login'));
+
+        $this->assertGuest();
     }
 
     public function test_an_unknown_listing_is_a_404(): void

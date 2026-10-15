@@ -174,13 +174,16 @@ class UpdateListingTest extends TestCase
         $this->assertSame('Admin fix', $listing->fresh()->name);
     }
 
-    public function test_a_suspended_owner_in_a_live_session_can_save(): void
+    public function test_a_suspended_owner_in_a_live_session_is_signed_out_and_saves_nothing(): void
     {
         $listing = $this->listing(ListingStatus::Approved, owner: User::factory()->suspended()->create());
+        $name = $listing->name;
 
-        $this->save($listing, ['name' => 'Saved while suspended'])->assertSessionHasNoErrors();
+        $this->save($listing, ['name' => 'Saved while suspended'])->assertRedirect(route('login'));
 
-        $this->assertSame('Saved while suspended', $listing->fresh()->name);
+        $this->assertGuest();
+        $this->assertSame($name, $listing->fresh()->name);
+        $this->assertSame(ListingStatus::Approved, $listing->fresh()->status);
     }
 
     public function test_the_listings_inactive_current_maker_and_model_are_accepted_unchanged(): void

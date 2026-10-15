@@ -26,6 +26,7 @@ class MainNavigation
             new NavItem('listings', 'app.nav.listings', 'listings.index', ['listings.index', 'listings.advanced', 'listings.show'], [NavAudience::Guest, NavAudience::Member]),
             new NavItem('compare', 'app.nav.compare', 'compare.show', 'compare.*', [NavAudience::Guest, NavAudience::Member], CompareCounter::class, NavCountStyle::Selected),
             new NavItem('bookmarks', 'app.nav.bookmarks', 'bookmarks.index', 'bookmarks.*', [NavAudience::Member]),
+            new NavItem('users', 'app.nav.users', 'admin.users', 'admin.users', [NavAudience::Admin]),
             new NavItem('conversations', 'app.nav.conversations', 'conversations.index', 'conversations.*', [NavAudience::Member, NavAudience::Admin], UnreadMessagesCounter::class, NavCountStyle::Unread),
         ];
     }

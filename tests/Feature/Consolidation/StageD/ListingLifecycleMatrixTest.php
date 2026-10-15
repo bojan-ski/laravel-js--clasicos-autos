@@ -17,6 +17,7 @@ use App\Models\ListingImage;
 use App\Models\User;
 use App\Services\ListingImageService;
 use App\Support\ListingFormValues;
+use App\Support\SuspensionText;
 use Generator;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -73,7 +74,7 @@ class ListingLifecycleMatrixTest extends TestCase
 
         foreach ($cells as $action => $byStatus) {
             foreach ($byStatus as $status => $cell) {
-                foreach (['owner', 'admin', 'suspended owner'] as $actor) {
+                foreach (['owner', 'admin'] as $actor) {
                     yield "{$action} from {$status} by {$actor}" => [$action, ListingStatus::from($status), $actor, $cell];
                 }
             }
@@ -83,7 +84,7 @@ class ListingLifecycleMatrixTest extends TestCase
     #[DataProvider('ownerOrAdminWrites')]
     public function test_an_owner_or_admin_write_lands_in_its_cell(string $action, ListingStatus $from, string $actor, string $cell): void
     {
-        $owner = $actor === 'suspended owner' ? User::factory()->suspended()->create() : User::factory()->create();
+        $owner = User::factory()->create();
         $listing = $this->listingIn($from, $owner);
         $before = $this->columns($listing);
         $files = $this->files($listing);
@@ -169,7 +170,7 @@ class ListingLifecycleMatrixTest extends TestCase
     public static function deletions(): Generator
     {
         foreach (ListingStatus::cases() as $status) {
-            foreach (['owner', 'admin', 'suspended owner'] as $actor) {
+            foreach (['owner', 'admin'] as $actor) {
                 yield "delete from {$status->value} by {$actor}" => [$status, $actor];
             }
         }
@@ -178,7 +179,7 @@ class ListingLifecycleMatrixTest extends TestCase
     #[DataProvider('deletions')]
     public function test_deleting_a_listing_removes_its_row_images_bookmarks_and_files(ListingStatus $from, string $actor): void
     {
-        $owner = $actor === 'suspended owner' ? User::factory()->suspended()->create() : User::factory()->create();
+        $owner = User::factory()->create();
         $listing = $this->listingIn($from, $owner);
         $other = $this->listingIn(ListingStatus::Approved, User::factory()->create());
         $otherFiles = $this->files($other);
@@ -226,11 +227,11 @@ class ListingLifecycleMatrixTest extends TestCase
 
                 $strangerOutcome = in_array($action, self::MODERATION_ACTIONS, true) || $status === ListingStatus::Approved ? '403' : '404';
                 yield "{$action} on {$status->value} by a stranger" => [$action, $status, 'stranger', $strangerOutcome];
+                yield "{$action} on {$status->value} by the suspended owner in a live session" => [$action, $status, 'suspended owner', 'signed out'];
             }
 
             foreach (self::MODERATION_ACTIONS as $action) {
                 yield "{$action} on {$status->value} by the owner" => [$action, $status, 'owner', '403'];
-                yield "{$action} on {$status->value} by the suspended owner" => [$action, $status, 'suspended owner', '403'];
             }
         }
     }
@@ -251,13 +252,18 @@ class ListingLifecycleMatrixTest extends TestCase
         });
 
         match ($outcome) {
-            'login' => $response->assertRedirect(route('login')),
+            'login', 'signed out' => $response->assertRedirect(route('login')),
             '403' => $response->assertForbidden()->assertSee(__('app.errors.403.title')),
             '404' => $response->assertNotFound()->assertSee(__('app.errors.404.title')),
         };
         $this->assertSame($before, $this->columns($listing));
         $this->assertSame($images, $listing->images()->orderBy('position')->pluck('id')->all());
         $this->assertSame($files, $this->files($listing));
+
+        if ($outcome === 'signed out') {
+            $response->assertSessionHasErrors(['email' => SuspensionText::notice($owner)]);
+            $this->assertGuest();
+        }
     }
 
     private function perform(string $action, CarListing $listing, ?User $actor): TestResponse

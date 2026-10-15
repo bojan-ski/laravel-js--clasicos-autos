@@ -123,7 +123,7 @@ class StageCExitConditionTest extends TestCase
     {
         $table = [
             'active' => ['seller' => 'all with stamps', 'admin' => 'all with stamps', 'stranger' => 'approved only', 'guest' => 'login'],
-            'suspended' => ['seller' => 'all with stamps', 'admin' => 'all with stamps', 'stranger' => '404', 'guest' => 'login'],
+            'suspended' => ['seller' => 'login', 'admin' => 'all with stamps', 'stranger' => '404', 'guest' => 'login'],
             'admin' => ['seller' => '404', 'admin' => '404', 'stranger' => '404', 'guest' => 'login'],
         ];
 

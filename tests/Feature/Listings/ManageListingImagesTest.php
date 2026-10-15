@@ -388,16 +388,18 @@ class ManageListingImagesTest extends TestCase
         $this->assertSame(2, $listing->images()->count());
     }
 
-    public function test_a_suspended_owner_in_a_live_session_can_write(): void
+    public function test_a_suspended_owner_in_a_live_session_is_signed_out_and_writes_nothing(): void
     {
         $listing = CarListing::factory()->approved()->for(User::factory()->suspended(), 'owner')->withImages(2)->create();
         $image = $listing->images()->where('position', 1)->sole();
 
         $this->actingAs($listing->owner)
             ->patch(route('listings.images.primary', [$listing, $image]))
-            ->assertSessionHas('success', 'Primary image changed!');
+            ->assertRedirect(route('login'));
 
-        $this->assertSame(0, $image->fresh()->position);
+        $this->assertGuest();
+        $this->assertSame(1, $image->fresh()->position);
+        $this->assertSame(ListingStatus::Approved, $listing->fresh()->status);
     }
 
     #[DataProvider('writeRoutes')]

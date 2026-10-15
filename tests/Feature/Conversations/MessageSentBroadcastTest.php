@@ -101,7 +101,7 @@ class MessageSentBroadcastTest extends TestCase
         return [
             'stranger' => ['stranger', 404],
             'admin' => ['admin', 403],
-            'suspended participant' => ['suspended participant', 403],
+            'suspended participant (signed out)' => ['suspended participant', 302],
         ];
     }
 
@@ -190,8 +190,33 @@ class MessageSentBroadcastTest extends TestCase
 
         $event = new MessageSent($message, $recipient);
 
-        $this->assertSame('private-user.'.$recipient->id, $event->broadcastOn()->name);
+        $this->assertSame(['private-user.'.$recipient->id], array_column($event->broadcastOn(), 'name'));
         $this->assertSame('message.sent', $event->broadcastAs());
+    }
+
+    public function test_no_broadcast_job_is_queued_for_a_suspended_recipient(): void
+    {
+        Queue::fake();
+        $conversation = Conversation::factory()->create();
+        $this->suspend($conversation->receiver);
+
+        $this->service()->send($conversation, $conversation->sender, 'See you on Saturday.');
+
+        $this->assertSame(1, Message::query()->count());
+        Queue::assertNotPushed(BroadcastEvent::class);
+    }
+
+    public function test_a_queued_event_whose_recipient_was_suspended_meanwhile_names_no_channel(): void
+    {
+        $message = Message::factory()->create();
+        $recipient = $message->conversation->receiver;
+        $serialized = serialize(new MessageSent($message, $recipient));
+
+        $this->suspend($recipient);
+        $restored = unserialize($serialized);
+
+        $this->assertTrue($restored->recipient->isSuspended());
+        $this->assertSame([], $restored->broadcastOn());
     }
 
     public function test_the_payload_holds_exactly_the_message_fields_and_the_recipients_unread_count(): void

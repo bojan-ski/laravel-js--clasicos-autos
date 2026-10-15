@@ -62,7 +62,7 @@ class LoginTest extends TestCase
     {
         return [
             'app user' => ['appUser', 'profile'],
-            'admin' => ['admin', 'admin.account'],
+            'admin' => ['admin', 'admin.users'],
         ];
     }
 
@@ -249,6 +249,44 @@ class LoginTest extends TestCase
 
         $this->assertNotSame($outdatedHash, $user->fresh()->password);
         $this->assertTrue(Hash::check('password', $user->fresh()->password));
+    }
+
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function expiredEnds(): array
+    {
+        return [
+            'ended yesterday' => ['-1 day'],
+            'ends this second' => ['+0 seconds'],
+        ];
+    }
+
+    #[DataProvider('expiredEnds')]
+    public function test_valid_credentials_lift_an_expired_suspension_and_sign_in(string $end): void
+    {
+        $this->freezeTime();
+        $user = User::factory()->suspended(now()->modify($end))->create();
+
+        $this->post(route('login.store'), ['email' => $user->email, 'password' => 'password'])
+            ->assertRedirect(route('profile'));
+
+        $this->assertAuthenticatedAs($user);
+        $this->assertSame(
+            ['status' => 'active', 'suspended_at' => null, 'suspended_until' => null, 'suspension_reason' => null],
+            (array) DB::table('users')->where('id', $user->id)->first(['status', 'suspended_at', 'suspended_until', 'suspension_reason']),
+        );
+    }
+
+    public function test_a_wrong_password_never_lifts_an_expired_suspension(): void
+    {
+        $user = User::factory()->suspended(now()->subDay())->create();
+
+        $this->post(route('login.store'), ['email' => $user->email, 'password' => 'wrong-password'])
+            ->assertSessionHasErrors(['email' => __('app.auth.login.failed')]);
+
+        $this->assertGuest();
+        $this->assertTrue($user->fresh()->isSuspended());
     }
 
     public function test_a_suspended_user_with_a_wrong_password_sees_only_bad_credentials(): void

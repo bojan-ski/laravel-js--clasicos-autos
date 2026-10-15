@@ -47,8 +47,8 @@ class SellerListingsPageTest extends TestCase
             'active seller × seller' => ['active', 'seller', 200],
             'active seller × admin' => ['active', 'admin', 200],
             'active seller × stranger' => ['active', 'stranger', 200],
-            'active seller × suspended stranger' => ['active', 'suspended', 200],
-            'suspended seller × seller' => ['suspended', 'seller', 200],
+            'active seller × suspended stranger (signed out)' => ['active', 'suspended', 302],
+            'suspended seller × seller (signed out)' => ['suspended', 'seller', 302],
             'suspended seller × admin' => ['suspended', 'admin', 200],
             'suspended seller × stranger' => ['suspended', 'stranger', 404],
             'admin id × that admin' => ['admin', 'seller', 404],
@@ -66,9 +66,32 @@ class SellerListingsPageTest extends TestCase
             'admin' => User::factory()->admin()->create(),
         };
 
-        $this->actingAs($this->viewer($viewerKind, $seller))
+        $response = $this->actingAs($this->viewer($viewerKind, $seller))
             ->get(route('users.listings', $seller))
             ->assertStatus($status);
+
+        if ($status === 302) {
+            $response->assertRedirect(route('login'));
+            $this->assertGuest();
+        }
+    }
+
+    public function test_an_admin_sees_the_suspended_stamp_only_for_a_suspended_seller(): void
+    {
+        $this->travelTo('2026-10-15 10:00:00');
+        $admin = User::factory()->admin()->create();
+        $suspended = User::factory()->suspended(now()->addDays(7))->create();
+        $indefinite = User::factory()->suspended()->create();
+        $active = User::factory()->create();
+
+        $this->page($suspended, $admin)
+            ->assertViewHas('suspensionStatus', 'Suspended until 22.10.2026')
+            ->assertSee('Suspended until 22.10.2026');
+        $this->page($indefinite, $admin)->assertSee('Suspended indefinitely');
+        $this->page($active, $admin)
+            ->assertViewHas('suspensionStatus', null)
+            ->assertDontSee('Suspended until')
+            ->assertDontSee('Suspended indefinitely');
     }
 
     public function test_a_stranger_sees_only_the_sellers_public_listings_without_status(): void
@@ -97,7 +120,6 @@ class SellerListingsPageTest extends TestCase
         return [
             'active seller, own view' => ['active', 'seller'],
             'active seller, admin view' => ['active', 'admin'],
-            'suspended seller, own view' => ['suspended', 'seller'],
             'suspended seller, admin view' => ['suspended', 'admin'],
         ];
     }
@@ -121,7 +143,7 @@ class SellerListingsPageTest extends TestCase
             ->assertViewHas('showsStatus', true);
         $html = (string) $response->getContent();
         $this->assertSame(1, substr_count($html, 'bg-status-pending/10'));
-        $this->assertSame(1, substr_count($html, 'text-status-rejected'));
+        $this->assertSame($sellerState === 'suspended' ? 2 : 1, substr_count($html, 'text-status-rejected'));
         $this->assertSame(0, substr_count($html, 'text-status-approved'));
     }
 
@@ -185,7 +207,6 @@ class SellerListingsPageTest extends TestCase
             'an active stranger' => ['stranger'],
             'the seller' => ['seller'],
             'an admin' => ['admin'],
-            'a suspended app user' => ['suspended'],
         ];
     }
 

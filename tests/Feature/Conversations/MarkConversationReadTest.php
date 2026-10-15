@@ -52,15 +52,16 @@ class MarkConversationReadTest extends TestCase
         $this->assertSame('2026-10-15 12:00:00', $fromSeller->fresh()->read_at->toDateTimeString());
     }
 
-    public function test_a_suspended_participant_still_marks_read(): void
+    public function test_a_suspended_participant_in_a_live_session_is_signed_out_and_marks_nothing(): void
     {
         $conversation = Conversation::factory()->create();
         $fromSeller = $this->message($conversation, $conversation->receiver);
         $conversation->sender->forceFill(['status' => UserStatus::Suspended])->save();
 
-        $this->actingAs($conversation->sender)->post(route('conversations.read', $conversation))->assertNoContent();
+        $this->actingAs($conversation->sender)->postJson(route('conversations.read', $conversation))->assertUnauthorized();
 
-        $this->assertNotNull($fromSeller->fresh()->read_at);
+        $this->assertGuest();
+        $this->assertNull($fromSeller->fresh()->read_at);
     }
 
     public function test_an_admin_gets_204_and_writes_nothing(): void

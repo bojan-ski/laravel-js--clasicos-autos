@@ -71,6 +71,44 @@ class UserPolicyTest extends TestCase
         $this->assertFalse(User::factory()->suspended()->create()->seesEveryListingOf($seller));
     }
 
+    /**
+     * @return array<string, array{string, string, string, bool}>
+     */
+    public static function managementTable(): array
+    {
+        $cases = [];
+
+        foreach (['suspend', 'unsuspend', 'delete'] as $ability) {
+            $cases["{$ability}: admin on an active app user"] = [$ability, 'admin', 'app user', true];
+            $cases["{$ability}: admin on a suspended app user"] = [$ability, 'admin', 'suspended app user', true];
+            $cases["{$ability}: admin on another admin"] = [$ability, 'admin', 'admin', false];
+            $cases["{$ability}: admin on themself"] = [$ability, 'admin', 'self', false];
+            $cases["{$ability}: app user on another app user"] = [$ability, 'app user', 'app user', false];
+            $cases["{$ability}: app user on themself"] = [$ability, 'app user', 'self', false];
+        }
+
+        return $cases;
+    }
+
+    #[DataProvider('managementTable')]
+    public function test_only_an_admin_manages_an_app_user(string $ability, string $actorKind, string $targetKind, bool $allowed): void
+    {
+        $actor = $actorKind === 'admin' ? User::factory()->admin()->create() : User::factory()->create();
+        $target = match ($targetKind) {
+            'self' => $actor,
+            'admin' => User::factory()->admin()->create(),
+            'app user' => User::factory()->create(),
+            'suspended app user' => User::factory()->suspended()->create(),
+        };
+
+        $response = Gate::forUser($actor)->inspect($ability, $target);
+
+        $this->assertSame($allowed, $response->allowed());
+        if (! $allowed) {
+            $this->assertNull($response->status(), 'A refusal is a plain 403 deny, never denyAsNotFound.');
+        }
+    }
+
     public function test_the_policy_is_auto_discovered_for_the_user_model(): void
     {
         $this->assertInstanceOf(UserPolicy::class, Gate::getPolicyFor(User::class));

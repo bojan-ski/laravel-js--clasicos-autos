@@ -167,14 +167,13 @@ class ProfilePageTest extends TestCase
         $this->assertMatchesRegularExpression('/<h3 class="[^"]*">Bel Air<\/h3>/', $html);
     }
 
-    public function test_a_suspended_user_does_not_see_list_your_car(): void
+    public function test_a_suspended_user_in_a_live_session_is_signed_out_of_the_profile(): void
     {
         $user = User::factory()->suspended()->create();
 
-        $html = $this->actingAs($user)->get(route('profile'))->assertOk()->getContent();
+        $this->actingAs($user)->get(route('profile'))->assertRedirect(route('login'));
 
-        $this->assertStringContainsString('id="my-listings-heading"', $html);
-        $this->assertDoesNotMatchRegularExpression('/my-listings-heading.*'.preg_quote(route('listings.create'), '/').'/s', $html);
+        $this->assertGuest();
     }
 
     public function test_own_cards_have_no_bookmark_button(): void

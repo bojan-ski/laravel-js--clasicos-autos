@@ -61,7 +61,7 @@ class ListingModerationTest extends TestCase
         $cases = [];
 
         foreach (['admin.listings.approve', 'admin.listings.reject'] as $route) {
-            foreach (['owner', 'stranger', 'suspended owner'] as $actor) {
+            foreach (['owner', 'stranger'] as $actor) {
                 $cases["{$route}, {$actor}"] = [$route, $actor];
             }
         }
@@ -72,7 +72,7 @@ class ListingModerationTest extends TestCase
     #[DataProvider('refusedAppUsers')]
     public function test_an_app_user_is_refused_before_validation_and_nothing_changes(string $route, string $actor): void
     {
-        $owner = $actor === 'suspended owner' ? User::factory()->suspended()->create() : User::factory()->create();
+        $owner = User::factory()->create();
         $listing = CarListing::factory()->for($owner, 'owner')->create();
         $before = $this->snapshot($listing);
         $user = $actor === 'stranger' ? User::factory()->create() : $owner;
