@@ -8,6 +8,8 @@ use App\Notifications\ResetPasswordNotification;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -81,6 +83,24 @@ class User extends Authenticatable
         return $this->isAppUser() && ! $this->isSuspended();
     }
 
+    public function suspensionHasExpired(): bool
+    {
+        return $this->isSuspended()
+            && $this->suspended_until !== null
+            && $this->suspended_until->lessThanOrEqualTo(now());
+    }
+
+    /**
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
+    protected function suspensionExpired(Builder $query): void
+    {
+        $query->where('status', UserStatus::Suspended)
+            ->whereNotNull('suspended_until')
+            ->where('suspended_until', '<=', now());
+    }
+
     public function seesEveryListingOf(User $seller): bool
     {
         return $this->is($seller) || $this->isAdmin();
@@ -99,7 +119,7 @@ class User extends Authenticatable
 
     public function landingRoute(): string
     {
-        return $this->isAdmin() ? 'admin.account' : 'profile';
+        return $this->isAdmin() ? 'admin.users' : 'profile';
     }
 
     /**

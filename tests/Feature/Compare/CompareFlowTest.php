@@ -110,6 +110,10 @@ class CompareFlowTest extends TestCase
 
         foreach (['pending', 'rejected', 'suspended owner'] as $state) {
             foreach (['guest', 'owner', 'admin'] as $viewer) {
+                if ($state === 'suspended owner' && $viewer === 'owner') {
+                    continue;
+                }
+
                 $cases["{$state} as {$viewer}"] = [$state, $viewer];
             }
         }

@@ -106,10 +106,12 @@ class ReviewSeederTest extends TestCase
 
     public function test_a_suspended_owner_has_one_approved_listing_that_is_not_public(): void
     {
+        $this->freezeTime();
         $this->seed([DatabaseSeeder::class, ReviewSeeder::class]);
 
         $owner = User::query()->where('status', UserStatus::Suspended)->sole();
 
+        $this->assertSame(now()->addDays(30)->toDateTimeString(), $owner->suspended_until->toDateTimeString());
         $listing = $owner->listings()->sole();
         $this->assertSame(ListingStatus::Approved, $listing->status);
         $this->assertFalse(CarListing::query()->publiclyVisible()->whereKey($listing->id)->exists());

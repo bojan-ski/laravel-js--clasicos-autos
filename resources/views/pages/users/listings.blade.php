@@ -6,6 +6,11 @@
             <x-ui.stamp tone="red" aria-hidden="true" class="h-19 w-16 shrink-0 md:h-27 md:w-23">
                 <span class="grid size-full place-items-center font-heading text-2xl text-red md:text-4xl">{{ $seller->initials() }}</span>
             </x-ui.stamp>
+            @if ($suspensionStatus !== null)
+                <x-ui.stamp tone="status-rejected">
+                    <span class="block px-2 py-0.5 text-[11px] tracking-[0.16em] uppercase">{{ $suspensionStatus }}</span>
+                </x-ui.stamp>
+            @endif
             <div class="flex min-w-0 flex-col gap-2">
                 <x-ui.page-header :kicker="__('app.sellers.kicker')" kicker-lang="es" :title="__('app.sellers.title', ['username' => $seller->username])" class="min-w-0 wrap-break-word" />
                 <p class="text-sm text-ink-2 tabular-nums">{{ trans_choice('app.sellers.joined', $listings->total(), ['date' => $joined, 'count' => $listings->total()]) }}</p>

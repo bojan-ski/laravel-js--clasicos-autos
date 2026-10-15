@@ -97,7 +97,6 @@ class MessageWritesTest extends TestCase
     {
         return [
             'admin' => ['admin', 403],
-            'suspended participant' => ['suspended participant', 403],
             'stranger' => ['stranger', 404],
         ];
     }
@@ -108,7 +107,6 @@ class MessageWritesTest extends TestCase
         $conversation = Conversation::factory()->create();
         $viewer = match ($viewerKind) {
             'admin' => User::factory()->admin()->create(),
-            'suspended participant' => $this->suspend($conversation->sender),
             'stranger' => User::factory()->create(),
         };
 
@@ -148,15 +146,16 @@ class MessageWritesTest extends TestCase
         $this->assertSame(1, Message::query()->count());
     }
 
-    public function test_a_suspended_owner_still_reads_the_thread_but_cannot_reply(): void
+    public function test_a_suspended_owner_in_a_live_session_is_signed_out_of_the_thread_and_the_reply(): void
     {
         $conversation = Conversation::factory()->create();
         $this->hide($conversation, 'suspended owner');
-        $this->actingAs($conversation->receiver->fresh());
+        $owner = $conversation->receiver->fresh();
 
-        $this->get(route('conversations.show', $conversation))->assertOk();
-        $this->post(route('conversations.messages.store', $conversation), ['message' => 'Still interested?'])->assertForbidden();
+        $this->actingAs($owner)->get(route('conversations.show', $conversation))->assertRedirect(route('login'));
+        $this->actingAs($owner)->post(route('conversations.messages.store', $conversation), ['message' => 'Still interested?'])->assertRedirect(route('login'));
 
+        $this->assertGuest();
         $this->assertSame(0, Message::query()->count());
     }
 
@@ -185,15 +184,16 @@ class MessageWritesTest extends TestCase
         $this->assertModelMissing($message);
     }
 
-    public function test_a_suspended_sender_still_deletes_their_own_message(): void
+    public function test_a_suspended_sender_in_a_live_session_is_signed_out_and_deletes_nothing(): void
     {
         $message = Message::factory()->create();
 
         $this->actingAs($this->suspend($message->conversation->sender))
             ->delete(route('conversations.messages.destroy', [$message->conversation, $message]))
-            ->assertSessionHas('success', 'Message deleted.');
+            ->assertRedirect(route('login'));
 
-        $this->assertModelMissing($message);
+        $this->assertGuest();
+        $this->assertModelExists($message);
     }
 
     /**

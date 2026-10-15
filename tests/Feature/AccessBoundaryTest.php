@@ -35,13 +35,17 @@ class AccessBoundaryTest extends TestCase
             'DELETE profile' => ['delete', 'profile.destroy'],
             'GET admin account' => ['get', 'admin.account'],
             'PUT admin account password' => ['put', 'admin.account.password.update'],
+            'GET admin users' => ['get', 'admin.users'],
+            'PATCH admin users suspend' => ['patch', 'admin.users.suspend'],
+            'PATCH admin users unsuspend' => ['patch', 'admin.users.unsuspend'],
+            'DELETE admin users destroy' => ['delete', 'admin.users.destroy'],
         ];
     }
 
     #[DataProvider('accountRoutes')]
     public function test_guest_is_sent_to_login_from_every_account_route(string $method, string $route): void
     {
-        $this->{$method}(route($route))->assertRedirect(route('login'));
+        $this->{$method}($this->urlFor($route))->assertRedirect(route('login'));
     }
 
     /**
@@ -55,6 +59,10 @@ class AccessBoundaryTest extends TestCase
             'admin DELETE profile' => ['admin', 'delete', 'profile.destroy'],
             'appUser GET admin account' => ['appUser', 'get', 'admin.account'],
             'appUser PUT admin account password' => ['appUser', 'put', 'admin.account.password.update'],
+            'appUser GET admin users' => ['appUser', 'get', 'admin.users'],
+            'appUser PATCH admin users suspend' => ['appUser', 'patch', 'admin.users.suspend'],
+            'appUser PATCH admin users unsuspend' => ['appUser', 'patch', 'admin.users.unsuspend'],
+            'appUser DELETE admin users destroy' => ['appUser', 'delete', 'admin.users.destroy'],
         ];
     }
 
@@ -64,7 +72,7 @@ class AccessBoundaryTest extends TestCase
         $user = $role === 'admin' ? User::factory()->admin()->create() : User::factory()->create();
 
         $this->actingAs($user)
-            ->{$method}(route($route))
+            ->{$method}($this->urlFor($route))
             ->assertForbidden()
             ->assertSee(__('app.errors.403.title'));
 
@@ -99,7 +107,7 @@ class AccessBoundaryTest extends TestCase
     {
         $cases = [];
 
-        foreach (['appUser' => 'profile', 'admin' => 'admin.account'] as $role => $landing) {
+        foreach (['appUser' => 'profile', 'admin' => 'admin.users'] as $role => $landing) {
             $cases["{$role} GET login"] = [$role, 'get', 'login', [], $landing];
             $cases["{$role} POST login"] = [$role, 'post', 'login.store', [], $landing];
             $cases["{$role} GET register"] = [$role, 'get', 'register', [], $landing];
@@ -126,5 +134,12 @@ class AccessBoundaryTest extends TestCase
             ->assertRedirect(route($landing));
 
         $this->assertDatabaseCount('users', 1);
+    }
+
+    private function urlFor(string $route): string
+    {
+        return str_starts_with($route, 'admin.users.')
+            ? route($route, User::factory()->create())
+            : route($route);
     }
 }

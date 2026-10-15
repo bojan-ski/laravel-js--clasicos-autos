@@ -17,4 +17,26 @@ class UserPolicy
             ? Response::allow()
             : Response::denyAsNotFound();
     }
+
+    public function suspend(User $actor, User $target): Response
+    {
+        return $this->manages($actor, $target);
+    }
+
+    public function unsuspend(User $actor, User $target): Response
+    {
+        return $this->manages($actor, $target);
+    }
+
+    public function delete(User $actor, User $target): Response
+    {
+        return $this->manages($actor, $target);
+    }
+
+    private function manages(User $actor, User $target): Response
+    {
+        return $actor->isAdmin() && $target->isAppUser()
+            ? Response::allow()
+            : Response::deny();
+    }
 }

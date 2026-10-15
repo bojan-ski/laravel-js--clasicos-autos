@@ -276,7 +276,7 @@ class ResetPasswordTest extends TestCase
             ->assertRedirect(route('login'));
 
         $this->post(route('login.store'), ['email' => $admin->email, 'password' => 'new-secret'])
-            ->assertRedirect(route('admin.account'));
+            ->assertRedirect(route('admin.users'));
         $this->assertAuthenticatedAs($admin);
     }
 

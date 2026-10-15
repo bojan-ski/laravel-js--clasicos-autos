@@ -14,7 +14,9 @@ class ListingDetailAccessTest extends TestCase
 {
     use LazilyRefreshDatabase;
 
-    private const array SEES_EVERY_STATE = ['owner', 'suspended owner', 'admin'];
+    private const array SEES_EVERY_STATE = ['owner', 'admin'];
+
+    private const array SIGNED_OUT = ['suspended owner', 'suspended app user'];
 
     protected function setUp(): void
     {
@@ -24,7 +26,7 @@ class ListingDetailAccessTest extends TestCase
     }
 
     /**
-     * @return array<string, array{string, string, bool}>
+     * @return array<string, array{string, string, string}>
      */
     public static function viewersAndStates(): array
     {
@@ -32,8 +34,12 @@ class ListingDetailAccessTest extends TestCase
 
         foreach (['guest', 'owner', 'suspended owner', 'other app user', 'suspended app user', 'admin'] as $viewer) {
             foreach (['pending', 'approved', 'rejected', 'approved with a suspended owner'] as $state) {
-                $visible = in_array($viewer, self::SEES_EVERY_STATE, true) || $state === 'approved';
-                $cases["{$viewer} × {$state}"] = [$viewer, $state, $visible];
+                $outcome = match (true) {
+                    in_array($viewer, self::SIGNED_OUT, true), $viewer === 'owner' && $state === 'approved with a suspended owner' => 'signed out',
+                    in_array($viewer, self::SEES_EVERY_STATE, true) || $state === 'approved' => 'shown',
+                    default => 'not found',
+                };
+                $cases["{$viewer} × {$state}"] = [$viewer, $state, $outcome];
             }
         }
 
@@ -41,7 +47,7 @@ class ListingDetailAccessTest extends TestCase
     }
 
     #[DataProvider('viewersAndStates')]
-    public function test_a_listing_renders_only_for_viewers_allowed_to_see_its_state(string $viewer, string $state, bool $visible): void
+    public function test_a_listing_renders_only_for_viewers_allowed_to_see_its_state(string $viewer, string $state, string $outcome): void
     {
         $owner = $viewer === 'suspended owner' || $state === 'approved with a suspended owner'
             ? User::factory()->suspended()->create()
@@ -51,10 +57,14 @@ class ListingDetailAccessTest extends TestCase
 
         $response = $this->get(route('listings.show', $listing));
 
-        if ($visible) {
-            $response->assertViewIs('pages.listings.show');
-        } else {
-            $response->assertNotFound()->assertSee(__('app.errors.404.title'));
+        match ($outcome) {
+            'shown' => $response->assertViewIs('pages.listings.show'),
+            'not found' => $response->assertNotFound()->assertSee(__('app.errors.404.title')),
+            'signed out' => $response->assertRedirect(route('login')),
+        };
+
+        if ($outcome === 'signed out') {
+            $this->assertGuest();
         }
     }
 

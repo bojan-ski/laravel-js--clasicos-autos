@@ -6,6 +6,7 @@ use App\Enums\ListingStatus;
 use App\Models\CarListing;
 use App\Models\CarMaker;
 use App\Models\User;
+use App\Support\LikePattern;
 use BackedEnum;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
@@ -60,7 +61,7 @@ class ListingBrowseService
     {
         return $this->publicListings()
             ->when($filters['search'] !== '', function (Builder $query) use ($filters): void {
-                $pattern = '%'.$this->escapeLike($filters['search']).'%';
+                $pattern = LikePattern::contains($filters['search']);
 
                 $query->where(fn (Builder $search) => $search
                     ->where('name', 'like', $pattern)
@@ -85,7 +86,7 @@ class ListingBrowseService
         }
 
         foreach (self::ADVANCED_SUBSTRING as $key => $column) {
-            $query->when($this->isFilled($filters[$key]), fn (Builder $listings) => $listings->where($column, 'like', '%'.$this->escapeLike($filters[$key]).'%'));
+            $query->when($this->isFilled($filters[$key]), fn (Builder $listings) => $listings->where($column, 'like', LikePattern::contains($filters[$key])));
         }
 
         foreach (self::ADVANCED_BOUNDS as $key => [$column, $operator]) {
@@ -170,10 +171,5 @@ class ListingBrowseService
     private function isFilled(string|int|BackedEnum|null $value): bool
     {
         return $value !== null && $value !== '';
-    }
-
-    private function escapeLike(string $term): string
-    {
-        return str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $term);
     }
 }

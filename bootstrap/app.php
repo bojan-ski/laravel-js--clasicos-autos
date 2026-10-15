@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Middleware\EndSuspendedSessions;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Middleware\SubstituteBindings;
 use Symfony\Component\HttpFoundation\Response;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -15,6 +17,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->redirectUsersTo(fn (Request $request): string => route($request->user()->landingRoute()));
+        $middleware->web(append: EndSuspendedSessions::class);
+        $middleware->prependToPriorityList(before: SubstituteBindings::class, prepend: EndSuspendedSessions::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->dontFlash(['old_password', 'delete_password', 'token']);

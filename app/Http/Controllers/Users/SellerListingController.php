@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Services\ListingBrowseService;
 use App\Support\BackUrl;
 use App\Support\ListingFormat;
+use App\Support\SuspensionText;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -25,6 +26,7 @@ class SellerListingController extends Controller
             'listings' => $listings->sellerListings($user, $everyStatus),
             'showsStatus' => $everyStatus,
             'joined' => ListingFormat::date($user->created_at),
+            'suspensionStatus' => $user->isSuspended() ? SuspensionText::status($user) : null,
             'backUrl' => $backUrl->resolve(route('listings.index')),
         ]);
     }

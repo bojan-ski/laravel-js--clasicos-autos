@@ -20,6 +20,7 @@ return [
         'listings' => 'Listings',
         'compare' => 'Compare',
         'bookmarks' => 'Bookmarks',
+        'users' => 'Users',
         'conversations' => 'Conversations',
     ],
 
@@ -774,10 +775,74 @@ return [
         'deleted' => 'Message deleted.',
     ],
 
+    'suspension' => [
+        'status' => [
+            'active' => 'Active',
+            'until' => 'Suspended until :date',
+            'indefinite' => 'Suspended indefinitely',
+        ],
+        'durations' => [
+            '7_days' => '7 days',
+            '30_days' => '30 days',
+            'indefinite' => 'Indefinite',
+        ],
+    ],
+
     'admin' => [
         'account' => [
             'kicker' => 'Mi cuenta',
             'title' => 'Account',
+        ],
+        'users' => [
+            'kicker' => 'Registro de usuarios',
+            'title' => 'App users',
+            'search_label' => 'Username or email',
+            'search_placeholder' => 'Enter user',
+            'search_button' => 'Search',
+            'empty' => 'No app users!',
+            'columns' => [
+                'id' => 'ID',
+                'username' => 'Username',
+                'email' => 'Email',
+                'phone' => 'Phone Number',
+                'created' => 'Account Created',
+                'status' => 'Status',
+                'listings' => 'Listings',
+                'actions' => 'Actions',
+            ],
+            'actions' => [
+                'view' => 'View listings of :username',
+                'suspend' => 'Suspend :username',
+                'unsuspend' => 'Unsuspend :username',
+                'delete' => 'Delete :username',
+            ],
+            'suspend' => [
+                'title' => 'Suspend :username?',
+                'reason_label' => 'Reason',
+                'reason_hint' => 'Shown to the user when they try to sign in. Max 500 characters.',
+                'duration_label' => 'Duration',
+                'duration_placeholder' => 'Choose a duration',
+                'cancel' => 'Cancel',
+                'confirm' => 'Suspend user',
+            ],
+            'delete' => [
+                'title' => 'Are you sure you want to delete :username?',
+                'warning' => "This can't be undone.",
+                'cancel' => 'Cancel',
+                'confirm' => 'Delete User Account',
+            ],
+            'attributes' => [
+                'search' => 'search',
+                'reason' => 'reason',
+                'duration' => 'duration',
+            ],
+            'flash' => [
+                'suspended' => ':username has been suspended.',
+                'unsuspended' => ':username is active again.',
+                'already_suspended' => 'This user is already suspended.',
+                'not_suspended' => 'This user is not suspended.',
+                'deleted' => 'User account has been deleted.',
+            ],
         ],
     ],
 

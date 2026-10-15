@@ -66,26 +66,14 @@ class UnreadNavCountTest extends TestCase
             ->assertDontSee('data-menu-signal', false);
     }
 
-    public function test_a_suspended_member_sees_the_counted_markup_without_live_hooks(): void
+    public function test_a_suspended_member_in_a_live_session_is_signed_out_before_any_header_renders(): void
     {
         $member = User::factory()->suspended()->create();
         $this->unreadFor($member, 2);
 
-        $this->page($member)
-            ->assertSee('<span data-unread-badge data-nav-count data-template=":count" '.self::PILL_CLASSES.'><span data-unread-badge-text>2</span>', false)
-            ->assertSee('2 NEW')
-            ->assertSee('<span data-unread-dot data-menu-signal', false)
-            ->assertDontSee('data-live-', false)
-            ->assertDontSee('data-unread-badge hidden', false)
-            ->assertDontSee('hidden="hidden" data-template', false)
-            ->assertDontSee('data-unread-dot hidden', false);
-    }
+        $this->actingAs($member)->get(route('home'))->assertRedirect(route('login'));
 
-    public function test_a_suspended_member_at_zero_sees_no_unread_markup(): void
-    {
-        $this->page(User::factory()->suspended()->create())
-            ->assertDontSee('data-unread-badge', false)
-            ->assertDontSee('data-unread-dot', false);
+        $this->assertGuest();
     }
 
     public function test_an_admin_never_sees_a_count_even_with_unread_messages_present(): void
@@ -118,7 +106,6 @@ class UnreadNavCountTest extends TestCase
         $member = User::factory()->create();
 
         $this->page($member)->assertSee('<header data-header-variant="member" data-live-channel="user.'.$member->id.'"', false);
-        $this->page(User::factory()->suspended()->create())->assertDontSee('data-live-channel', false);
         $this->actingAs(User::factory()->admin()->create())->get(route('admin.account'))->assertOk()->assertDontSee('data-live-channel', false);
     }
 

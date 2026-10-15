@@ -36,7 +36,15 @@ class AppShellTest extends TestCase
 
         $this->assertSame(['home', 'listings', 'compare'], array_column($navigation->linksFor(NavAudience::Guest, null), 'key'));
         $this->assertSame(['home', 'listings', 'compare', 'bookmarks', 'conversations'], array_column($navigation->linksFor(NavAudience::Member, User::factory()->make()), 'key'));
-        $this->assertSame(['conversations'], array_column($navigation->linksFor(NavAudience::Admin, null), 'key'));
+        $this->assertSame(['users', 'conversations'], array_column($navigation->linksFor(NavAudience::Admin, null), 'key'));
+    }
+
+    public function test_the_users_item_carries_no_counter(): void
+    {
+        $items = array_column($this->app->make(MainNavigation::class)->items(), null, 'key');
+
+        $this->assertNull($items['users']->counter);
+        $this->assertSame('admin.users', $items['users']->route);
     }
 
     public function test_the_conversations_item_counts_unread_messages(): void

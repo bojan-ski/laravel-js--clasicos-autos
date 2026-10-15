@@ -118,14 +118,14 @@ class StageAExitConditionTest extends TestCase
         $this->assertModelMissing($user);
     }
 
-    public function test_the_admin_seeded_from_env_signs_in_and_lands_on_the_admin_account(): void
+    public function test_the_admin_seeded_from_env_signs_in_and_lands_on_the_users_table(): void
     {
         config(['auth.admin.email' => 'boss@example.com', 'auth.admin.password' => 'initial1']);
         $this->seed(AdminUserSeeder::class);
 
         $this->post(route('login.store'), ['email' => 'boss@example.com', 'password' => 'initial1'])
-            ->assertRedirect(route('admin.account'));
-        $this->get(route('admin.account'))->assertOk()->assertSee('data-header-variant="admin"', false);
+            ->assertRedirect(route('admin.users'));
+        $this->get(route('admin.users'))->assertOk()->assertSee('data-header-variant="admin"', false);
     }
 
     public function test_the_database_seeder_seeds_every_maker_and_model(): void

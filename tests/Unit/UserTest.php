@@ -42,14 +42,14 @@ class UserTest extends TestCase
         $this->assertSame('profile', $user->landingRoute());
     }
 
-    public function test_an_admin_lands_on_the_admin_account(): void
+    public function test_an_admin_lands_on_the_users_table(): void
     {
         $user = new User;
         $user->role = UserRole::Admin;
 
         $this->assertTrue($user->isAdmin());
         $this->assertFalse($user->isAppUser());
-        $this->assertSame('admin.account', $user->landingRoute());
+        $this->assertSame('admin.users', $user->landingRoute());
     }
 
     public function test_a_suspended_user_is_suspended(): void

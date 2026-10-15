@@ -192,7 +192,6 @@ class ListingDetailPageTest extends TestCase
             'guest gets the login link in the card and the bar' => ['guest', 2, 0, 0],
             'owner is told it is their listing, bar is price only' => ['owner', 0, 1, 0],
             'active app user gets send message in the card and the bar' => ['app user', 0, 0, 2],
-            'suspended app user gets no action' => ['suspended', 0, 0, 0],
             'admin gets no action' => ['admin', 0, 0, 0],
         ];
     }
@@ -221,7 +220,6 @@ class ListingDetailPageTest extends TestCase
             'owner on a public listing' => ['owner', ListingStatus::Approved, 0],
             'owner on a pending listing' => ['owner', ListingStatus::Pending, 0],
             'app user on a public listing' => ['app user', ListingStatus::Approved, 1],
-            'suspended app user on a public listing' => ['suspended', ListingStatus::Approved, 1],
             'admin on a public listing' => ['admin', ListingStatus::Approved, 1],
             'admin on a pending listing' => ['admin', ListingStatus::Pending, 1],
             'admin on a rejected listing' => ['admin', ListingStatus::Rejected, 1],
@@ -283,7 +281,6 @@ class ListingDetailPageTest extends TestCase
         return [
             'guest' => ['guest'],
             'other app user' => ['app user'],
-            'suspended app user' => ['suspended'],
         ];
     }
 
@@ -418,14 +415,25 @@ class ListingDetailPageTest extends TestCase
     }
 
     #[DataProvider('statuses')]
-    public function test_a_suspended_owner_sees_the_panel_and_the_suspension_note_on_their_own_listing(ListingStatus $status): void
+    public function test_a_suspended_owner_with_a_live_session_is_signed_out_instead_of_seeing_their_listing(ListingStatus $status): void
     {
         $owner = User::factory()->suspended()->create();
         $listing = $this->listingWithStatus($status, $owner);
 
-        $this->show($listing, $owner)
-            ->assertSeeInOrder(['aria-label="'.__('app.listings.show.status.label').'"', $status->label()], false)
-            ->assertSee(__('app.listings.show.status.owner_suspended'));
+        $this->actingAs($owner)
+            ->get(route('listings.show', $listing))
+            ->assertRedirect(route('login'));
+        $this->assertGuest();
+    }
+
+    public function test_a_suspended_viewer_with_a_live_session_is_signed_out_on_a_public_listing(): void
+    {
+        $listing = CarListing::factory()->approved()->create();
+
+        $this->actingAs(User::factory()->suspended()->create())
+            ->get(route('listings.show', $listing))
+            ->assertRedirect(route('login'));
+        $this->assertGuest();
     }
 
     public function test_the_panel_has_no_suspension_note_for_an_active_owner(): void
@@ -594,7 +602,6 @@ class ListingDetailPageTest extends TestCase
             'guest' => null,
             'owner' => $owner,
             'app user' => User::factory()->create(),
-            'suspended' => User::factory()->suspended()->create(),
             'admin' => User::factory()->admin()->create(),
         };
     }

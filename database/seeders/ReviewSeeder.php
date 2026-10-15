@@ -103,7 +103,7 @@ class ReviewSeeder extends Seeder
         $this->seedImages($pending, self::IMAGES_PENDING);
         $this->seedImages($rejected, self::IMAGES_REJECTED);
 
-        $suspended = CarListing::factory()->approved()->forCarModel($models[2])->for(User::factory()->suspended(), 'owner')
+        $suspended = CarListing::factory()->approved()->forCarModel($models[2])->for(User::factory()->suspended(now()->addDays(30)), 'owner')
             ->create(['moderated_by' => $moderatorId]);
 
         return ['photographed' => $approved[0], 'suspended' => $suspended];

@@ -37,17 +37,27 @@ class CreateListingPageTest extends TestCase
     {
         return [
             'admin' => ['admin'],
-            'suspended app user' => ['suspended'],
         ];
     }
 
     #[DataProvider('refusedActors')]
     public function test_a_refused_actor_gets_the_403_page_on_both_routes_before_validation(string $actor): void
     {
-        $user = $actor === 'admin' ? User::factory()->admin()->create() : User::factory()->suspended()->create();
+        $user = User::factory()->admin()->create();
 
         $this->actingAs($user)->get(route('listings.create'))->assertForbidden()->assertSee(__('app.errors.403.title'));
         $this->actingAs($user)->post(route('listings.store'))->assertForbidden()->assertSessionHasNoErrors();
+    }
+
+    public function test_a_suspended_app_user_in_a_live_session_is_signed_out_on_both_routes(): void
+    {
+        $user = User::factory()->suspended()->create();
+
+        $this->actingAs($user)->get(route('listings.create'))->assertRedirect(route('login'));
+        $this->actingAs($user)->post(route('listings.store'))->assertRedirect(route('login'));
+
+        $this->assertGuest();
+        $this->assertDatabaseCount('car_listings', 0);
     }
 
     public function test_an_active_app_user_sees_the_page_with_its_spanish_kicker(): void

@@ -25,9 +25,21 @@ class MessageSent implements ShouldBroadcast, ShouldDispatchAfterCommit
 
     public function __construct(public Message $message, public User $recipient) {}
 
-    public function broadcastOn(): PrivateChannel
+    public function broadcastWhen(): bool
     {
-        return new PrivateChannel('user.'.$this->recipient->getKey());
+        return $this->recipient->isActiveAppUser();
+    }
+
+    /**
+     * @return list<PrivateChannel>
+     */
+    public function broadcastOn(): array
+    {
+        if (! $this->recipient->isActiveAppUser()) {
+            return [];
+        }
+
+        return [new PrivateChannel('user.'.$this->recipient->getKey())];
     }
 
     public function broadcastAs(): string

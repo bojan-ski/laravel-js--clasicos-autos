@@ -74,13 +74,16 @@ class DeleteListingTest extends TestCase
         $this->assertModelMissing($listing);
     }
 
-    public function test_a_suspended_owner_in_a_live_session_can_delete(): void
+    public function test_a_suspended_owner_in_a_live_session_is_signed_out_and_deletes_nothing(): void
     {
         $listing = CarListing::factory()->approved()->for(User::factory()->suspended(), 'owner')->create();
+        $this->putFiles($listing);
 
-        $this->actingAs($listing->owner)->delete(route('listings.destroy', $listing))->assertRedirect(route('profile'));
+        $this->actingAs($listing->owner)->delete(route('listings.destroy', $listing))->assertRedirect(route('login'));
 
-        $this->assertModelMissing($listing);
+        $this->assertGuest();
+        $this->assertModelExists($listing);
+        Storage::disk('public')->assertExists("listings/{$listing->id}/photo.webp");
     }
 
     public function test_an_admin_is_redirected_to_the_listings_index_with_the_flash(): void

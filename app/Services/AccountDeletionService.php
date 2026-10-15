@@ -12,6 +12,7 @@ class AccountDeletionService
     public function __construct(
         private PasswordBroker $broker,
         private ListingImageService $images,
+        private UserSessionService $sessions,
     ) {}
 
     public function delete(User $user): void
@@ -20,9 +21,15 @@ class AccountDeletionService
             throw new LogicException('Admin accounts cannot be deleted.');
         }
 
-        $this->broker->deleteToken($user);
-        $listingIds = $user->listings()->pluck('id')->all();
-        $user->delete();
-        DB::afterCommit(fn () => $this->images->deleteListingDirectories($listingIds));
+        DB::transaction(function () use ($user): void {
+            $locked = User::query()->lockForUpdate()->findOrFail($user->getKey());
+
+            $this->sessions->endAll($locked);
+            $this->broker->deleteToken($locked);
+            $listingIds = $locked->listings()->pluck('id')->all();
+            $locked->delete();
+
+            DB::afterCommit(fn () => $this->images->deleteListingDirectories($listingIds));
+        });
     }
 }
