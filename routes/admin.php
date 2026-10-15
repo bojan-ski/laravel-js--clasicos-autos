@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AccountController;
 use App\Http\Controllers\Admin\ListingModerationController;
+use App\Http\Controllers\Admin\ListingQueueController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +15,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'can:access-admin'])
     Route::get('/account', [AccountController::class, 'show'])->name('account');
     Route::put('/account/password', [AccountController::class, 'updatePassword'])->name('account.password.update');
 
+    Route::get('/listings', [ListingQueueController::class, 'index'])->name('listings');
+    Route::patch('/listings/{listing}/promote-model', [ListingModerationController::class, 'promote'])->name('listings.promote')->whereNumber('listing');
     Route::patch('/listings/{listing}/approve', [ListingModerationController::class, 'approve'])->name('listings.approve')->whereNumber('listing');
     Route::patch('/listings/{listing}/reject', [ListingModerationController::class, 'reject'])->name('listings.reject')->whereNumber('listing');
 });

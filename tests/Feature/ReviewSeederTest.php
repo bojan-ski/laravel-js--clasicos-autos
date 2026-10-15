@@ -43,7 +43,7 @@ class ReviewSeederTest extends TestCase
             ->all();
 
         $this->assertSame(['approved' => 8, 'pending' => 2, 'rejected' => 1], $counts);
-        $this->assertSame(11, ListingImage::query()->count());
+        $this->assertSame(12, ListingImage::query()->count());
 
         foreach ($reviewer->listings()->whereHas('images')->with('images')->get() as $listing) {
             $this->assertSame(range(0, $listing->images->count() - 1), $listing->images->pluck('position')->sort()->values()->all());
@@ -56,8 +56,8 @@ class ReviewSeederTest extends TestCase
 
         $images = ListingImage::query()->get();
 
-        $this->assertCount(11, $images);
-        $this->assertCount(33, Storage::disk('public')->allFiles('listings'));
+        $this->assertCount(12, $images);
+        $this->assertCount(36, Storage::disk('public')->allFiles('listings'));
 
         foreach ($images as $image) {
             foreach ([$image->path, $image->card_path, $image->thumb_path] as $path) {
@@ -202,6 +202,24 @@ class ReviewSeederTest extends TestCase
         $this->assertSame([], $sold->messages->whereNull('read_at')->all());
         $this->assertTrue($sold->last_message_at->lessThan($bought->last_message_at));
         $this->assertSame(2, Conversation::query()->involving($reviewer)->count());
+    }
+
+    public function test_the_stranger_owns_the_oldest_pending_custom_model_listing_with_one_photo(): void
+    {
+        $this->freezeTime();
+        $this->seed([DatabaseSeeder::class, ReviewSeeder::class]);
+
+        $stranger = User::query()->where('email', 'stranger@example.com')->sole();
+        $roadster = CarListing::query()->where('name', 'Custom Roadster')->withCount('images')->sole();
+        $conversation = Conversation::query()->where('receiver_id', $stranger->id)->sole();
+
+        $this->assertSame($stranger->id, $roadster->user_id);
+        $this->assertTrue($roadster->canPromoteModel());
+        $this->assertSame('Roadster', $roadster->model);
+        $this->assertSame(1, $roadster->images_count);
+        $this->assertSame(now()->subDays(2)->toDateTimeString(), $roadster->submitted_at->toDateTimeString());
+        $this->assertSame($roadster->id, CarListing::query()->where('status', ListingStatus::Pending)->orderBy('submitted_at')->orderBy('id')->value('id'));
+        $this->assertNotSame($roadster->id, $conversation->listing_id);
     }
 
     public function test_each_seeded_conversation_spans_exactly_its_messages(): void

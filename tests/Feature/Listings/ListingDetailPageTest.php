@@ -352,6 +352,7 @@ class ListingDetailPageTest extends TestCase
         $this->assertMatchesRegularExpression('/<textarea id="rejection_reason" name="rejection_reason"\s*required aria-required="true"\s*aria-describedby="rejection_reason-hint"[^>]*maxlength="1000"/', $html);
         $this->assertStringContainsString('<p id="rejection_reason-hint" class="text-xs text-muted">'.e(__('app.listings.moderation.reason_hint')).'</p>', $html);
         $this->assertMatchesRegularExpression('/<div class="flex flex-col-reverse gap-3 md:flex-row md:justify-end">\s*<button type="button"[^>]*border-rule[^>]*data-dialog-close="data-dialog-close" commandfor="reject-listing" command="close">\s*Cancel\s*<\/button>\s*<button type="submit"[^>]*border-red-deep[^>]*>\s*Reject\s*<\/button>/', $html);
+        $this->assertStringNotContainsString('return=queue', $html);
     }
 
     /**

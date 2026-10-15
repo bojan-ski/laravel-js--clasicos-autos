@@ -108,16 +108,18 @@ class ListingSchemaTest extends TestCase
         $this->assertSame(['created_at', 'updated_at'], $nullable);
     }
 
-    public function test_car_listings_has_the_composite_status_index_and_no_lone_status_index(): void
+    public function test_car_listings_has_the_two_composite_status_indexes_and_no_lone_status_index(): void
     {
         $indexes = collect(Schema::getIndexes('car_listings'))->reject(fn (array $index) => $index['primary'])->pluck('columns')->all();
 
+        $this->assertContains(['status', 'submitted_at'], $indexes);
         $this->assertEqualsCanonicalizing([
             ['user_id'],
             ['car_maker_id'],
             ['car_model_id'],
             ['moderated_by'],
             ['status', 'created_at'],
+            ['status', 'submitted_at'],
             ['year'],
             ['price'],
         ], $indexes);

@@ -40,6 +40,7 @@ class RedirectDisciplineTest extends TestCase
     ];
 
     private const array STAGE_F_PINNED_TARGETS = [
+        'admin.listings.promote' => 'admin.listings',
         'admin.users.destroy' => 'admin.users',
         'admin.users.suspend' => 'admin.users',
         'admin.users.unsuspend' => 'admin.users',
@@ -192,6 +193,7 @@ class RedirectDisciplineTest extends TestCase
             'profile.destroy',
             'admin.account.password.update',
             'admin.listings.approve',
+            'admin.listings.promote',
             'admin.listings.reject',
             'admin.users.destroy',
             'admin.users.suspend',
@@ -247,6 +249,12 @@ class RedirectDisciplineTest extends TestCase
             'admin.listings.reject' => [
                 'version' => CarListing::query()->latest('id')->firstOrFail()->moderationVersion(),
                 'rejection_reason' => 'Photos do not match the description.',
+            ],
+            'admin.listings.promote' => [
+                'version' => CarListing::query()->latest('id')->firstOrFail()->moderationVersion(),
+                'name' => 'Promoted Model',
+                'year_from' => config('listings.min_year'),
+                'year_to' => config('listings.max_year'),
             ],
             'admin.users.suspend' => ['reason' => 'Repeated abusive messages.', 'duration' => '30_days'],
             'conversations.store', 'conversations.messages.store' => ['message' => 'Is this car still available?'],

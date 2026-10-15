@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use App\Models\CarListing;
+use App\Support\ListingQueueQuery;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Contracts\Validation\Validator;
@@ -44,10 +45,17 @@ abstract class ModerateListingRequest extends FormRequest
         return (int) $this->validated('version');
     }
 
+    public function returnUrl(): string
+    {
+        return ListingQueueQuery::returnsToQueue($this)
+            ? route('admin.listings', ListingQueueQuery::from($this))
+            : route('listings.show', $this->listing());
+    }
+
     protected function failedValidation(Validator $validator): void
     {
         throw new HttpResponseException(
-            redirect()->route('listings.show', $this->listing())->with('error', $validator->errors()->first())
+            redirect()->to($this->returnUrl())->with('error', $validator->errors()->first())
         );
     }
 

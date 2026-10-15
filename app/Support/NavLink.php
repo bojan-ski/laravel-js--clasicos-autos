@@ -13,5 +13,6 @@ final readonly class NavLink
         public bool $active,
         public ?int $count = null,
         public ?NavCountStyle $countStyle = null,
+        public ?string $countLabel = null,
     ) {}
 }

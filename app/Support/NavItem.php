@@ -22,9 +22,14 @@ final readonly class NavItem
         public array $audiences,
         public ?string $counter = null,
         public ?NavCountStyle $countStyle = null,
+        public ?string $countLabelKey = null,
     ) {
         if (($counter === null) !== ($countStyle === null)) {
             throw new InvalidArgumentException("Nav item [{$key}] must set both a counter and a count style, or neither.");
+        }
+
+        if ($countLabelKey !== null && $counter === null) {
+            throw new InvalidArgumentException("Nav item [{$key}] cannot set a count label without a counter.");
         }
     }
 
