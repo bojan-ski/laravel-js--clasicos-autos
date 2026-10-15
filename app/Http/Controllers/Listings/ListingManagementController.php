@@ -60,7 +60,7 @@ class ListingManagementController extends Controller
 
         $listings->delete($listing);
 
-        return redirect()->route($request->user()->isAdmin() ? 'listings.index' : 'profile')
+        return redirect()->route($request->user()->isAdmin() ? 'admin.listings' : 'profile')
             ->with('success', __('app.listings.edit.deleted'));
     }
 }

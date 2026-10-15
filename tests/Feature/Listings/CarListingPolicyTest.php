@@ -42,6 +42,7 @@ class CarListingPolicyTest extends TestCase
             'delete' => $ownerOrAdmin,
             'approve' => $adminOnly,
             'reject' => $adminOnly,
+            'promoteModel' => $adminOnly,
             'bookmark' => [
                 'pending' => [403, 403, 404, 404, 403],
                 'approved' => [403, 403, 'allow', 'allow', 'allow'],

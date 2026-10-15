@@ -194,6 +194,11 @@ class CarListing extends Model
         return $this->isPending();
     }
 
+    public function canPromoteModel(): bool
+    {
+        return $this->isPending() && $this->hasCustomModel();
+    }
+
     public function shouldReturnToPendingOnEdit(): bool
     {
         return $this->isApproved() || $this->isRejected();

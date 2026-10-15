@@ -186,7 +186,7 @@ class ListingLifecycleMatrixTest extends TestCase
         User::factory()->create()->bookmarks()->attach([$listing->id, $other->id]);
 
         $this->perform('delete', $listing, $actor === 'admin' ? $this->admin : $owner)
-            ->assertRedirect(route($actor === 'admin' ? 'listings.index' : 'profile'))
+            ->assertRedirect(route($actor === 'admin' ? 'admin.listings' : 'profile'))
             ->assertSessionHas('success', __('app.listings.edit.deleted'));
 
         $this->assertModelMissing($listing);

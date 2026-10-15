@@ -86,12 +86,12 @@ class DeleteListingTest extends TestCase
         Storage::disk('public')->assertExists("listings/{$listing->id}/photo.webp");
     }
 
-    public function test_an_admin_is_redirected_to_the_listings_index_with_the_flash(): void
+    public function test_an_admin_is_redirected_to_the_listings_queue_with_the_flash(): void
     {
         $listing = CarListing::factory()->create();
 
         $this->actingAs(User::factory()->admin()->create())->delete(route('listings.destroy', $listing))
-            ->assertRedirect(route('listings.index'))
+            ->assertRedirect(route('admin.listings'))
             ->assertSessionHas('success', 'Car listing deleted.');
 
         $this->assertModelMissing($listing);

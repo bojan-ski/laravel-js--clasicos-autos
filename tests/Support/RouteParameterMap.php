@@ -59,6 +59,10 @@ final class RouteParameterMap
             return ['listing' => (string) CarListing::factory()->create()->id];
         }
 
+        if ($name === 'admin.listings.promote') {
+            return ['listing' => (string) CarListing::factory()->customModel()->create()->id];
+        }
+
         if (in_array($name, ['admin.users.suspend', 'admin.users.destroy'], true)) {
             return ['user' => (string) User::factory()->create()->id];
         }

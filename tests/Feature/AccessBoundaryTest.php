@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\CarListing;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -39,6 +40,8 @@ class AccessBoundaryTest extends TestCase
             'PATCH admin users suspend' => ['patch', 'admin.users.suspend'],
             'PATCH admin users unsuspend' => ['patch', 'admin.users.unsuspend'],
             'DELETE admin users destroy' => ['delete', 'admin.users.destroy'],
+            'GET admin listings' => ['get', 'admin.listings'],
+            'PATCH admin listings promote' => ['patch', 'admin.listings.promote'],
         ];
     }
 
@@ -63,6 +66,8 @@ class AccessBoundaryTest extends TestCase
             'appUser PATCH admin users suspend' => ['appUser', 'patch', 'admin.users.suspend'],
             'appUser PATCH admin users unsuspend' => ['appUser', 'patch', 'admin.users.unsuspend'],
             'appUser DELETE admin users destroy' => ['appUser', 'delete', 'admin.users.destroy'],
+            'appUser GET admin listings' => ['appUser', 'get', 'admin.listings'],
+            'appUser PATCH admin listings promote' => ['appUser', 'patch', 'admin.listings.promote'],
         ];
     }
 
@@ -138,8 +143,10 @@ class AccessBoundaryTest extends TestCase
 
     private function urlFor(string $route): string
     {
-        return str_starts_with($route, 'admin.users.')
-            ? route($route, User::factory()->create())
-            : route($route);
+        return match (true) {
+            str_starts_with($route, 'admin.users.') => route($route, User::factory()->create()),
+            str_starts_with($route, 'admin.listings.') => route($route, CarListing::factory()->customModel()->create()),
+            default => route($route),
+        };
     }
 }

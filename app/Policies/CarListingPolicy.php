@@ -43,6 +43,11 @@ class CarListingPolicy
         return $this->adminOnly($user, $listing);
     }
 
+    public function promoteModel(User $user, CarListing $listing): Response
+    {
+        return $this->adminOnly($user, $listing);
+    }
+
     public function bookmark(User $user, CarListing $listing): Response
     {
         if (! $this->isVisibleTo($user, $listing)) {

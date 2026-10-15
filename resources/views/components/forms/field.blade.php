@@ -7,11 +7,13 @@
     'required' => false,
     'autocomplete' => null,
     'value' => null,
+    'id' => null,
 ])
 
 @php
-    $errorId = $name.'-error';
-    $hintId = $name.'-hint';
+    $fieldId = $id ?? $name;
+    $errorId = $fieldId.'-error';
+    $hintId = $fieldId.'-hint';
     $hasError = $errors->has($name);
     $oldValue = old($name, $value);
     $inputValue = $type === 'password' ? null : (is_array($oldValue) ? $value : $oldValue);
@@ -19,8 +21,8 @@
 @endphp
 
 <div class="flex flex-col gap-1.5">
-    <label for="{{ $name }}" class="text-xs text-ink/70">{{ $label }}@if ($required) <span aria-hidden="true">*</span>@endif</label>
-    <input id="{{ $name }}" name="{{ $name }}" type="{{ $type }}"
+    <label for="{{ $fieldId }}" class="text-xs text-ink/70">{{ $label }}@if ($required) <span aria-hidden="true">*</span>@endif</label>
+    <input id="{{ $fieldId }}" name="{{ $name }}" type="{{ $type }}"
            @if ($inputValue !== null) value="{{ $inputValue }}" @endif
            @if ($placeholder !== null) placeholder="{{ $placeholder }}" @endif
            @if ($autocomplete !== null) autocomplete="{{ $autocomplete }}" @endif

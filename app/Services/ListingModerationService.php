@@ -3,9 +3,12 @@
 namespace App\Services;
 
 use App\Enums\ListingStatus;
+use App\Enums\ModelPromotionResult;
 use App\Exceptions\InvalidListingStatusTransitionException;
+use App\Exceptions\ListingNotPromotableException;
 use App\Exceptions\StaleListingReviewException;
 use App\Models\CarListing;
+use App\Models\CarMaker;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -63,6 +66,51 @@ class ListingModerationService
             $locked->moderated_by = $admin->getKey();
             $locked->save();
         });
+    }
+
+    public function promoteModel(CarListing $listing, string $name, int $yearFrom, int $yearTo, int $version): ModelPromotionResult
+    {
+        [$promoted, $result] = DB::transaction(function () use ($listing, $name, $yearFrom, $yearTo, $version): array {
+            $locked = $this->lock($listing);
+
+            if (! $locked->canPromoteModel()) {
+                throw new ListingNotPromotableException(
+                    "Listing {$locked->getKey()} cannot have its model promoted (status {$locked->status->value})."
+                );
+            }
+
+            $this->ensureUnchanged($locked, $version);
+
+            $maker = CarMaker::query()->lockForUpdate()->findOrFail($locked->car_maker_id);
+            $model = $maker->models()->firstOrCreate(['name' => $name], ['year_from' => $yearFrom, 'year_to' => $yearTo]);
+
+            if (! $model->coversYear($locked->year)) {
+                throw new ListingNotPromotableException(
+                    "Model {$model->getKey()} ({$model->productionYears()}) does not cover listing {$locked->getKey()}'s year {$locked->year}."
+                );
+            }
+
+            $result = match (true) {
+                $model->wasRecentlyCreated => ModelPromotionResult::Created,
+                ! $model->is_active => ModelPromotionResult::Reactivated,
+                default => ModelPromotionResult::Linked,
+            };
+
+            if (! $model->is_active) {
+                $model->is_active = true;
+                $model->save();
+            }
+
+            $locked->car_model_id = $model->getKey();
+            $locked->model = $model->name;
+            $locked->save();
+
+            return [$locked, $result];
+        }, attempts: 3);
+
+        $listing->setRawAttributes($promoted->getAttributes(), sync: true);
+
+        return $result;
     }
 
     private function lock(CarListing $listing): CarListing

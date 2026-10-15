@@ -27,6 +27,7 @@ class MainNavigation
             new NavItem('compare', 'app.nav.compare', 'compare.show', 'compare.*', [NavAudience::Guest, NavAudience::Member], CompareCounter::class, NavCountStyle::Selected),
             new NavItem('bookmarks', 'app.nav.bookmarks', 'bookmarks.index', 'bookmarks.*', [NavAudience::Member]),
             new NavItem('users', 'app.nav.users', 'admin.users', 'admin.users', [NavAudience::Admin]),
+            new NavItem('admin-listings', 'app.nav.listings', 'admin.listings', 'admin.listings', [NavAudience::Admin], PendingListingsCounter::class, NavCountStyle::Queue, 'app.header.count_labels.pending'),
             new NavItem('conversations', 'app.nav.conversations', 'conversations.index', 'conversations.*', [NavAudience::Member, NavAudience::Admin], UnreadMessagesCounter::class, NavCountStyle::Unread),
         ];
     }
@@ -43,13 +44,16 @@ class MainNavigation
                 continue;
             }
 
+            $count = $this->countFor($item, $user);
+
             $links[] = new NavLink(
                 key: $item->key,
                 label: __($item->labelKey),
                 url: route($item->route),
                 active: $this->router->currentRouteNamed(...(array) $item->activePattern),
-                count: $this->countFor($item, $user),
+                count: $count,
                 countStyle: $item->countStyle,
+                countLabel: $count !== null && $item->countLabelKey !== null ? __($item->countLabelKey) : null,
             );
         }
 

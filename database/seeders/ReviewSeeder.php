@@ -62,6 +62,7 @@ class ReviewSeeder extends Seeder
         $this->seedBookmarks($user, $suspendedListing);
         $this->seedConversation($user, $stranger);
         $this->seedSellerConversation($photographedListing, $user, $this->appUser('Lucia Fernandez', 'buyer@example.com', '+5355500111'));
+        $this->seedCustomModelListing($stranger, $models[0]->car_maker_id);
     }
 
     private function appUser(string $username, string $email, string $phone): User
@@ -183,6 +184,20 @@ class ReviewSeeder extends Seeder
             [$seller, 'It does, rebuilt in 2019 with every receipt kept.', $now->subDays(3)->addHours(2), $now->subDays(2)->subHour()],
             [$buyer, 'Thank you, I will think it over and write again soon.', $now->subDays(2), $now->subDays(2)->addMinutes(30)],
         ]);
+    }
+
+    private function seedCustomModelListing(User $owner, int $makerId): void
+    {
+        $submittedAt = now()->subDays(2);
+        $listing = CarListing::factory()->customModel()->for($owner, 'owner')->create([
+            'car_maker_id' => $makerId,
+            'name' => 'Custom Roadster',
+            'model' => 'Roadster',
+            'submitted_at' => $submittedAt,
+            'created_at' => $submittedAt,
+        ]);
+
+        $this->seedImages($listing, 1);
     }
 
     /**

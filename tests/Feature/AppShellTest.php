@@ -5,12 +5,15 @@ namespace Tests\Feature;
 use App\Contracts\NavCounter;
 use App\Enums\NavAudience;
 use App\Enums\NavCountStyle;
+use App\Models\CarListing;
 use App\Models\User;
 use App\Support\MainNavigation;
 use App\Support\NavItem;
+use App\Support\PendingListingsCounter;
 use App\Support\UnreadMessagesCounter;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Route;
+use InvalidArgumentException;
 use Tests\TestCase;
 
 class AppShellTest extends TestCase
@@ -36,7 +39,34 @@ class AppShellTest extends TestCase
 
         $this->assertSame(['home', 'listings', 'compare'], array_column($navigation->linksFor(NavAudience::Guest, null), 'key'));
         $this->assertSame(['home', 'listings', 'compare', 'bookmarks', 'conversations'], array_column($navigation->linksFor(NavAudience::Member, User::factory()->make()), 'key'));
-        $this->assertSame(['users', 'conversations'], array_column($navigation->linksFor(NavAudience::Admin, null), 'key'));
+        $this->assertSame(['users', 'admin-listings', 'conversations'], array_column($navigation->linksFor(NavAudience::Admin, null), 'key'));
+    }
+
+    public function test_the_admin_listings_item_counts_pending_listings_in_the_queue_style(): void
+    {
+        $items = array_column($this->app->make(MainNavigation::class)->items(), null, 'key');
+
+        $this->assertSame(PendingListingsCounter::class, $items['admin-listings']->counter);
+        $this->assertSame(NavCountStyle::Queue, $items['admin-listings']->countStyle);
+        $this->assertSame('app.header.count_labels.pending', $items['admin-listings']->countLabelKey);
+        $this->assertSame([NavAudience::Admin], $items['admin-listings']->audiences);
+    }
+
+    public function test_the_queue_badge_speaks_its_noun_in_the_header_and_the_mobile_menu(): void
+    {
+        CarListing::factory()->count(4)->create();
+
+        $html = $this->actingAs(User::factory()->admin()->create())->get(route('admin.users'))->assertOk()->getContent();
+
+        $this->assertSame(2, substr_count($html, '4<span class="sr-only"> pending</span>'));
+    }
+
+    public function test_a_count_label_without_a_counter_is_refused(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Nav item [x] cannot set a count label without a counter.');
+
+        new NavItem('x', 'app.nav.home', 'home', 'home', [NavAudience::Admin], null, null, 'app.header.count_labels.pending');
     }
 
     public function test_the_users_item_carries_no_counter(): void
@@ -76,7 +106,8 @@ class AppShellTest extends TestCase
             ->assertSee('data-header-variant="admin"', false)
             ->assertSee(__('app.header.admin_tag'))
             ->assertDontSee(__('app.nav.home'))
-            ->assertDontSee(__('app.nav.listings'));
+            ->assertDontSee('href="'.route('listings.index').'"', false)
+            ->assertSee('href="'.route('admin.listings').'"', false);
     }
 
     public function test_the_admin_header_renders_its_nav_with_the_conversations_link(): void
