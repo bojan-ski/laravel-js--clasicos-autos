@@ -711,7 +711,44 @@ return [
         'kicker' => 'Vendedor',
         'joined' => 'Joined :date · :count listing|Joined :date · :count listings',
         'empty' => 'No car listings available, please come back later',
-        'send_message' => 'Send message',
+    ],
+
+    'conversations' => [
+        'heading' => [
+            'with' => 'Conversation with :username',
+            'between' => 'Conversation between :buyer and :seller',
+        ],
+        'participants' => ':buyer · :seller',
+        'listing' => [
+            'kicker' => 'Regarding',
+            'view' => 'View listing',
+            'unavailable' => 'This listing is no longer available.',
+        ],
+        'messages_label' => 'Messages',
+        'empty' => [
+            'new' => 'No messages yet. Write the first one below.',
+            'thread' => 'There are no messages in this conversation.',
+        ],
+        'bubble' => [
+            'you' => 'You',
+            'said' => ':name:',
+        ],
+        'composer' => [
+            'label' => 'Your message',
+            'attribute' => 'message',
+            'placeholder' => 'Type your message...',
+            'send' => 'Send',
+            'counter' => ':count / :max · min :min',
+        ],
+        'delete' => [
+            'open' => 'Delete',
+            'context' => 'message sent :time',
+            'title' => 'Are you sure you want to delete the message?',
+            'warning' => "This can't be undone.",
+            'cancel' => 'Cancel',
+            'confirm' => 'Delete message',
+        ],
+        'deleted' => 'Message deleted.',
     ],
 
     'admin' => [

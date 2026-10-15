@@ -3,6 +3,8 @@
 namespace Tests\Support;
 
 use App\Models\CarListing;
+use App\Models\Conversation;
+use App\Models\Message;
 use App\Models\User;
 use Database\Factories\CarListingFactory;
 use Illuminate\Routing\Route;
@@ -28,8 +30,19 @@ final class RouteParameterMap
 
         $name = (string) $route->getName();
 
-        if (in_array($name, ['listings.show', 'compare.add', 'compare.remove', 'bookmarks.store', 'bookmarks.destroy'], true)) {
+        if (in_array($name, ['listings.show', 'compare.add', 'compare.remove', 'bookmarks.store', 'bookmarks.destroy', 'conversations.create', 'conversations.store'], true)) {
             return ['listing' => (string) CarListing::factory()->approved()->create()->id];
+        }
+
+        if (in_array($name, ['conversations.show', 'conversations.messages.store'], true)) {
+            return ['conversation' => (string) self::conversationForActor()->id];
+        }
+
+        if ($name === 'conversations.messages.destroy') {
+            $conversation = self::conversationForActor();
+            $message = Message::factory()->for($conversation)->create();
+
+            return ['conversation' => (string) $conversation->id, 'message' => (string) $message->id];
         }
 
         if (in_array($name, ['listings.edit', 'listings.update', 'listings.destroy', 'listings.images.edit', 'listings.images.store'], true)) {
@@ -55,6 +68,18 @@ final class RouteParameterMap
         }
 
         return self::MAP[$name];
+    }
+
+    private static function conversationForActor(): Conversation
+    {
+        $user = auth()->user();
+        $factory = Conversation::factory();
+
+        if ($user instanceof User && $user->isAppUser()) {
+            $factory = $factory->for($user, 'sender');
+        }
+
+        return $factory->create();
     }
 
     private static function listingForActor(): CarListingFactory

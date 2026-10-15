@@ -207,7 +207,8 @@ class ListingDetailPageTest extends TestCase
 
         $this->assertSame($logins, preg_match_all('/<a href="'.preg_quote(route('login'), '/').'"[^>]*>'.preg_quote(__('app.listings.show.owner.login'), '/').'<\/a>/', $html));
         $this->assertSame($ownNotes, substr_count($html, __('app.listings.show.owner.own')));
-        $this->assertSame($sendButtons, preg_match_all('/<button[^>]*\sdisabled(="disabled")?>'.__('app.listings.show.owner.send_message').'<\/button>/', $html));
+        $this->assertSame($sendButtons, preg_match_all('/<a href="'.preg_quote(route('conversations.create', $listing), '/').'"[^>]*>'.__('app.listings.show.owner.send_message').'<\/a>/', $html));
+        $this->assertSame(0, preg_match_all('/<button[^>]*\sdisabled(="disabled")?>'.__('app.listings.show.owner.send_message').'<\/button>/', $html));
     }
 
     /**

@@ -20,7 +20,7 @@ class CarListingPolicy
 
     public function create(User $user): bool
     {
-        return $user->isAppUser() && ! $user->isSuspended();
+        return $user->isActiveAppUser();
     }
 
     public function update(User $user, CarListing $listing): Response
@@ -60,7 +60,7 @@ class CarListingPolicy
             return Response::denyAsNotFound();
         }
 
-        return $user->isAppUser() && ! $user->isSuspended() && ! $listing->isOwnedBy($user) && $this->isPublic($listing)
+        return $user->isActiveAppUser() && ! $listing->isOwnedBy($user) && $this->isPublic($listing)
             ? Response::allow()
             : Response::deny();
     }

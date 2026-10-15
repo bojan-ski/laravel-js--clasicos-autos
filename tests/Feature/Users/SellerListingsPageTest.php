@@ -177,37 +177,28 @@ class SellerListingsPageTest extends TestCase
     }
 
     /**
-     * @return array<string, array{string, int}>
+     * @return array<string, array{string}>
      */
     public static function sendMessageViewers(): array
     {
         return [
-            'active stranger sees it' => ['stranger', 1],
-            'the seller does not' => ['seller', 0],
-            'an admin does not' => ['admin', 0],
-            'a suspended app user does not' => ['suspended', 0],
+            'an active stranger' => ['stranger'],
+            'the seller' => ['seller'],
+            'an admin' => ['admin'],
+            'a suspended app user' => ['suspended'],
         ];
     }
 
     #[DataProvider('sendMessageViewers')]
-    public function test_send_message_is_a_disabled_outlined_button_for_active_non_seller_app_users(string $viewerKind, int $expected): void
+    public function test_no_viewer_sees_send_message_on_the_seller_page(string $viewerKind): void
     {
         $seller = User::factory()->create();
+        CarListing::factory()->approved()->for($seller, 'owner')->create();
 
-        $response = $this->page($seller, $this->viewer($viewerKind, $seller));
-
-        $response->assertViewHas('showsSendMessage', $expected === 1);
-        $this->assertSame($expected, preg_match_all('/<button[^>]*\sdisabled(="disabled")?>'.preg_quote(__('app.sellers.send_message'), '/').'<\/button>/', (string) $response->getContent()));
-    }
-
-    public function test_the_send_message_button_shows_even_when_the_stranger_sees_no_listings(): void
-    {
-        $seller = User::factory()->create();
-        CarListing::factory()->for($seller, 'owner')->create();
-
-        $this->page($seller, User::factory()->create())
-            ->assertViewHas('showsSendMessage', true)
-            ->assertSee(__('app.sellers.empty'));
+        $this->page($seller, $this->viewer($viewerKind, $seller))
+            ->assertOk()
+            ->assertViewMissing('showsSendMessage')
+            ->assertDontSee(__('app.listings.show.owner.send_message'));
     }
 
     public function test_with_no_listings_the_header_and_empty_message_render_without_a_grid(): void

@@ -28,5 +28,6 @@ class AppServiceProvider extends ServiceProvider
 
         Gate::define('access-profile', fn (User $user): bool => $user->isAppUser());
         Gate::define('access-admin', fn (User $user): bool => $user->isAdmin());
+        Gate::define('access-messaging', fn (User $user): bool => $user->isActiveAppUser());
     }
 }
