@@ -20,7 +20,7 @@
             <p class="text-sm text-ink-2">{{ __('app.listings.show.owner.own') }}</p>
         @else
             @can('message', $listing)
-                <x-ui.button variant="primary" size="lg" class="w-full" disabled>{{ __('app.listings.show.owner.send_message') }}</x-ui.button>
+                <x-ui.button variant="primary" size="lg" class="w-full" :href="route('conversations.create', $listing)">{{ __('app.listings.show.owner.send_message') }}</x-ui.button>
             @endcan
             <p class="text-sm text-ink-2 wrap-break-word"><a href="{{ route('users.listings', $listing->owner) }}" class="inline-flex min-h-11 items-center text-red underline md:min-h-0">{{ __('app.listings.show.owner.see_all', ['username' => $listing->owner->username]) }}</a></p>
         @endif

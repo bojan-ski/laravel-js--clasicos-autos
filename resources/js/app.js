@@ -1,5 +1,6 @@
 import { initBackToTop } from './modules/back-to-top'
 import { initBrandChips } from './modules/brand-chips'
+import { initComposer } from './modules/composer'
 import { initCookieBanner } from './modules/cookie-banner'
 import { initDialogs } from './modules/dialog'
 import { initErrorFocus } from './modules/error-focus'
@@ -25,5 +26,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initModelSelect()
     initPhotoInput()
     initFormProgress()
+    initComposer()
     initErrorFocus()
 })

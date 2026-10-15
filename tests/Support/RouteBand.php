@@ -13,6 +13,7 @@ enum RouteBand: string
     case Profile = 'profile';
     case Seller = 'seller';
     case Admin = 'admin';
+    case Messaging = 'messaging';
 
     public static function fromRoute(Route $route): self
     {
@@ -46,6 +47,7 @@ enum RouteBand: string
             self::Profile => ['auth', 'can:access-profile'],
             self::Seller => ['auth', 'can:access-profile', 'can:create,App\Models\CarListing'],
             self::Admin => ['auth', 'can:access-admin'],
+            self::Messaging => ['auth', 'can:access-messaging'],
         };
     }
 }

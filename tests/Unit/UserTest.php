@@ -59,4 +59,27 @@ class UserTest extends TestCase
 
         $this->assertTrue($user->isSuspended());
     }
+
+    /**
+     * @return array<string, array{UserRole, UserStatus, bool}>
+     */
+    public static function activeAppUsers(): array
+    {
+        return [
+            'active app user' => [UserRole::AppUser, UserStatus::Active, true],
+            'suspended app user' => [UserRole::AppUser, UserStatus::Suspended, false],
+            'active admin' => [UserRole::Admin, UserStatus::Active, false],
+            'suspended admin' => [UserRole::Admin, UserStatus::Suspended, false],
+        ];
+    }
+
+    #[DataProvider('activeAppUsers')]
+    public function test_only_an_unsuspended_app_user_is_an_active_app_user(UserRole $role, UserStatus $status, bool $expected): void
+    {
+        $user = new User;
+        $user->role = $role;
+        $user->status = $status;
+
+        $this->assertSame($expected, $user->isActiveAppUser());
+    }
 }

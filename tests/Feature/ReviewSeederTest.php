@@ -6,7 +6,9 @@ use App\Enums\ListingStatus;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
 use App\Models\CarListing;
+use App\Models\Conversation;
 use App\Models\ListingImage;
+use App\Models\Message;
 use App\Models\User;
 use Database\Seeders\CarMakerSeeder;
 use Database\Seeders\CarModelSeeder;
@@ -157,6 +159,30 @@ class ReviewSeederTest extends TestCase
         $this->assertFalse($reviewer->bookmarks()->where('car_listings.user_id', $reviewer->id)->exists());
     }
 
+    public function test_the_review_user_has_a_conversation_with_the_stranger_about_one_of_their_listings(): void
+    {
+        $this->seed([DatabaseSeeder::class, ReviewSeeder::class]);
+
+        $reviewer = User::query()->where('email', 'review@example.com')->sole();
+        $stranger = User::query()->where('email', 'stranger@example.com')->sole();
+        $conversation = Conversation::query()->with(['listing', 'messages'])->sole();
+
+        $this->assertSame([$reviewer->id, $stranger->id, $stranger->id], [$conversation->sender_id, $conversation->receiver_id, $conversation->listing->user_id]);
+        $this->assertTrue($conversation->listing->isApproved());
+        $this->assertSame([$reviewer->id, $stranger->id, $reviewer->id, $stranger->id], $conversation->messages->pluck('sender_id')->all());
+        $this->assertContains(100, $conversation->messages->map(fn (Message $message): int => mb_strlen($message->message))->all());
+        $this->assertTrue($conversation->last_message_at->equalTo($conversation->messages->last()->created_at));
+    }
+
+    public function test_only_the_newest_message_from_the_stranger_is_unread(): void
+    {
+        $this->seed([DatabaseSeeder::class, ReviewSeeder::class]);
+
+        $messages = Conversation::query()->sole()->messages()->get();
+
+        $this->assertSame([false, false, false, true], $messages->map(fn (Message $message): bool => $message->read_at === null)->all());
+    }
+
     public function test_without_an_admin_the_moderated_listings_have_no_moderator(): void
     {
         $this->seed([CarMakerSeeder::class, CarModelSeeder::class, ReviewSeeder::class]);
@@ -173,9 +199,12 @@ class ReviewSeederTest extends TestCase
         $bookmarks = DB::table('user_bookmarks')->count();
         $images = ListingImage::query()->count();
         $files = Storage::disk('public')->allFiles();
+        $messages = Message::query()->count();
 
         $this->seed(ReviewSeeder::class);
 
+        $this->assertSame(1, Conversation::query()->count());
+        $this->assertSame($messages, Message::query()->count());
         $this->assertSame($users, User::query()->count());
         $this->assertSame($listings, CarListing::query()->count());
         $this->assertSame($bookmarks, DB::table('user_bookmarks')->count());

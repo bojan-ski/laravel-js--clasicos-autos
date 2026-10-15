@@ -21,7 +21,7 @@ class SignedInVisibilitySweepTest extends TestCase
 
     private const array LISTING_PAGES = ['bookmarks.index', 'users.listings'];
 
-    private const array STAGE_D_PAGES = ['profile', 'listings.create', 'listings.edit', 'listings.images.edit'];
+    private const array GUARDED_PAGES = ['profile', 'listings.create', 'listings.edit', 'listings.images.edit', 'conversations.create', 'conversations.show'];
 
     private const string CONTROL = 'Sweep Control Public';
 
@@ -68,11 +68,11 @@ class SignedInVisibilitySweepTest extends TestCase
         }
     }
 
-    public function test_the_sweep_covers_the_stage_d_pages_and_each_answers_200(): void
+    public function test_the_sweep_covers_the_guarded_pages_and_each_answers_200(): void
     {
         $swept = $this->signedInGetRoutes();
 
-        foreach (self::STAGE_D_PAGES as $name) {
+        foreach (self::GUARDED_PAGES as $name) {
             $this->assertArrayHasKey($name, $swept);
 
             $this->visit($name, $swept[$name])->assertOk();
@@ -126,7 +126,7 @@ class SignedInVisibilitySweepTest extends TestCase
         return array_filter(
             ApplicationRoutes::named(),
             fn (Route $route): bool => in_array('GET', $route->methods(), true)
-                && in_array(RouteBand::fromRoute($route), [RouteBand::Auth, RouteBand::Profile, RouteBand::Seller], true),
+                && in_array(RouteBand::fromRoute($route), [RouteBand::Auth, RouteBand::Profile, RouteBand::Seller, RouteBand::Messaging], true),
         );
     }
 }

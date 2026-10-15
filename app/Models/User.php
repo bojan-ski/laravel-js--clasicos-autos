@@ -76,6 +76,11 @@ class User extends Authenticatable
         return $this->status === UserStatus::Suspended;
     }
 
+    public function isActiveAppUser(): bool
+    {
+        return $this->isAppUser() && ! $this->isSuspended();
+    }
+
     public function seesEveryListingOf(User $seller): bool
     {
         return $this->is($seller) || $this->isAdmin();

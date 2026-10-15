@@ -24,7 +24,6 @@ class SellerListingController extends Controller
             'seller' => $user,
             'listings' => $listings->sellerListings($user, $everyStatus),
             'showsStatus' => $everyStatus,
-            'showsSendMessage' => $viewer->isAppUser() && ! $viewer->isSuspended() && ! $viewer->is($user),
             'joined' => ListingFormat::date($user->created_at),
             'backUrl' => $backUrl->resolve(route('listings.index')),
         ]);

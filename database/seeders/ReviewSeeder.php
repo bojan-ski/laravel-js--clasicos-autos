@@ -7,6 +7,8 @@ use App\Enums\UserStatus;
 use App\Models\CarListing;
 use App\Models\CarMaker;
 use App\Models\CarModel;
+use App\Models\Conversation;
+use App\Models\Message;
 use App\Models\User;
 use App\Services\BookmarkService;
 use App\Services\ListingImageService;
@@ -26,6 +28,8 @@ class ReviewSeeder extends Seeder
     private const int BOOKMARKS = 13;
 
     private const string STRANGER_USERNAME = 'Cristobal Ignacio de la Santisima Trinidad Valdes y Hernandez';
+
+    private const string LONG_MESSAGE = 'I would love to see it on Saturday morning. Could you also bring the service records and the titles?';
 
     private const int IMAGES_APPROVED = 8;
 
@@ -55,6 +59,7 @@ class ReviewSeeder extends Seeder
         $suspendedListing = $this->seedListings($user, $models, $moderatorId);
         $this->seedStrangerListings($stranger, $models, $moderatorId);
         $this->seedBookmarks($user, $suspendedListing);
+        $this->seedConversation($user, $stranger);
     }
 
     private function appUser(string $username, string $email, string $phone): User
@@ -148,6 +153,34 @@ class ReviewSeeder extends Seeder
 
         foreach ([...$listings, $suspendedListing] as $listing) {
             $bookmarks->add($reviewer, $listing);
+        }
+    }
+
+    private function seedConversation(User $buyer, User $seller): void
+    {
+        $listing = $seller->listings()->latest('id')->firstOrFail();
+        $conversation = Conversation::factory()->create([
+            'listing_id' => $listing->id,
+            'sender_id' => $buyer->id,
+            'receiver_id' => $seller->id,
+            'last_message_at' => now()->subMinutes(5),
+        ]);
+        $messages = [
+            [$buyer, 'Hello! Is the car still available?', now()->subHours(3), now()->subHours(2)],
+            [$seller, 'Yes, it is. Would you like to see it this weekend?', now()->subHours(2), now()->subHour()],
+            [$buyer, self::LONG_MESSAGE, now()->subHour(), now()->subMinutes(30)],
+            [$seller, 'Saturday at ten works for me. I will send you the address.', now()->subMinutes(5), null],
+        ];
+
+        foreach ($messages as [$sender, $text, $sentAt, $readAt]) {
+            Message::factory()->create([
+                'conversation_id' => $conversation->id,
+                'sender_id' => $sender->id,
+                'message' => $text,
+                'read_at' => $readAt,
+                'created_at' => $sentAt,
+                'updated_at' => $sentAt,
+            ]);
         }
     }
 

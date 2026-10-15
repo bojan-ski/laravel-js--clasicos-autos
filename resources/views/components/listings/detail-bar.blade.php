@@ -11,7 +11,7 @@
         <a href="{{ route('login') }}" class="flex min-h-12 flex-1 items-center justify-end text-right text-sm text-red underline">{{ __('app.listings.show.owner.login') }}</a>
     @else
         @can('message', $listing)
-            <x-ui.button variant="primary" size="lg" class="flex-1" disabled>{{ __('app.listings.show.owner.send_message') }}</x-ui.button>
+            <x-ui.button variant="primary" size="lg" class="flex-1" :href="route('conversations.create', $listing)">{{ __('app.listings.show.owner.send_message') }}</x-ui.button>
         @endcan
     @endguest
 </div>

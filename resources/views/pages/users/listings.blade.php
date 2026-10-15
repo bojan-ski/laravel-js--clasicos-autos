@@ -10,9 +10,6 @@
                 <x-ui.page-header :kicker="__('app.sellers.kicker')" kicker-lang="es" :title="__('app.sellers.title', ['username' => $seller->username])" class="min-w-0 wrap-break-word" />
                 <p class="text-sm text-ink-2 tabular-nums">{{ trans_choice('app.sellers.joined', $listings->total(), ['date' => $joined, 'count' => $listings->total()]) }}</p>
             </div>
-            @if ($showsSendMessage)
-                <x-ui.button variant="primary" class="md:ml-auto" disabled>{{ __('app.sellers.send_message') }}</x-ui.button>
-            @endif
         </div>
 
         @if ($listings->total() === 0)

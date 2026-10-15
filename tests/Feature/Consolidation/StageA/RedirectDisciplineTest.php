@@ -3,6 +3,7 @@
 namespace Tests\Feature\Consolidation\StageA;
 
 use App\Models\CarListing;
+use App\Models\Conversation;
 use App\Models\User;
 use App\Support\ListingFormOptions;
 use App\Support\ListingFormValues;
@@ -30,6 +31,11 @@ class RedirectDisciplineTest extends TestCase
         'listings.images.store' => 'listings.images.edit',
         'admin.listings.approve' => 'listings.show',
         'admin.listings.reject' => 'listings.show',
+    ];
+
+    private const array STAGE_E_PINNED_TARGETS = [
+        'conversations.store' => 'conversations.create',
+        'conversations.messages.store' => 'conversations.show',
     ];
 
     protected function setUp(): void
@@ -82,6 +88,22 @@ class RedirectDisciplineTest extends TestCase
         $this->assertSame(array_fill_keys(array_keys(self::STAGE_D_PINNED_TARGETS), true), $landed);
     }
 
+    public function test_empty_stage_e_writes_land_on_their_pinned_targets(): void
+    {
+        $writes = $this->writeRoutes();
+        $landed = [];
+
+        foreach (self::STAGE_E_PINNED_TARGETS as $name => $target) {
+            $location = $this->send($writes[$name], fn (?User $user): array => [])->headers->get('Location');
+            $parameter = $target === 'conversations.create'
+                ? CarListing::query()->latest('id')->value('id')
+                : Conversation::query()->latest('id')->value('id');
+            $landed[$name] = $location === route($target, $parameter);
+        }
+
+        $this->assertSame(array_fill_keys(array_keys(self::STAGE_E_PINNED_TARGETS), true), $landed);
+    }
+
     /**
      * @return array<string, RoutingRoute>
      */
@@ -105,7 +127,7 @@ class RedirectDisciplineTest extends TestCase
     {
         $user = match (RouteBand::fromRoute($route)) {
             RouteBand::Public, RouteBand::Guest => null,
-            RouteBand::Auth, RouteBand::Profile, RouteBand::Seller => User::factory()->create(),
+            RouteBand::Auth, RouteBand::Profile, RouteBand::Seller, RouteBand::Messaging => User::factory()->create(),
             RouteBand::Admin => User::factory()->admin()->create(),
         };
 
@@ -148,6 +170,9 @@ class RedirectDisciplineTest extends TestCase
             'admin.account.password.update',
             'admin.listings.approve',
             'admin.listings.reject',
+            'conversations.store',
+            'conversations.messages.store',
+            'conversations.messages.destroy',
         ], true);
     }
 
@@ -196,6 +221,7 @@ class RedirectDisciplineTest extends TestCase
                 'version' => CarListing::query()->latest('id')->firstOrFail()->moderationVersion(),
                 'rejection_reason' => 'Photos do not match the description.',
             ],
+            'conversations.store', 'conversations.messages.store' => ['message' => 'Is this car still available?'],
             default => [],
         };
     }
