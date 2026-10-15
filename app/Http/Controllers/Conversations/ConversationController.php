@@ -27,7 +27,8 @@ class ConversationController extends Controller
         return view('pages.conversations.index', [
             'heading' => __("app.conversations.index.title.{$audience}"),
             'conversations' => $conversations,
-            'liveList' => ! $viewer->isAdmin(),
+            'liveList' => $viewer->isActiveAppUser(),
+            'showsUnreadLine' => ! $viewer->isAdmin(),
             'firstPage' => $conversations->onFirstPage(),
             'unreadCount' => $unreadCount,
             'unreadLine' => $unreadCount > 0 ? __('app.conversations.index.unread', ['count' => $unreadCount]) : '',

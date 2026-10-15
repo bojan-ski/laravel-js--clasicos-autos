@@ -3,6 +3,8 @@
 namespace Tests\Feature\Consolidation\StageC;
 
 use App\Models\CarListing;
+use App\Models\Conversation;
+use App\Models\Message;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Routing\Route;
@@ -29,6 +31,7 @@ class SignedInVisibilitySweepTest extends TestCase
         'pending' => 'Sweep Marker Pending',
         'rejected' => 'Sweep Marker Rejected',
         'suspended owner' => 'Sweep Marker Suspended',
+        'message' => 'Sweep Marker Message between others',
     ];
 
     private User $actor;
@@ -50,6 +53,9 @@ class SignedInVisibilitySweepTest extends TestCase
             CarListing::factory()->rejected()->for($this->markersOwner, 'owner')->create(['name' => self::MARKERS['rejected'], 'created_at' => $ahead]),
             CarListing::factory()->approved()->for(User::factory()->suspended(), 'owner')->create(['name' => self::MARKERS['suspended owner'], 'created_at' => $ahead]),
         ];
+
+        $othersConversation = Conversation::factory()->for($control, 'listing')->create();
+        Message::factory()->for($othersConversation)->create(['message' => self::MARKERS['message']]);
 
         $this->actor = User::factory()->create();
         $this->actor->bookmarks()->attach([$control->id, ...array_map(fn (CarListing $marker): int => $marker->id, $markers)]);

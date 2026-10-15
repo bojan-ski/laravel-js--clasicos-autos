@@ -54,6 +54,7 @@ function appendToThread(thread, payload) {
     time.dateTime = payload.created_at
     time.textContent = payload.created_at_human
     list.append(bubble)
+    list.hidden = false
 
     const empty = document.querySelector('[data-live-empty]')
     if (empty) empty.hidden = true

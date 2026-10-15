@@ -3,8 +3,8 @@
         <div>
             <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                 <x-ui.page-header :kicker="__('app.conversations.index.kicker')" kicker-lang="es" :title="$heading" />
-                @if ($liveList)
-                    <p role="status" data-live-unread data-template="{{ __('app.conversations.index.unread') }}" class="text-sm text-ink-2 tabular-nums">{{ $unreadLine }}</p>
+                @if ($showsUnreadLine)
+                    <p role="status"@if ($liveList) data-live-unread data-template="{{ __('app.conversations.index.unread') }}"@endif class="text-sm text-ink-2 tabular-nums">{{ $unreadLine }}</p>
                 @endif
             </div>
 
