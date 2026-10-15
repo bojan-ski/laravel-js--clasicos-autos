@@ -7,6 +7,7 @@ use App\Enums\UserStatus;
 use App\Models\CarListing;
 use App\Models\Conversation;
 use App\Models\Message;
+use App\Models\MessageReport;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -117,7 +118,7 @@ class ConversationThreadPageTest extends TestCase
         $this->assertStringContainsString(self::OWN, $this->bubble($html, $fromSeller));
         $this->assertStringContainsString('<span class="wrap-break-word">cuban buyer</span>', $this->bubble($html, $fromBuyer));
         $this->assertStringContainsString('<span class="wrap-break-word">havana seller</span>', $this->bubble($html, $fromSeller));
-        $this->assertStringContainsString('<p class="wrap-break-word">Sent by the buyer</p>', $this->bubble($html, $fromBuyer));
+        $this->assertStringContainsString('<p id="message-'.$fromBuyer->id.'-text" class="wrap-break-word">Sent by the buyer</p>', $this->bubble($html, $fromBuyer));
     }
 
     public function test_message_text_is_escaped(): void
@@ -265,23 +266,27 @@ class ConversationThreadPageTest extends TestCase
 
         $this->show($conversation, $conversation->sender)
             ->assertSee('<div role="log" aria-label="Messages" data-live-thread="'.$conversation->id.'" data-mark-read-url="'.route('conversations.read', $conversation).'">', false)
-            ->assertSeeInOrder(['role="log"', '<ol role="list" class="flex flex-col gap-4">', 'A message from the seller', '</ol>', '<template data-live-bubble>'], false);
+            ->assertSeeInOrder(['role="log"', '<ol role="list" class="flex flex-col gap-4">', 'A message from the seller', '</ol>', '<template data-live-bubble data-live-bubble-placeholder="__message__">'], false);
     }
 
-    public function test_the_live_bubble_template_is_an_other_style_bubble_without_actions(): void
+    public function test_the_live_bubble_template_is_an_other_style_bubble_with_only_the_report_control(): void
     {
         $conversation = $this->conversationBetween('buyer.one', 'seller.one');
 
         $html = $this->show($conversation, $conversation->sender)->getContent();
-        $start = strpos($html, '<template data-live-bubble>');
+        $start = strpos($html, '<template data-live-bubble data-live-bubble-placeholder="__message__">');
         $template = substr($html, $start, strpos($html, '</template>', $start) - $start);
 
         $this->assertStringContainsString('<li class="w-fit max-w-110 scroll-mt-16 border px-4 py-3 bg-card border-rule -rotate-[0.4deg]">', $template);
-        $this->assertStringContainsString('<span class="sr-only">seller.one: </span><span data-live-bubble-text></span>', $template);
+        $this->assertStringContainsString('<p id="message-__message__-text" class="wrap-break-word"><span class="sr-only">seller.one: </span><span data-live-bubble-text></span></p>', $template);
         $this->assertStringContainsString('<div class="mt-1 flex flex-wrap items-center gap-x-3 text-[11px] text-muted">', $template);
         $this->assertStringContainsString('<time data-live-bubble-time></time>', $template);
-        $this->assertStringNotContainsString('<dialog', $template);
-        $this->assertStringNotContainsString('<button', $template);
+        $this->assertStringContainsString('aria-describedby="message-__message__-text"', $template);
+        $this->assertStringContainsString('<dialog id="report-message-__message__"', $template);
+        $this->assertStringContainsString('action="'.route('conversations.messages.report', [$conversation, '__message__']).'"', $template);
+        $this->assertStringContainsString('id="report-message-__message__-reason"', $template);
+        $this->assertStringContainsString('id="report-message-__message__-note"', $template);
+        $this->assertStringNotContainsString('delete-message', $template);
     }
 
     public function test_a_new_conversation_page_has_no_live_thread(): void
@@ -413,9 +418,14 @@ class ConversationThreadPageTest extends TestCase
         $small = Conversation::factory()->for(CarListing::factory()->approved()->withImages(), 'listing')->create();
         $large = Conversation::factory()->for(CarListing::factory()->approved()->withImages(), 'listing')->create();
         Message::factory()->for($small)->create();
-        foreach (range(1, 5) as $index) {
+        Message::factory()->count(2)->for($small)->create(['sender_id' => $small->receiver_id]);
+        foreach (range(1, 12) as $index) {
             Message::factory()->for($large)->create();
-            Message::factory()->for($large)->create(['sender_id' => $large->receiver_id]);
+            $fromSeller = Message::factory()->for($large)->create(['sender_id' => $large->receiver_id]);
+
+            if ($index % 4 === 0) {
+                MessageReport::factory()->create(['message_id' => $fromSeller->id]);
+            }
         }
         $admin = User::factory()->admin()->create();
 

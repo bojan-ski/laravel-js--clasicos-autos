@@ -4,6 +4,7 @@ namespace Tests\Feature\Consolidation\StageA;
 
 use App\Models\CarListing;
 use App\Models\Conversation;
+use App\Models\Message;
 use App\Models\User;
 use App\Support\ListingFormOptions;
 use App\Support\ListingFormValues;
@@ -41,6 +42,7 @@ class RedirectDisciplineTest extends TestCase
 
     private const array STAGE_F_PINNED_TARGETS = [
         'admin.listings.promote' => 'admin.listings',
+        'admin.reports.resolve' => 'admin.reports',
         'admin.users.destroy' => 'admin.users',
         'admin.users.suspend' => 'admin.users',
         'admin.users.unsuspend' => 'admin.users',
@@ -128,6 +130,16 @@ class RedirectDisciplineTest extends TestCase
         $this->assertSame(array_fill_keys(array_keys(self::STAGE_F_PINNED_TARGETS), true), $landed);
     }
 
+    public function test_an_empty_report_lands_on_the_reported_message_in_its_thread(): void
+    {
+        $location = $this->send($this->writeRoutes()['conversations.messages.report'], fn (?User $user): array => [])->headers->get('Location');
+
+        $this->assertSame(
+            route('conversations.show', Conversation::query()->latest('id')->value('id')).'#message-'.Message::query()->latest('id')->value('id'),
+            $location,
+        );
+    }
+
     /**
      * @return array<string, RoutingRoute>
      */
@@ -195,6 +207,7 @@ class RedirectDisciplineTest extends TestCase
             'admin.listings.approve',
             'admin.listings.promote',
             'admin.listings.reject',
+            'admin.reports.resolve',
             'admin.users.destroy',
             'admin.users.suspend',
             'admin.users.unsuspend',
@@ -202,6 +215,7 @@ class RedirectDisciplineTest extends TestCase
             'conversations.store',
             'conversations.messages.store',
             'conversations.messages.destroy',
+            'conversations.messages.report',
         ], true);
     }
 
@@ -257,6 +271,8 @@ class RedirectDisciplineTest extends TestCase
                 'year_to' => config('listings.max_year'),
             ],
             'admin.users.suspend' => ['reason' => 'Repeated abusive messages.', 'duration' => '30_days'],
+            'admin.reports.resolve' => ['outcome' => 'dismissed'],
+            'conversations.messages.report' => ['reason' => 'spam'],
             'conversations.store', 'conversations.messages.store' => ['message' => 'Is this car still available?'],
             default => [],
         };

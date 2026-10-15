@@ -3,10 +3,13 @@
 namespace Tests\Feature\Admin;
 
 use App\Enums\ListingStatus;
+use App\Enums\ReportOutcome;
+use App\Enums\ReportStatus;
 use App\Enums\UserStatus;
 use App\Models\CarListing;
 use App\Models\Conversation;
 use App\Models\Message;
+use App\Models\MessageReport;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -61,6 +64,25 @@ class UserWritesTest extends TestCase
             ['status' => 'suspended', 'suspended_at' => '2026-10-15 10:00:00', 'suspended_until' => $until, 'suspension_reason' => self::REASON],
             $this->columns($user),
         );
+    }
+
+    public function test_a_users_table_suspension_resolves_the_users_open_reports_and_an_unsuspend_never_reopens_them(): void
+    {
+        $user = User::factory()->create();
+        $conversation = Conversation::factory()->create(['receiver_id' => $user->id]);
+        $report = MessageReport::factory()->create([
+            'message_id' => Message::factory()->for($conversation)->create(['sender_id' => $user->id])->id,
+        ]);
+
+        $this->actingAs($this->admin)
+            ->patch(route('admin.users.suspend', $user), ['reason' => self::REASON, 'duration' => '7_days'])
+            ->assertSessionHas('success');
+        $this->actingAs($this->admin)->patch(route('admin.users.unsuspend', $user))->assertSessionHas('success');
+
+        $report->refresh();
+        $this->assertSame(ReportStatus::Resolved, $report->status);
+        $this->assertSame(ReportOutcome::UserSuspended, $report->outcome);
+        $this->assertSame($this->admin->id, $report->resolved_by);
     }
 
     public function test_a_suspension_hides_the_users_approved_listings_from_the_index_and_ignores_server_controlled_keys(): void

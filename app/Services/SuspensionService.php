@@ -2,8 +2,11 @@
 
 namespace App\Services;
 
+use App\Enums\ReportOutcome;
+use App\Enums\ReportStatus;
 use App\Enums\UserStatus;
 use App\Exceptions\InvalidUserStatusTransitionException;
+use App\Models\MessageReport;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use LogicException;
@@ -12,13 +15,13 @@ class SuspensionService
 {
     public function __construct(private UserSessionService $sessions) {}
 
-    public function suspend(User $user, string $reason, ?int $days): void
+    public function suspend(User $user, string $reason, ?int $days, User $admin): void
     {
         if (! $user->isAppUser()) {
             throw new LogicException('Only app users can be suspended.');
         }
 
-        $locked = DB::transaction(function () use ($user, $reason, $days): User {
+        $locked = DB::transaction(function () use ($user, $reason, $days, $admin): User {
             $locked = $this->lock($user);
 
             if ($locked->isSuspended()) {
@@ -32,10 +35,17 @@ class SuspensionService
             $locked->suspension_reason = $reason;
             $locked->save();
 
+            MessageReport::query()->open()->against($locked)->update([
+                'status' => ReportStatus::Resolved,
+                'outcome' => ReportOutcome::UserSuspended,
+                'resolved_by' => $admin->id,
+                'resolved_at' => $now,
+            ]);
+
             $this->sessions->endAll($locked);
 
             return $locked;
-        });
+        }, attempts: 3);
 
         $this->sync($user, $locked);
     }

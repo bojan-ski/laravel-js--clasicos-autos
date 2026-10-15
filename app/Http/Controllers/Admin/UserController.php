@@ -32,7 +32,7 @@ class UserController extends Controller
     {
         return $this->transition(
             $request,
-            fn () => $suspensions->suspend($user, $request->reason(), $request->days()),
+            fn () => $suspensions->suspend($user, $request->reason(), $request->days(), $request->user()),
             __('app.admin.users.flash.suspended', ['username' => $user->username]),
             __('app.admin.users.flash.already_suspended'),
         );

@@ -64,7 +64,7 @@ class ConversationController extends Controller
         Gate::authorize('view', $conversation);
 
         $messaging->markRead($conversation, $request->user());
-        $conversation = $messaging->thread($conversation);
+        $conversation = $messaging->thread($conversation, $request->user());
         $composerAction = Gate::allows('reply', $conversation) ? route('conversations.messages.store', $conversation) : null;
 
         return $this->page($request->user(), $conversation->listing, $conversation, $composerAction, route('conversations.index'));

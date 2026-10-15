@@ -54,13 +54,7 @@ class UserRow extends Component
      */
     public function durationOptions(): array
     {
-        $options = [];
-
-        foreach (array_keys(config('listings.suspension.durations')) as $duration) {
-            $options[$duration] = __("app.suspension.durations.{$duration}");
-        }
-
-        return $options;
+        return SuspensionText::durationOptions();
     }
 
     public function render(): View

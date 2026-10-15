@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\ReportReason;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
 use App\Models\CarListing;
@@ -9,6 +10,7 @@ use App\Models\CarMaker;
 use App\Models\CarModel;
 use App\Models\Conversation;
 use App\Models\Message;
+use App\Models\MessageReport;
 use App\Models\User;
 use App\Services\BookmarkService;
 use App\Services\ListingImageService;
@@ -60,9 +62,11 @@ class ReviewSeeder extends Seeder
         ['photographed' => $photographedListing, 'suspended' => $suspendedListing] = $this->seedListings($user, $models, $moderatorId);
         $this->seedStrangerListings($stranger, $models, $moderatorId);
         $this->seedBookmarks($user, $suspendedListing);
-        $this->seedConversation($user, $stranger);
-        $this->seedSellerConversation($photographedListing, $user, $this->appUser('Lucia Fernandez', 'buyer@example.com', '+5355500111'));
+        $strangerMessage = $this->seedConversation($user, $stranger);
+        $buyer = $this->appUser('Lucia Fernandez', 'buyer@example.com', '+5355500111');
+        $reviewerReply = $this->seedSellerConversation($photographedListing, $user, $buyer);
         $this->seedCustomModelListing($stranger, $models[0]->car_maker_id);
+        $this->seedReports($strangerMessage, $user, $reviewerReply, $buyer, $moderatorId);
     }
 
     private function appUser(string $username, string $email, string $phone): User
@@ -162,28 +166,28 @@ class ReviewSeeder extends Seeder
         }
     }
 
-    private function seedConversation(User $buyer, User $seller): void
+    private function seedConversation(User $buyer, User $seller): Message
     {
         $listing = $seller->listings()->latest('id')->firstOrFail();
         $now = now()->toImmutable();
 
-        $this->seedThread($listing, $buyer, $seller, [
+        return $this->seedThread($listing, $buyer, $seller, [
             [$buyer, 'Hello! Is the car still available?', $now->subHours(3), $now->subHours(2)],
             [$seller, 'Yes, it is. Would you like to see it this weekend?', $now->subHours(2), $now->subHour()],
             [$buyer, self::LONG_MESSAGE, $now->subHour(), $now->subMinutes(30)],
             [$seller, 'Saturday at ten works for me. I will send you the address.', $now->subMinutes(5), null],
-        ]);
+        ])[3];
     }
 
-    private function seedSellerConversation(CarListing $listing, User $seller, User $buyer): void
+    private function seedSellerConversation(CarListing $listing, User $seller, User $buyer): Message
     {
         $now = now()->toImmutable();
 
-        $this->seedThread($listing, $buyer, $seller, [
+        return $this->seedThread($listing, $buyer, $seller, [
             [$buyer, 'Good afternoon. Does the car have its original engine?', $now->subDays(3), $now->subDays(3)->addHour()],
             [$seller, 'It does, rebuilt in 2019 with every receipt kept.', $now->subDays(3)->addHours(2), $now->subDays(2)->subHour()],
             [$buyer, 'Thank you, I will think it over and write again soon.', $now->subDays(2), $now->subDays(2)->addMinutes(30)],
-        ]);
+        ])[1];
     }
 
     private function seedCustomModelListing(User $owner, int $makerId): void
@@ -200,10 +204,35 @@ class ReviewSeeder extends Seeder
         $this->seedImages($listing, 1);
     }
 
+    private function seedReports(Message $strangerMessage, User $reviewer, Message $reviewerReply, User $buyer, ?int $moderatorId): void
+    {
+        $now = now()->toImmutable();
+
+        MessageReport::factory()->create([
+            'message_id' => $strangerMessage->id,
+            'reporter_id' => $reviewer->id,
+            'reason' => ReportReason::Other,
+            'note' => 'He keeps asking me to pay a deposit outside the app.',
+            'created_at' => $now->subMinutes(2),
+            'updated_at' => $now->subMinutes(2),
+        ]);
+
+        MessageReport::factory()->resolved()->create([
+            'message_id' => $reviewerReply->id,
+            'reporter_id' => $buyer->id,
+            'reason' => ReportReason::Scam,
+            'resolved_by' => $moderatorId,
+            'resolved_at' => $now->subDay(),
+            'created_at' => $now->subDays(2),
+            'updated_at' => $now->subDay(),
+        ]);
+    }
+
     /**
      * @param  non-empty-list<array{User, string, CarbonInterface, ?CarbonInterface}>  $messages
+     * @return list<Message>
      */
-    private function seedThread(CarListing $listing, User $buyer, User $seller, array $messages): void
+    private function seedThread(CarListing $listing, User $buyer, User $seller, array $messages): array
     {
         $startedAt = $messages[0][2];
         $conversation = Conversation::factory()->create([
@@ -215,8 +244,10 @@ class ReviewSeeder extends Seeder
             'updated_at' => $startedAt,
         ]);
 
+        $created = [];
+
         foreach ($messages as [$sender, $text, $sentAt, $readAt]) {
-            Message::factory()->create([
+            $created[] = Message::factory()->create([
                 'conversation_id' => $conversation->id,
                 'sender_id' => $sender->id,
                 'message' => $text,
@@ -225,6 +256,8 @@ class ReviewSeeder extends Seeder
                 'updated_at' => $sentAt,
             ]);
         }
+
+        return $created;
     }
 
     /**

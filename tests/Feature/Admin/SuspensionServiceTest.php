@@ -5,6 +5,9 @@ namespace Tests\Feature\Admin;
 use App\Enums\UserStatus;
 use App\Exceptions\InvalidUserStatusTransitionException;
 use App\Models\CarListing;
+use App\Models\Conversation;
+use App\Models\Message;
+use App\Models\MessageReport;
 use App\Models\User;
 use App\Services\SuspensionService;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
@@ -39,7 +42,7 @@ class SuspensionServiceTest extends TestCase
         $this->travelTo('2026-10-15 10:00:00');
         $user = User::factory()->create();
 
-        $this->service()->suspend($user, self::REASON, $days);
+        $this->service()->suspend($user, self::REASON, $days, $this->actingAdmin());
 
         $this->assertSame([
             'status' => 'suspended',
@@ -60,12 +63,47 @@ class SuspensionServiceTest extends TestCase
         $kept = [$this->insertSessionRow(User::factory()->create()), $this->insertSessionRow(null)];
         sort($kept);
 
-        $this->service()->suspend($user, self::REASON, 30);
+        $this->service()->suspend($user, self::REASON, 30, $this->actingAdmin());
 
         $this->assertSame($kept, $this->sessionRowIds());
         $token = DB::table('users')->where('id', $user->id)->value('remember_token');
         $this->assertNotSame('known-remember-token', $token);
         $this->assertSame(60, strlen($token));
+    }
+
+    public function test_suspend_resolves_every_open_report_on_the_user_as_suspended_by_the_acting_admin(): void
+    {
+        $this->travelTo('2026-10-15 10:00:00');
+        $user = User::factory()->create();
+        $admin = $this->actingAdmin();
+        $open = MessageReport::factory()->count(2)->create(['message_id' => fn () => $this->messageBy($user)->id]);
+        $dismissed = MessageReport::factory()->resolved()->create(['message_id' => $this->messageBy($user)->id]);
+        $otherUsers = MessageReport::factory()->create();
+
+        $this->service()->suspend($user, self::REASON, 7, $admin);
+
+        foreach ($open as $report) {
+            $this->assertSame(
+                ['status' => 'resolved', 'outcome' => 'user_suspended', 'resolved_by' => $admin->id, 'resolved_at' => '2026-10-15 10:00:00'],
+                $this->reportColumns($report),
+            );
+        }
+        $this->assertSame(['status' => 'resolved', 'outcome' => 'dismissed', 'resolved_by' => null], array_slice($this->reportColumns($dismissed), 0, 3));
+        $this->assertSame(['status' => 'open', 'outcome' => null, 'resolved_by' => null, 'resolved_at' => null], $this->reportColumns($otherUsers));
+    }
+
+    public function test_a_refused_suspend_leaves_the_users_open_reports_open(): void
+    {
+        $user = User::factory()->suspended()->create();
+        $report = MessageReport::factory()->create(['message_id' => $this->messageBy($user)->id]);
+
+        $this->expectException(InvalidUserStatusTransitionException::class);
+
+        try {
+            $this->service()->suspend($user, self::REASON, 7, $this->actingAdmin());
+        } finally {
+            $this->assertSame('open', $this->reportColumns($report)['status']);
+        }
     }
 
     public function test_a_suspend_unsuspend_cycle_changes_no_listing_and_hides_then_restores_the_approved_ones(): void
@@ -76,7 +114,7 @@ class SuspensionServiceTest extends TestCase
         CarListing::factory()->rejected()->for($user, 'owner')->create();
         $before = DB::table('car_listings')->orderBy('id')->get()->toArray();
 
-        $this->service()->suspend($user, self::REASON, 7);
+        $this->service()->suspend($user, self::REASON, 7, $this->actingAdmin());
 
         $this->assertEquals($before, DB::table('car_listings')->orderBy('id')->get()->toArray());
         $this->assertFalse(CarListing::query()->publiclyVisible()->exists());
@@ -118,7 +156,7 @@ class SuspensionServiceTest extends TestCase
         $this->insertSessionRow($user);
 
         try {
-            $this->service()->suspend($user, self::REASON, 7);
+            $this->service()->suspend($user, self::REASON, 7, $this->actingAdmin());
             $caught = null;
         } catch (InvalidUserStatusTransitionException $exception) {
             $caught = $exception;
@@ -150,7 +188,7 @@ class SuspensionServiceTest extends TestCase
         $this->expectException(InvalidUserStatusTransitionException::class);
 
         try {
-            $this->service()->suspend($user, self::REASON, 7);
+            $this->service()->suspend($user, self::REASON, 7, $this->actingAdmin());
         } finally {
             $this->assertSame('Earlier reason.', $user->fresh()->suspension_reason);
         }
@@ -163,7 +201,7 @@ class SuspensionServiceTest extends TestCase
         $this->expectException(LogicException::class);
 
         try {
-            $this->service()->suspend($admin, self::REASON, null);
+            $this->service()->suspend($admin, self::REASON, null, $this->actingAdmin());
         } finally {
             $this->assertSame(UserStatus::Active, $admin->fresh()->status);
         }
@@ -241,6 +279,26 @@ class SuspensionServiceTest extends TestCase
     private function service(): SuspensionService
     {
         return $this->app->make(SuspensionService::class);
+    }
+
+    private function actingAdmin(): User
+    {
+        return User::factory()->admin()->create();
+    }
+
+    private function messageBy(User $sender): Message
+    {
+        $conversation = Conversation::factory()->create(['receiver_id' => $sender->id]);
+
+        return Message::factory()->for($conversation)->create(['sender_id' => $sender->id]);
+    }
+
+    /**
+     * @return array{status: string, outcome: ?string, resolved_by: ?int, resolved_at: ?string}
+     */
+    private function reportColumns(MessageReport $report): array
+    {
+        return (array) DB::table('message_reports')->where('id', $report->id)->first(['status', 'outcome', 'resolved_by', 'resolved_at']);
     }
 
     /**

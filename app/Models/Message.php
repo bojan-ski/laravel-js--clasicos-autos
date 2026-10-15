@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['message'])]
 class Message extends Model
@@ -40,6 +41,14 @@ class Message extends Model
     public function sender(): BelongsTo
     {
         return $this->belongsTo(User::class, 'sender_id');
+    }
+
+    /**
+     * @return HasMany<MessageReport, $this>
+     */
+    public function reports(): HasMany
+    {
+        return $this->hasMany(MessageReport::class);
     }
 
     public function isSentBy(User $user): bool

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AccountController;
 use App\Http\Controllers\Admin\ListingModerationController;
 use App\Http\Controllers\Admin\ListingQueueController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -19,4 +20,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'can:access-admin'])
     Route::patch('/listings/{listing}/promote-model', [ListingModerationController::class, 'promote'])->name('listings.promote')->whereNumber('listing');
     Route::patch('/listings/{listing}/approve', [ListingModerationController::class, 'approve'])->name('listings.approve')->whereNumber('listing');
     Route::patch('/listings/{listing}/reject', [ListingModerationController::class, 'reject'])->name('listings.reject')->whereNumber('listing');
+
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports');
+    Route::patch('/reports/{report}/resolve', [ReportController::class, 'resolve'])->name('reports.resolve')->whereNumber('report');
 });

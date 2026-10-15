@@ -30,4 +30,18 @@ class SuspensionText
 
         return __('app.suspension.status.until', ['date' => $user->suspended_until->format('d.m.Y')]);
     }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function durationOptions(): array
+    {
+        $options = [];
+
+        foreach (array_keys(config('listings.suspension.durations')) as $duration) {
+            $options[$duration] = __("app.suspension.durations.{$duration}");
+        }
+
+        return $options;
+    }
 }

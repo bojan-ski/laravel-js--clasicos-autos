@@ -5,6 +5,7 @@ namespace Tests\Support;
 use App\Models\CarListing;
 use App\Models\Conversation;
 use App\Models\Message;
+use App\Models\MessageReport;
 use App\Models\User;
 use Database\Factories\CarListingFactory;
 use Illuminate\Routing\Route;
@@ -43,6 +44,17 @@ final class RouteParameterMap
             $message = Message::factory()->for($conversation)->create();
 
             return ['conversation' => (string) $conversation->id, 'message' => (string) $message->id];
+        }
+
+        if ($name === 'conversations.messages.report') {
+            $conversation = self::conversationForActor();
+            $message = Message::factory()->for($conversation)->create(['sender_id' => $conversation->receiver_id]);
+
+            return ['conversation' => (string) $conversation->id, 'message' => (string) $message->id];
+        }
+
+        if ($name === 'admin.reports.resolve') {
+            return ['report' => (string) MessageReport::factory()->create()->id];
         }
 
         if (in_array($name, ['listings.edit', 'listings.update', 'listings.destroy', 'listings.images.edit', 'listings.images.store'], true)) {

@@ -48,6 +48,26 @@ class MessageBubble extends Component
         return route('conversations.messages.destroy', [$this->conversation, $this->message]);
     }
 
+    public function reported(): bool
+    {
+        return (bool) $this->message->getAttribute('reported_by_viewer');
+    }
+
+    public function reportAction(): string
+    {
+        return route('conversations.messages.report', [$this->conversation, $this->message]);
+    }
+
+    public function reportDialogId(): string
+    {
+        return 'report-message-'.$this->message->id;
+    }
+
+    public function textId(): string
+    {
+        return 'message-'.$this->message->id.'-text';
+    }
+
     public function render(): View
     {
         return view('components.conversations.message-bubble');
