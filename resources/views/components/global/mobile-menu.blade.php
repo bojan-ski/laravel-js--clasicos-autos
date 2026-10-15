@@ -14,12 +14,12 @@
 @endphp
 
 <details data-mobile-menu class="group lg:hidden">
-    <summary aria-label="{{ __('app.a11y.menu') }}"
-             class="relative grid size-11 cursor-pointer list-none place-items-center rounded-xs [&::-webkit-details-marker]:hidden">
+    <summary class="relative grid size-11 cursor-pointer list-none place-items-center rounded-xs [&::-webkit-details-marker]:hidden">
+        <span class="sr-only">{{ __('app.a11y.menu') }}</span>
         <x-icons.menu class="size-5.5 group-open:hidden" />
         <x-icons.x class="hidden size-5.5 group-open:block" />
         @if ($signal || $live)
-            <span data-unread-dot {{ $signal ? 'data-menu-signal' : 'hidden' }} class="absolute top-2 right-2 size-2.5 rounded-full bg-red"></span>
+            <span data-unread-dot {{ $signal ? 'data-menu-signal' : 'hidden' }} class="absolute top-2 right-2 size-2.5 rounded-full bg-red"><span class="sr-only"> {{ __('app.a11y.menu_unread') }}</span></span>
         @endif
     </summary>
 

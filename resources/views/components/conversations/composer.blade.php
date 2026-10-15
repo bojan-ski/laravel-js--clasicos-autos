@@ -16,7 +16,7 @@
                    'border-rule-input' => ! $hasError,
                    'border-red' => $hasError,
                ])>
-        <x-ui.button type="submit" variant="primary" size="responsive" data-composer-submit>{{ __('app.conversations.composer.send') }}</x-ui.button>
+        <x-ui.button type="submit" variant="primary" size="responsive" class="aria-disabled:cursor-not-allowed aria-disabled:opacity-45" data-composer-submit>{{ __('app.conversations.composer.send') }}</x-ui.button>
     </div>
     <p id="message-counter" class="text-xs text-muted tabular-nums" data-composer-counter
        data-template="{{ $counterTemplate() }}" data-min="{{ $min() }}" data-max="{{ $max() }}">{{ $counter() }}</p>

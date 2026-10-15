@@ -12,6 +12,7 @@ return [
         'main_navigation' => 'Main navigation',
         'mobile_navigation' => 'Mobile navigation',
         'menu' => 'Menu',
+        'menu_unread' => '(unread messages)',
     ],
 
     'nav' => [

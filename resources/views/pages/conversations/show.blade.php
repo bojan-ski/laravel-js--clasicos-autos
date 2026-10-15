@@ -18,8 +18,8 @@
                     @if ($messages->isEmpty())
                         <p data-live-empty class="text-muted italic">{{ $emptyMessage }}</p>
                     @endif
-                    <div role="log" data-live-thread="{{ $conversation->id }}" data-mark-read-url="{{ $markReadUrl }}">
-                        <ol class="flex flex-col gap-4" aria-label="{{ __('app.conversations.messages_label') }}">
+                    <div role="log" aria-label="{{ __('app.conversations.messages_label') }}" data-live-thread="{{ $conversation->id }}" data-mark-read-url="{{ $markReadUrl }}">
+                        <ol role="list" class="flex flex-col gap-4"{{ $messages->isEmpty() ? ' hidden' : '' }}>
                             @foreach ($messages as $message)
                                 <x-conversations.message-bubble :message="$message" :conversation="$conversation" />
                             @endforeach
@@ -29,7 +29,7 @@
                 @elseif ($messages->isEmpty())
                     <p class="text-muted italic">{{ $emptyMessage }}</p>
                 @else
-                    <ol class="flex flex-col gap-4" aria-label="{{ __('app.conversations.messages_label') }}">
+                    <ol role="list" class="flex flex-col gap-4" aria-label="{{ __('app.conversations.messages_label') }}">
                         @foreach ($messages as $message)
                             <x-conversations.message-bubble :message="$message" :conversation="$conversation" />
                         @endforeach

@@ -12,8 +12,12 @@ export function initComposer() {
             const length = [...input.value.trim()].length
 
             counter.textContent = counter.dataset.template.replace(':count', String(length))
-            submit.disabled = length < min || length > max
+            submit.setAttribute('aria-disabled', String(length < min || length > max))
         }
+
+        form.addEventListener('submit', (event) => {
+            if (submit.getAttribute('aria-disabled') === 'true') event.preventDefault()
+        })
 
         input.addEventListener('input', update)
         update()

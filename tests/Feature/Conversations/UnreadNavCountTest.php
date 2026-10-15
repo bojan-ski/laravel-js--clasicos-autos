@@ -5,6 +5,7 @@ namespace Tests\Feature\Conversations;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\User;
+use App\Support\UnreadMessagesCounter;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Testing\TestResponse;
@@ -17,6 +18,8 @@ class UnreadNavCountTest extends TestCase
     private const string PILL_CLASSES = 'class="absolute -top-2.5 -right-4 h-4.5 min-w-4.5 rounded-full bg-red px-1.25 text-center text-[11px] leading-4.5 text-cream-on-dark tabular-nums"';
 
     private const string DOT_CLASSES = 'class="absolute top-2 right-2 size-2.5 rounded-full bg-red"';
+
+    private const string DOT_TEXT = '<span class="sr-only"> (unread messages)</span></span>';
 
     private const string STAMP_CLASSES = 'class="inline-block border-2 border-dashed p-1 border-red text-red bg-card"';
 
@@ -37,7 +40,17 @@ class UnreadNavCountTest extends TestCase
             ->assertSee('<span data-unread-badge data-nav-count data-template=":count" '.self::PILL_CLASSES.'><span data-unread-badge-text>3</span><span class="sr-only"> unread</span></span>', false)
             ->assertSee('<span '.self::STAMP_CLASSES.' data-unread-badge="data-unread-badge" data-nav-count="data-nav-count" data-template=":count NEW">', false)
             ->assertSee('3 NEW')
-            ->assertSee('<span data-unread-dot data-menu-signal '.self::DOT_CLASSES.'></span>', false);
+            ->assertSee('<span data-unread-dot data-menu-signal '.self::DOT_CLASSES.'>'.self::DOT_TEXT, false);
+    }
+
+    public function test_the_menu_button_is_named_by_its_text_so_the_dot_adds_the_unread_cue(): void
+    {
+        $member = User::factory()->create();
+        $this->unreadFor($member, 1);
+
+        $this->page($member)
+            ->assertSeeInOrder(['<summary class=', '<span class="sr-only">Menu</span>', 'data-unread-dot', self::DOT_TEXT, '</summary>'], false)
+            ->assertDontSee('<summary aria-label', false);
     }
 
     public function test_a_live_member_at_zero_gets_hidden_targets_and_no_count_markers(): void
@@ -48,7 +61,7 @@ class UnreadNavCountTest extends TestCase
         $this->page($member)
             ->assertSee('<span data-unread-badge hidden data-template=":count" '.self::PILL_CLASSES.'><span data-unread-badge-text>0</span>', false)
             ->assertSee('<span '.self::STAMP_CLASSES.' data-unread-badge="data-unread-badge" hidden="hidden" data-template=":count NEW">', false)
-            ->assertSee('<span data-unread-dot hidden '.self::DOT_CLASSES.'></span>', false)
+            ->assertSee('<span data-unread-dot hidden '.self::DOT_CLASSES.'>'.self::DOT_TEXT, false)
             ->assertDontSee('data-nav-count', false)
             ->assertDontSee('data-menu-signal', false);
     }
@@ -142,6 +155,20 @@ class UnreadNavCountTest extends TestCase
 
         $this->assertSame(1, $this->messageQueriesOn($member, route('home')));
         $this->assertSame(0, $this->messageQueriesOn($admin, route('admin.account')));
+    }
+
+    public function test_the_counter_is_zero_for_a_guest_without_a_query(): void
+    {
+        $this->unreadFor(User::factory()->create(), 2);
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+
+        $count = app(UnreadMessagesCounter::class)->count(null);
+
+        $queries = DB::getQueryLog();
+        DB::disableQueryLog();
+        $this->assertSame(0, $count);
+        $this->assertSame([], $queries);
     }
 
     private function messageQueriesOn(User $viewer, string $url): int

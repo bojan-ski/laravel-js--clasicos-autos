@@ -11,7 +11,7 @@
     <div class="flex min-w-0 flex-col">
         <p class="truncate font-heading text-lg leading-tight">{{ $name }}</p>
         @can('view', $listing)
-            <a href="{{ route('listings.show', $listing) }}" class="truncate text-xs text-muted underline">{{ $listing->name }} · <span class="tabular-nums">{{ $price() }}</span></a>
+            <a href="{{ route('listings.show', $listing) }}" class="-my-3.5 flex min-h-11 items-center text-xs text-muted underline"><span class="min-w-0 truncate">{{ $listing->name }} · <span class="tabular-nums">{{ $price() }}</span></span></a>
         @else
             <p class="truncate text-xs text-muted">{{ $listing->name }} · {{ __('app.conversations.listing.unavailable') }}</p>
         @endcan

@@ -14,7 +14,7 @@
     @endcan
 
     <div class="flex min-w-0 flex-col gap-1">
-        <div class="flex items-start justify-between gap-3">
+        <div class="flex items-start justify-between gap-3 group-data-unread:pr-12">
             <h2 class="min-w-0 font-heading text-[22px] leading-tight wrap-break-word">
                 <a href="{{ $url() }}"@if ($isUnread()) aria-describedby="{{ $unreadId() }}"@endif class="after:absolute after:inset-0 focus-visible:outline-none">{{ $heading }}<span class="sr-only"> {{ __('app.conversations.index.link_context', ['listing' => $conversation->listing->name]) }}</span></a>
             </h2>

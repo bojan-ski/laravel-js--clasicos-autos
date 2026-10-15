@@ -243,6 +243,7 @@ class ConversationsListPageTest extends TestCase
         $this->assertStringContainsString('data-conversation-card="'.$conversation->id.'" data-unread-count="2" data-last-message-id="'.$latest->id.'" data-unread>', $card);
         $this->assertMatchesRegularExpression(self::UNREAD_ATTRIBUTE, $card);
         $this->assertStringContainsString(self::STAMP_WRAPPER, $card);
+        $this->assertStringContainsString('<div class="flex items-start justify-between gap-3 group-data-unread:pr-12">', $card);
         $this->assertStringContainsString('<span class="uppercase">New</span><span id="'.$unreadId.'" data-card-count data-template-one=":count unread message" data-template-other=":count unread messages" class="sr-only"> 2 unread messages</span>', $card);
         $this->assertStringContainsString('<a href="'.route('conversations.show', $conversation).'" aria-describedby="'.$unreadId.'"', $card);
     }
@@ -369,6 +370,27 @@ class ConversationsListPageTest extends TestCase
         Conversation::factory()->create();
 
         $this->list(User::factory()->admin()->create())
+            ->assertDontSee('data-live-', false)
+            ->assertDontSee('<template data-live-notice>', false);
+    }
+
+    public function test_an_admins_list_has_no_unread_status_line(): void
+    {
+        $conversation = Conversation::factory()->create();
+        $this->message($conversation, $conversation->sender, 'Unread by the seller.');
+
+        $this->list(User::factory()->admin()->create())
+            ->assertDontSee('<p role="status"', false);
+    }
+
+    public function test_a_suspended_participants_list_keeps_the_unread_line_without_live_hooks(): void
+    {
+        $suspended = User::factory()->suspended()->create();
+        $conversation = Conversation::factory()->for($suspended, 'sender')->create();
+        $this->message($conversation, $conversation->receiver, 'Still interested in it?');
+
+        $this->list($suspended)
+            ->assertSee('<p role="status" class="text-sm text-ink-2 tabular-nums">1 unread</p>', false)
             ->assertDontSee('data-live-', false)
             ->assertDontSee('<template data-live-notice>', false);
     }

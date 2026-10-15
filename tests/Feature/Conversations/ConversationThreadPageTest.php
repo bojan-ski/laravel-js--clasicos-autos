@@ -207,7 +207,7 @@ class ConversationThreadPageTest extends TestCase
             ->assertSee('aria-describedby="message-counter"', false)
             ->assertSee('<p id="message-counter" class="text-xs text-muted tabular-nums" data-composer-counter', false)
             ->assertSee('data-template=":count / 100 · min 5" data-min="5" data-max="100">0 / 100 · min 5</p>', false)
-            ->assertSee('data-composer-submit', false);
+            ->assertSee('aria-disabled:cursor-not-allowed aria-disabled:opacity-45" data-composer-submit="data-composer-submit">', false);
     }
 
     public function test_below_md_the_composer_is_a_sticky_bar_and_the_mobile_header_sticks_to_the_top(): void
@@ -252,8 +252,8 @@ class ConversationThreadPageTest extends TestCase
         $this->message($conversation, $conversation->receiver, 'A message from the seller');
 
         $this->show($conversation, $conversation->sender)
-            ->assertSee('<div role="log" data-live-thread="'.$conversation->id.'" data-mark-read-url="'.route('conversations.read', $conversation).'">', false)
-            ->assertSeeInOrder(['role="log"', '<ol class="flex flex-col gap-4"', 'A message from the seller', '</ol>', '<template data-live-bubble>'], false);
+            ->assertSee('<div role="log" aria-label="Messages" data-live-thread="'.$conversation->id.'" data-mark-read-url="'.route('conversations.read', $conversation).'">', false)
+            ->assertSeeInOrder(['role="log"', '<ol role="list" class="flex flex-col gap-4">', 'A message from the seller', '</ol>', '<template data-live-bubble>'], false);
     }
 
     public function test_the_live_bubble_template_is_an_other_style_bubble_without_actions(): void
@@ -313,16 +313,33 @@ class ConversationThreadPageTest extends TestCase
         ));
     }
 
-    public function test_an_emptied_thread_shows_its_empty_line_above_an_empty_live_list(): void
+    public function test_an_emptied_thread_shows_its_empty_line_above_a_hidden_live_list(): void
     {
         $conversation = Conversation::factory()->create();
 
         $this->show($conversation, $conversation->sender)
             ->assertSeeInOrder([
                 '<p data-live-empty class="text-muted italic">There are no messages in this conversation.</p>',
-                '<div role="log" data-live-thread="'.$conversation->id.'"',
-                '<ol class="flex flex-col gap-4"',
+                '<div role="log" aria-label="Messages" data-live-thread="'.$conversation->id.'"',
+                '<ol role="list" class="flex flex-col gap-4" hidden>',
             ], false);
+    }
+
+    public function test_a_read_only_viewer_gets_a_named_list_of_messages(): void
+    {
+        $conversation = Conversation::factory()->create();
+        $this->message($conversation, $conversation->receiver, 'A message to read');
+
+        $this->show($conversation, User::factory()->admin()->create())
+            ->assertSee('<ol role="list" class="flex flex-col gap-4" aria-label="Messages">', false);
+    }
+
+    public function test_the_mobile_headers_listing_link_is_a_44_px_target(): void
+    {
+        $conversation = Conversation::factory()->create();
+
+        $this->show($conversation, $conversation->sender)
+            ->assertSee('<a href="'.route('listings.show', $conversation->listing).'" class="-my-3.5 flex min-h-11 items-center text-xs text-muted underline"><span class="min-w-0 truncate">', false);
     }
 
     public function test_an_emptied_thread_shows_a_read_only_viewer_no_list(): void

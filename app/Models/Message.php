@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Database\Factories\MessageFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -43,5 +45,15 @@ class Message extends Model
     public function isSentBy(User $user): bool
     {
         return $this->sender()->is($user);
+    }
+
+    /**
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
+    protected function unreadFor(Builder $query, User $viewer): void
+    {
+        $query->whereNull($query->qualifyColumn('read_at'))
+            ->where($query->qualifyColumn('sender_id'), '!=', $viewer->id);
     }
 }

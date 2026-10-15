@@ -54,8 +54,7 @@ class MessagingService
 
         return Message::query()
             ->where('conversation_id', $conversation->id)
-            ->where('sender_id', '!=', $viewer->id)
-            ->whereNull('read_at')
+            ->unreadFor($viewer)
             ->update(['read_at' => now()]);
     }
 
@@ -77,9 +76,7 @@ class MessagingService
         return Conversation::query()
             ->unless($viewer->isAdmin(), fn (Builder $query) => $query
                 ->involving($viewer)
-                ->withCount(['messages as unread_count' => fn (Builder $messages) => $messages
-                    ->whereNull($messages->qualifyColumn('read_at'))
-                    ->where($messages->qualifyColumn('sender_id'), '!=', $viewer->id)]))
+                ->withCount(['messages as unread_count' => fn (Builder $messages) => $messages->unreadFor($viewer)]))
             ->with(['listing.owner', 'listing.primaryImage', 'sender', 'receiver', 'latestMessage'])
             ->orderByDesc('last_message_at')
             ->orderByDesc('id')
@@ -92,11 +89,8 @@ class MessagingService
             return 0;
         }
 
-        $messages = Message::query();
-
-        return $messages
-            ->whereNull($messages->qualifyColumn('read_at'))
-            ->where($messages->qualifyColumn('sender_id'), '!=', $viewer->id)
+        return Message::query()
+            ->unreadFor($viewer)
             ->whereHas('conversation', fn (Builder $conversation) => $conversation->involving($viewer))
             ->count();
     }
