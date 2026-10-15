@@ -18,4 +18,15 @@ class MessagePolicy
 
         return $message->isSentBy($user) || $user->isAdmin() ? Response::allow() : Response::deny();
     }
+
+    public function report(User $user, Message $message): Response
+    {
+        if ($this->conversations->view($user, $message->conversation)->denied()) {
+            return Response::denyAsNotFound();
+        }
+
+        return $user->isActiveAppUser() && $message->conversation->hasParticipant($user) && ! $message->isSentBy($user)
+            ? Response::allow()
+            : Response::deny();
+    }
 }

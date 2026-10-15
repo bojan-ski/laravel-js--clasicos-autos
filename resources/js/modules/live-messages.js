@@ -48,7 +48,9 @@ function appendToThread(thread, payload) {
     const endInView = list.getBoundingClientRect().bottom <= window.innerHeight
     const bubble = template.content.firstElementChild.cloneNode(true)
     const time = bubble.querySelector('[data-live-bubble-time]')
+    const placeholder = template.dataset.liveBubblePlaceholder
 
+    if (placeholder) replacePlaceholder(bubble, placeholder, String(payload.id))
     bubble.id = `message-${payload.id}`
     bubble.querySelector('[data-live-bubble-text]').textContent = payload.message
     time.dateTime = payload.created_at
@@ -60,6 +62,14 @@ function appendToThread(thread, payload) {
     if (empty) empty.hidden = true
 
     if (endInView) bubble.scrollIntoView({ block: 'nearest' })
+}
+
+function replacePlaceholder(root, placeholder, value) {
+    for (const element of [root, ...root.querySelectorAll('*')]) {
+        for (const attribute of element.attributes) {
+            if (attribute.value.includes(placeholder)) attribute.value = attribute.value.replaceAll(placeholder, value)
+        }
+    }
 }
 
 let readPending = false

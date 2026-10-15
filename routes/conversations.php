@@ -10,6 +10,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/listings/{listing}/message', [ConversationController::class, 'store'])->whereNumber('listing')->name('conversations.store');
         Route::post('/conversations/{conversation}/messages', [MessageController::class, 'store'])
             ->whereNumber('conversation')->scopeBindings()->name('conversations.messages.store');
+        Route::post('/conversations/{conversation}/messages/{message}/report', [MessageController::class, 'report'])
+            ->whereNumber(['conversation', 'message'])->scopeBindings()->name('conversations.messages.report');
     });
 
     Route::get('/conversations', [ConversationController::class, 'index'])->name('conversations.index');

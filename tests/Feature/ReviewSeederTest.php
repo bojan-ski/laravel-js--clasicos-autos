@@ -3,12 +3,16 @@
 namespace Tests\Feature;
 
 use App\Enums\ListingStatus;
+use App\Enums\ReportOutcome;
+use App\Enums\ReportReason;
+use App\Enums\ReportStatus;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
 use App\Models\CarListing;
 use App\Models\Conversation;
 use App\Models\ListingImage;
 use App\Models\Message;
+use App\Models\MessageReport;
 use App\Models\User;
 use Database\Seeders\CarMakerSeeder;
 use Database\Seeders\CarModelSeeder;
@@ -232,12 +236,33 @@ class ReviewSeederTest extends TestCase
         }
     }
 
+    public function test_the_reviewer_has_reported_the_strangers_last_message_and_the_buyers_report_was_dismissed(): void
+    {
+        $this->seed([DatabaseSeeder::class, ReviewSeeder::class]);
+        $reviewer = User::query()->where('email', 'review@example.com')->sole();
+        $buyer = User::query()->where('email', 'buyer@example.com')->sole();
+        $admin = User::query()->where('role', UserRole::Admin)->sole();
+
+        $open = MessageReport::query()->open()->with('message')->sole();
+        $strangersLast = Conversation::query()->where('sender_id', $reviewer->id)->sole()->messages()->get()->last();
+        $this->assertSame([$reviewer->id, $strangersLast->id, $strangersLast->message, ReportReason::Other], [$open->reporter_id, $open->message_id, $open->message_text, $open->reason]);
+        $this->assertNotNull($open->note);
+
+        $dismissed = MessageReport::query()->where('status', ReportStatus::Resolved)->sole();
+        $reviewerReply = Conversation::query()->where('receiver_id', $reviewer->id)->sole()->messages()->get()[1];
+        $this->assertSame([$buyer->id, $reviewerReply->id, $reviewer->id, ReportReason::Scam, ReportOutcome::Dismissed, $admin->id], [
+            $dismissed->reporter_id, $dismissed->message_id, $dismissed->reported_user_id, $dismissed->reason, $dismissed->outcome, $dismissed->resolved_by,
+        ]);
+        $this->assertSame(1, User::query()->where('role', UserRole::Admin)->count());
+    }
+
     public function test_without_an_admin_the_moderated_listings_have_no_moderator(): void
     {
         $this->seed([CarMakerSeeder::class, CarModelSeeder::class, ReviewSeeder::class]);
 
         $this->assertSame(0, User::query()->where('role', UserRole::Admin)->count());
         $this->assertSame([null], CarListing::query()->distinct()->pluck('moderated_by')->all());
+        $this->assertSame([null], MessageReport::query()->distinct()->pluck('resolved_by')->all());
     }
 
     public function test_a_second_run_adds_nothing(): void
@@ -253,6 +278,7 @@ class ReviewSeederTest extends TestCase
         $this->seed(ReviewSeeder::class);
 
         $this->assertSame(2, Conversation::query()->count());
+        $this->assertSame(2, MessageReport::query()->count());
         $this->assertSame($messages, Message::query()->count());
         $this->assertSame($users, User::query()->count());
         $this->assertSame($listings, CarListing::query()->count());

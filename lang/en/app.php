@@ -21,6 +21,7 @@ return [
         'compare' => 'Compare',
         'bookmarks' => 'Bookmarks',
         'users' => 'Users',
+        'reports' => 'Reports',
         'conversations' => 'Conversations',
     ],
 
@@ -37,6 +38,7 @@ return [
         'unread' => 'unread',
         'count_labels' => [
             'pending' => 'pending',
+            'open' => 'open',
         ],
         'selected_count' => ':count selected',
         'sign_in' => 'Sign in',
@@ -776,6 +778,44 @@ return [
             'confirm' => 'Delete message',
         ],
         'deleted' => 'Message deleted.',
+        'report' => [
+            'open' => 'Report',
+            'reported' => 'Reported',
+            'title' => 'Report this message?',
+            'reason_label' => 'Reason',
+            'reason_placeholder' => 'Choose a reason',
+            'note_label' => 'Note',
+            'note_hint' => 'Optional. Max 500 characters.',
+            'stays_visible' => 'The message stays visible until an admin reviews it.',
+            'cancel' => 'Cancel',
+            'confirm' => 'Send report',
+            'attributes' => [
+                'reason' => 'reason',
+                'note' => 'note',
+            ],
+            'flash' => [
+                'sent' => 'Thank you. An admin will review this message.',
+                'already_reported' => 'You already reported this message',
+            ],
+        ],
+    ],
+
+    'reports' => [
+        'reasons' => [
+            'spam' => 'Spam',
+            'abusive' => 'Abusive',
+            'scam' => 'Scam',
+            'other' => 'Other',
+        ],
+        'status' => [
+            'open' => 'Open',
+            'resolved' => 'Resolved',
+        ],
+        'outcomes' => [
+            'dismissed' => 'Dismissed',
+            'message_deleted' => 'Message deleted',
+            'user_suspended' => 'User suspended',
+        ],
     ],
 
     'suspension' => [
@@ -900,6 +940,57 @@ return [
                 'not_promotable' => 'Only a pending listing with a custom model can be promoted.',
                 'years_mismatch' => ':model already exists with production years :years, which do not include :year.',
                 'range_excludes_year' => 'The production years must include :year.',
+            ],
+        ],
+        'reports' => [
+            'kicker' => 'Denuncias',
+            'title' => 'Message reports',
+            'chips_label' => 'Filter by status',
+            'chips' => [
+                'open' => 'Open',
+                'resolved' => 'Resolved',
+            ],
+            'columns' => [
+                'message' => 'Message',
+                'reason' => 'Reason',
+                'reporter' => 'Reporter',
+                'reported_user' => 'Reported user',
+                'reported' => 'Reported',
+                'status' => 'Status',
+                'actions' => 'Actions',
+            ],
+            'open_conversation' => 'Open conversation',
+            'message_deleted' => 'Message deleted',
+            'no_note' => 'No note',
+            'resolved_by' => 'by :username',
+            'resolved_by_removed' => 'by a removed admin',
+            'action_context' => 'the report on :username, :time',
+            'actions' => [
+                'dismiss' => 'Dismiss',
+                'delete_message' => 'Delete message',
+                'suspend' => 'Suspend user',
+            ],
+            'delete' => [
+                'title' => 'Delete the message by :username?',
+                'warning' => 'It disappears for both participants; the report keeps a copy.',
+                'cancel' => 'Cancel',
+                'confirm' => 'Delete message',
+            ],
+            'empty' => [
+                'open' => 'No open reports.',
+                'resolved' => 'No resolved reports yet.',
+            ],
+            'attributes' => [
+                'status' => 'status',
+                'outcome' => 'outcome',
+                'reason' => 'reason',
+                'duration' => 'duration',
+            ],
+            'flash' => [
+                'dismissed' => 'The report has been dismissed.',
+                'message_deleted' => 'The message has been deleted. The report keeps a copy.',
+                'user_suspended' => 'The user has been suspended and their open reports are resolved.',
+                'error' => 'This report can no longer be resolved that way.',
             ],
         ],
     ],

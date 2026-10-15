@@ -4,9 +4,11 @@ namespace Tests\Feature\Conversations;
 
 use App\Models\Conversation;
 use App\Models\Message;
+use App\Models\MessageReport;
 use App\Models\User;
 use App\Policies\ConversationPolicy;
 use App\Policies\MessagePolicy;
+use App\Policies\MessageReportPolicy;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Gate;
@@ -100,6 +102,66 @@ class ConversationPolicyTest extends TestCase
     }
 
     /**
+     * @return array<string, array{string, int|string}>
+     */
+    public static function reportOutcomes(): array
+    {
+        return [
+            'the buyer on the seller\'s message' => ['buyer', 'allow'],
+            'the seller on their own message' => ['seller', 403],
+            'a suspended buyer' => ['suspended buyer', 403],
+            'an admin' => ['admin', 403],
+            'a stranger' => ['stranger', 404],
+            'a suspended stranger' => ['suspended stranger', 404],
+        ];
+    }
+
+    #[DataProvider('reportOutcomes')]
+    public function test_only_an_active_participant_reports_the_other_partys_message(string $viewerKind, int|string $expected): void
+    {
+        [$conversation, $viewer] = $this->arrange($viewerKind);
+        $message = Message::factory()->for($conversation)->create(['sender_id' => $conversation->receiver_id]);
+
+        $response = Gate::forUser($viewer)->inspect('report', $message);
+
+        $this->assertSame($expected, $this->outcome($response));
+    }
+
+    public function test_a_report_already_made_does_not_deny_reporting(): void
+    {
+        [$conversation, $buyer] = $this->arrange('buyer');
+        $message = Message::factory()->for($conversation)->create(['sender_id' => $conversation->receiver_id]);
+        MessageReport::factory()->resolved()->create(['message_id' => $message->id]);
+
+        $this->assertTrue(Gate::forUser($buyer)->allows('report', $message));
+    }
+
+    /**
+     * @return array<string, array{string, int|string}>
+     */
+    public static function resolveOutcomes(): array
+    {
+        return [
+            'admin' => ['admin', 'allow'],
+            'the reporter' => ['buyer', 403],
+            'the reported user' => ['seller', 403],
+            'a stranger' => ['stranger', 403],
+        ];
+    }
+
+    #[DataProvider('resolveOutcomes')]
+    public function test_only_an_admin_resolves_a_report(string $viewerKind, int|string $expected): void
+    {
+        [$conversation, $viewer] = $this->arrange($viewerKind);
+        $message = Message::factory()->for($conversation)->create(['sender_id' => $conversation->receiver_id]);
+        $report = MessageReport::factory()->create(['message_id' => $message->id]);
+
+        $response = Gate::forUser($viewer)->inspect('resolve', $report);
+
+        $this->assertSame($expected, $this->outcome($response));
+    }
+
+    /**
      * @return array<string, array{string, bool}>
      */
     public static function messagingGate(): array
@@ -119,10 +181,11 @@ class ConversationPolicyTest extends TestCase
         $this->assertSame($expected, Gate::forUser($viewer)->allows('access-messaging'));
     }
 
-    public function test_both_policies_are_auto_discovered(): void
+    public function test_the_three_policies_are_auto_discovered(): void
     {
         $this->assertInstanceOf(ConversationPolicy::class, Gate::getPolicyFor(Conversation::class));
         $this->assertInstanceOf(MessagePolicy::class, Gate::getPolicyFor(Message::class));
+        $this->assertInstanceOf(MessageReportPolicy::class, Gate::getPolicyFor(MessageReport::class));
     }
 
     /**

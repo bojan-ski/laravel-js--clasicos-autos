@@ -8,6 +8,7 @@ use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -58,9 +59,19 @@ class MessagingService
             ->update(['read_at' => now()]);
     }
 
-    public function thread(Conversation $conversation): Conversation
+    public function thread(Conversation $conversation, User $viewer): Conversation
     {
-        return $conversation->load(['listing.owner', 'listing.primaryImage', 'sender', 'receiver', 'messages']);
+        $relations = ['listing.owner', 'listing.primaryImage', 'sender', 'receiver'];
+
+        if ($viewer->isAdmin()) {
+            $relations[] = 'messages';
+        } else {
+            $relations['messages'] = fn (HasMany $messages) => $messages->withExists([
+                'reports as reported_by_viewer' => fn (Builder $reports) => $reports->where('reporter_id', $viewer->id),
+            ]);
+        }
+
+        return $conversation->load($relations);
     }
 
     public function forNewConversation(CarListing $listing): CarListing

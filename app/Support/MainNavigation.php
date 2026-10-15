@@ -28,6 +28,7 @@ class MainNavigation
             new NavItem('bookmarks', 'app.nav.bookmarks', 'bookmarks.index', 'bookmarks.*', [NavAudience::Member]),
             new NavItem('users', 'app.nav.users', 'admin.users', 'admin.users', [NavAudience::Admin]),
             new NavItem('admin-listings', 'app.nav.listings', 'admin.listings', 'admin.listings', [NavAudience::Admin], PendingListingsCounter::class, NavCountStyle::Queue, 'app.header.count_labels.pending'),
+            new NavItem('admin-reports', 'app.nav.reports', 'admin.reports', 'admin.reports', [NavAudience::Admin], OpenReportsCounter::class, NavCountStyle::Queue, 'app.header.count_labels.open'),
             new NavItem('conversations', 'app.nav.conversations', 'conversations.index', 'conversations.*', [NavAudience::Member, NavAudience::Admin], UnreadMessagesCounter::class, NavCountStyle::Unread),
         ];
     }
