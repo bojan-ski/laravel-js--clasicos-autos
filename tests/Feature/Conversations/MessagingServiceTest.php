@@ -206,6 +206,64 @@ class MessagingServiceTest extends TestCase
         $this->assertModelMissing($message);
     }
 
+    public function test_conversations_for_a_participant_holds_both_sides_with_their_own_unread_count(): void
+    {
+        $viewer = User::factory()->create();
+        $buying = Conversation::factory()->for($viewer, 'sender')->create();
+        $selling = Conversation::factory()->for(CarListing::factory()->approved()->for($viewer, 'owner'), 'listing')->create();
+        Conversation::factory()->create();
+        Message::factory()->for($buying)->count(2)->create(['sender_id' => $buying->receiver_id]);
+        Message::factory()->for($buying)->create(['sender_id' => $buying->receiver_id, 'read_at' => now()]);
+        Message::factory()->for($buying)->create(['sender_id' => $viewer->id]);
+        Message::factory()->for($selling)->create(['sender_id' => $viewer->id]);
+
+        $conversations = $this->service()->conversationsFor($viewer);
+
+        $this->assertEqualsCanonicalizing([$buying->id, $selling->id], $conversations->pluck('id')->all());
+        $this->assertSame([$buying->id => 2, $selling->id => 0], $conversations->pluck('unread_count', 'id')->sortKeys()->all());
+    }
+
+    public function test_conversations_for_an_admin_holds_every_conversation_without_a_count(): void
+    {
+        $conversations = Conversation::factory()->count(2)->create();
+        Message::factory()->for($conversations[0])->create();
+
+        $listed = $this->service()->conversationsFor(User::factory()->admin()->create());
+
+        $this->assertEqualsCanonicalizing($conversations->modelKeys(), $listed->pluck('id')->all());
+        $this->assertSame([null, null], $listed->pluck('unread_count')->all());
+    }
+
+    public function test_unread_count_for_counts_the_other_partys_unread_messages_across_the_viewers_conversations(): void
+    {
+        $viewer = User::factory()->create();
+        $buying = Conversation::factory()->for($viewer, 'sender')->create();
+        $selling = Conversation::factory()->for(CarListing::factory()->approved()->for($viewer, 'owner'), 'listing')->create();
+        $elsewhere = Conversation::factory()->create();
+        Message::factory()->for($buying)->count(2)->create(['sender_id' => $buying->receiver_id]);
+        Message::factory()->for($selling)->create(['sender_id' => $selling->sender_id]);
+        Message::factory()->for($selling)->create(['sender_id' => $selling->sender_id, 'read_at' => now()]);
+        Message::factory()->for($buying)->create(['sender_id' => $viewer->id]);
+        Message::factory()->for($elsewhere)->create(['sender_id' => $elsewhere->receiver_id]);
+
+        $count = $this->service()->unreadCountFor($viewer);
+
+        $this->assertSame(3, $count);
+        $this->assertSame($count, $this->service()->conversationsFor($viewer)->sum('unread_count'));
+    }
+
+    public function test_unread_count_for_an_admin_is_zero_without_a_query(): void
+    {
+        Message::factory()->create();
+        $admin = User::factory()->admin()->create();
+        DB::enableQueryLog();
+
+        $count = $this->service()->unreadCountFor($admin);
+
+        $this->assertSame(0, $count);
+        $this->assertSame([], DB::getQueryLog());
+    }
+
     private function service(): MessagingService
     {
         return app(MessagingService::class);

@@ -12,6 +12,7 @@ Route::middleware('auth')->group(function () {
             ->whereNumber('conversation')->scopeBindings()->name('conversations.messages.store');
     });
 
+    Route::get('/conversations', [ConversationController::class, 'index'])->name('conversations.index');
     Route::get('/conversations/{conversation}', [ConversationController::class, 'show'])->whereNumber('conversation')->name('conversations.show');
     Route::delete('/conversations/{conversation}/messages/{message}', [MessageController::class, 'destroy'])
         ->whereNumber(['conversation', 'message'])->scopeBindings()->name('conversations.messages.destroy');

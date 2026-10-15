@@ -282,14 +282,14 @@ class ConversationThreadPageTest extends TestCase
             ->assertDontSee('<ol', false);
     }
 
-    public function test_the_back_link_is_the_listings_index(): void
+    public function test_the_back_link_is_the_conversations_list_whatever_the_referer(): void
     {
         $conversation = Conversation::factory()->create();
 
         $this->actingAs($conversation->sender)
             ->from(route('conversations.create', $conversation->listing))
             ->get(route('conversations.show', $conversation))
-            ->assertViewHas('backUrl', route('listings.index'));
+            ->assertViewHas('backUrl', route('conversations.index'));
     }
 
     public function test_a_participants_visit_marks_only_the_other_partys_messages_read(): void

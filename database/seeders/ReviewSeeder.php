@@ -12,6 +12,7 @@ use App\Models\Message;
 use App\Models\User;
 use App\Services\BookmarkService;
 use App\Services\ListingImageService;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Seeder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
@@ -56,10 +57,11 @@ class ReviewSeeder extends Seeder
         $user = $this->appUser('review user', 'review@example.com', '+5355512345');
         $stranger = $this->appUser(self::STRANGER_USERNAME, 'stranger@example.com', '+5355554321');
         $moderatorId = User::query()->where('role', UserRole::Admin)->value('id');
-        $suspendedListing = $this->seedListings($user, $models, $moderatorId);
+        ['photographed' => $photographedListing, 'suspended' => $suspendedListing] = $this->seedListings($user, $models, $moderatorId);
         $this->seedStrangerListings($stranger, $models, $moderatorId);
         $this->seedBookmarks($user, $suspendedListing);
         $this->seedConversation($user, $stranger);
+        $this->seedSellerConversation($photographedListing, $user, $this->appUser('Lucia Fernandez', 'buyer@example.com', '+5355500111'));
     }
 
     private function appUser(string $username, string $email, string $phone): User
@@ -79,8 +81,9 @@ class ReviewSeeder extends Seeder
 
     /**
      * @param  Collection<int, CarModel>  $models
+     * @return array{photographed: CarListing, suspended: CarListing}
      */
-    private function seedListings(User $reviewer, Collection $models, ?int $moderatorId): CarListing
+    private function seedListings(User $reviewer, Collection $models, ?int $moderatorId): array
     {
         $sellers = [$reviewer, User::factory()->create(), User::factory()->create()];
 
@@ -100,8 +103,10 @@ class ReviewSeeder extends Seeder
         $this->seedImages($pending, self::IMAGES_PENDING);
         $this->seedImages($rejected, self::IMAGES_REJECTED);
 
-        return CarListing::factory()->approved()->forCarModel($models[2])->for(User::factory()->suspended(), 'owner')
+        $suspended = CarListing::factory()->approved()->forCarModel($models[2])->for(User::factory()->suspended(), 'owner')
             ->create(['moderated_by' => $moderatorId]);
+
+        return ['photographed' => $approved[0], 'suspended' => $suspended];
     }
 
     private function seedImages(CarListing $listing, int $count): void
@@ -159,18 +164,41 @@ class ReviewSeeder extends Seeder
     private function seedConversation(User $buyer, User $seller): void
     {
         $listing = $seller->listings()->latest('id')->firstOrFail();
+        $now = now()->toImmutable();
+
+        $this->seedThread($listing, $buyer, $seller, [
+            [$buyer, 'Hello! Is the car still available?', $now->subHours(3), $now->subHours(2)],
+            [$seller, 'Yes, it is. Would you like to see it this weekend?', $now->subHours(2), $now->subHour()],
+            [$buyer, self::LONG_MESSAGE, $now->subHour(), $now->subMinutes(30)],
+            [$seller, 'Saturday at ten works for me. I will send you the address.', $now->subMinutes(5), null],
+        ]);
+    }
+
+    private function seedSellerConversation(CarListing $listing, User $seller, User $buyer): void
+    {
+        $now = now()->toImmutable();
+
+        $this->seedThread($listing, $buyer, $seller, [
+            [$buyer, 'Good afternoon. Does the car have its original engine?', $now->subDays(3), $now->subDays(3)->addHour()],
+            [$seller, 'It does, rebuilt in 2019 with every receipt kept.', $now->subDays(3)->addHours(2), $now->subDays(2)->subHour()],
+            [$buyer, 'Thank you, I will think it over and write again soon.', $now->subDays(2), $now->subDays(2)->addMinutes(30)],
+        ]);
+    }
+
+    /**
+     * @param  non-empty-list<array{User, string, CarbonInterface, ?CarbonInterface}>  $messages
+     */
+    private function seedThread(CarListing $listing, User $buyer, User $seller, array $messages): void
+    {
+        $startedAt = $messages[0][2];
         $conversation = Conversation::factory()->create([
             'listing_id' => $listing->id,
             'sender_id' => $buyer->id,
             'receiver_id' => $seller->id,
-            'last_message_at' => now()->subMinutes(5),
+            'last_message_at' => $messages[array_key_last($messages)][2],
+            'created_at' => $startedAt,
+            'updated_at' => $startedAt,
         ]);
-        $messages = [
-            [$buyer, 'Hello! Is the car still available?', now()->subHours(3), now()->subHours(2)],
-            [$seller, 'Yes, it is. Would you like to see it this weekend?', now()->subHours(2), now()->subHour()],
-            [$buyer, self::LONG_MESSAGE, now()->subHour(), now()->subMinutes(30)],
-            [$seller, 'Saturday at ten works for me. I will send you the address.', now()->subMinutes(5), null],
-        ];
 
         foreach ($messages as [$sender, $text, $sentAt, $readAt]) {
             Message::factory()->create([

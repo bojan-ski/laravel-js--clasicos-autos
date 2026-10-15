@@ -16,6 +16,20 @@ use Illuminate\Support\Facades\Gate;
 
 class ConversationController extends Controller
 {
+    public function index(Request $request, MessagingService $messaging): View
+    {
+        $viewer = $request->user();
+        $audience = $viewer->isAdmin() ? 'admin' : 'member';
+
+        return view('pages.conversations.index', [
+            'heading' => __("app.conversations.index.title.{$audience}"),
+            'conversations' => $messaging->conversationsFor($viewer),
+            'unreadCount' => $messaging->unreadCountFor($viewer),
+            'emptyMessage' => __("app.conversations.index.empty.{$audience}"),
+            'browseUrl' => $viewer->isAdmin() ? null : route('listings.index'),
+        ]);
+    }
+
     public function create(Request $request, CarListing $listing, MessagingService $messaging, BackUrl $backUrl): View|RedirectResponse
     {
         Gate::authorize('message', $listing);
@@ -46,7 +60,7 @@ class ConversationController extends Controller
         $conversation = $messaging->thread($conversation);
         $composerAction = Gate::allows('reply', $conversation) ? route('conversations.messages.store', $conversation) : null;
 
-        return $this->page($request->user(), $conversation->listing, $conversation, $composerAction, route('listings.index'));
+        return $this->page($request->user(), $conversation->listing, $conversation, $composerAction, route('conversations.index'));
     }
 
     private function page(User $viewer, CarListing $listing, ?Conversation $conversation, ?string $composerAction, string $backUrl): View
