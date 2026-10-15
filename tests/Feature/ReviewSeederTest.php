@@ -165,7 +165,7 @@ class ReviewSeederTest extends TestCase
 
         $reviewer = User::query()->where('email', 'review@example.com')->sole();
         $stranger = User::query()->where('email', 'stranger@example.com')->sole();
-        $conversation = Conversation::query()->with(['listing', 'messages'])->sole();
+        $conversation = Conversation::query()->where('receiver_id', $stranger->id)->with(['listing', 'messages'])->sole();
 
         $this->assertSame([$reviewer->id, $stranger->id, $stranger->id], [$conversation->sender_id, $conversation->receiver_id, $conversation->listing->user_id]);
         $this->assertTrue($conversation->listing->isApproved());
@@ -178,9 +178,38 @@ class ReviewSeederTest extends TestCase
     {
         $this->seed([DatabaseSeeder::class, ReviewSeeder::class]);
 
-        $messages = Conversation::query()->sole()->messages()->get();
+        $messages = Conversation::query()->whereRelation('receiver', 'email', 'stranger@example.com')->sole()->messages()->get();
 
         $this->assertSame([false, false, false, true], $messages->map(fn (Message $message): bool => $message->read_at === null)->all());
+    }
+
+    public function test_the_review_user_sells_in_an_older_read_conversation_about_the_photographed_listing(): void
+    {
+        $this->seed([DatabaseSeeder::class, ReviewSeeder::class]);
+
+        $reviewer = User::query()->where('email', 'review@example.com')->sole();
+        $buyer = User::query()->where('email', 'buyer@example.com')->sole();
+        $sold = Conversation::query()->where('receiver_id', $reviewer->id)->with(['listing.images', 'messages'])->sole();
+        $bought = Conversation::query()->where('sender_id', $reviewer->id)->sole();
+
+        $this->assertTrue($buyer->isActiveAppUser());
+        $this->assertSame([$buyer->id, $reviewer->id], [$sold->sender_id, $sold->listing->user_id]);
+        $this->assertTrue($sold->listing->isApproved());
+        $this->assertCount(8, $sold->listing->images);
+        $this->assertSame([$buyer->id, $reviewer->id, $buyer->id], $sold->messages->pluck('sender_id')->all());
+        $this->assertSame([], $sold->messages->whereNull('read_at')->all());
+        $this->assertTrue($sold->last_message_at->lessThan($bought->last_message_at));
+        $this->assertSame(2, Conversation::query()->involving($reviewer)->count());
+    }
+
+    public function test_each_seeded_conversation_spans_exactly_its_messages(): void
+    {
+        $this->seed([DatabaseSeeder::class, ReviewSeeder::class]);
+
+        foreach (Conversation::query()->with('messages')->get() as $conversation) {
+            $this->assertTrue($conversation->created_at->equalTo($conversation->messages->first()->created_at));
+            $this->assertTrue($conversation->last_message_at->equalTo($conversation->messages->last()->created_at));
+        }
     }
 
     public function test_without_an_admin_the_moderated_listings_have_no_moderator(): void
@@ -203,7 +232,7 @@ class ReviewSeederTest extends TestCase
 
         $this->seed(ReviewSeeder::class);
 
-        $this->assertSame(1, Conversation::query()->count());
+        $this->assertSame(2, Conversation::query()->count());
         $this->assertSame($messages, Message::query()->count());
         $this->assertSame($users, User::query()->count());
         $this->assertSame($listings, CarListing::query()->count());

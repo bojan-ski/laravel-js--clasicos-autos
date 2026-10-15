@@ -34,8 +34,8 @@ class AppShellTest extends TestCase
         $navigation = $this->app->make(MainNavigation::class);
 
         $this->assertSame(['home', 'listings', 'compare'], array_column($navigation->linksFor(NavAudience::Guest, null), 'key'));
-        $this->assertSame(['home', 'listings', 'compare', 'bookmarks'], array_column($navigation->linksFor(NavAudience::Member, User::factory()->make()), 'key'));
-        $this->assertSame([], $navigation->linksFor(NavAudience::Admin, null));
+        $this->assertSame(['home', 'listings', 'compare', 'bookmarks', 'conversations'], array_column($navigation->linksFor(NavAudience::Member, User::factory()->make()), 'key'));
+        $this->assertSame(['conversations'], array_column($navigation->linksFor(NavAudience::Admin, null), 'key'));
     }
 
     public function test_guest_sees_the_guest_header(): void
@@ -50,7 +50,7 @@ class AppShellTest extends TestCase
         $this->actingAs(User::factory()->make())
             ->get('/')
             ->assertSee('data-header-variant="member"', false)
-            ->assertSeeInOrder([__('app.nav.home'), __('app.nav.listings'), __('app.nav.compare'), __('app.nav.bookmarks')]);
+            ->assertSeeInOrder([__('app.nav.home'), __('app.nav.listings'), __('app.nav.compare'), __('app.nav.bookmarks'), __('app.nav.conversations')]);
     }
 
     public function test_admin_audience_renders_the_admin_header_without_home(): void
@@ -60,6 +60,14 @@ class AppShellTest extends TestCase
             ->assertSee(__('app.header.admin_tag'))
             ->assertDontSee(__('app.nav.home'))
             ->assertDontSee(__('app.nav.listings'));
+    }
+
+    public function test_the_admin_header_renders_its_nav_with_the_conversations_link(): void
+    {
+        $this->blade('<x-global.header :audience="\App\Enums\NavAudience::Admin" />')
+            ->assertSee('aria-label="'.__('app.a11y.main_navigation').'"', false)
+            ->assertSee('href="'.route('conversations.index').'"', false)
+            ->assertSee(__('app.nav.conversations'));
     }
 
     public function test_the_wordmark_is_gold_light_on_the_dark_admin_bar_and_red_on_paper(): void

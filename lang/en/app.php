@@ -19,6 +19,7 @@ return [
         'listings' => 'Listings',
         'compare' => 'Compare',
         'bookmarks' => 'Bookmarks',
+        'conversations' => 'Conversations',
     ],
 
     'pagination' => [
@@ -714,6 +715,24 @@ return [
     ],
 
     'conversations' => [
+        'index' => [
+            'kicker' => 'Correspondencia',
+            'title' => [
+                'member' => 'My Conversations',
+                'admin' => 'All conversations',
+            ],
+            'unread' => ':count unread',
+            'regarding' => 'Regarding:',
+            'link_context' => 'regarding :listing',
+            'stamp' => 'New',
+            'stamp_count' => '{1} :count unread message|[2,*] :count unread messages',
+            'no_messages' => 'No messages',
+            'empty' => [
+                'member' => 'You have no active conversations',
+                'admin' => 'No conversations yet.',
+            ],
+            'browse' => 'Browse listings',
+        ],
         'heading' => [
             'with' => 'Conversation with :username',
             'between' => 'Conversation between :buyer and :seller',
