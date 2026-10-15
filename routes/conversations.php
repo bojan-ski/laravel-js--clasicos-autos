@@ -14,6 +14,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/conversations', [ConversationController::class, 'index'])->name('conversations.index');
     Route::get('/conversations/{conversation}', [ConversationController::class, 'show'])->whereNumber('conversation')->name('conversations.show');
+    Route::post('/conversations/{conversation}/read', [ConversationController::class, 'read'])->whereNumber('conversation')->name('conversations.read');
     Route::delete('/conversations/{conversation}/messages/{message}', [MessageController::class, 'destroy'])
         ->whereNumber(['conversation', 'message'])->scopeBindings()->name('conversations.messages.destroy');
 });

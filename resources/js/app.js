@@ -7,6 +7,7 @@ import { initErrorFocus } from './modules/error-focus'
 import { initFlash } from './modules/flash'
 import { initFormProgress } from './modules/form-progress'
 import { initGallery } from './modules/gallery'
+import { initLiveMessages } from './modules/live-messages'
 import { initLoadingOverlay } from './modules/loading-overlay'
 import { initMobileMenu } from './modules/mobile-menu'
 import { initModelSelect } from './modules/model-select'
@@ -28,4 +29,5 @@ document.addEventListener('DOMContentLoaded', () => {
     initFormProgress()
     initComposer()
     initErrorFocus()
+    initLiveMessages()
 })

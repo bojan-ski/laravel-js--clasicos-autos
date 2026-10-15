@@ -34,7 +34,7 @@ final class RouteParameterMap
             return ['listing' => (string) CarListing::factory()->approved()->create()->id];
         }
 
-        if (in_array($name, ['conversations.show', 'conversations.messages.store'], true)) {
+        if (in_array($name, ['conversations.show', 'conversations.read', 'conversations.messages.store'], true)) {
             return ['conversation' => (string) self::conversationForActor()->id];
         }
 

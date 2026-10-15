@@ -14,7 +14,19 @@
             <div class="flex min-w-0 flex-col gap-6">
                 <h1 class="border-b border-rule pb-4 text-[38px] leading-none wrap-break-word md:text-[56px]">{{ $heading }}</h1>
 
-                @if ($messages->isEmpty())
+                @if ($markReadUrl !== null)
+                    @if ($messages->isEmpty())
+                        <p data-live-empty class="text-muted italic">{{ $emptyMessage }}</p>
+                    @endif
+                    <div role="log" data-live-thread="{{ $conversation->id }}" data-mark-read-url="{{ $markReadUrl }}">
+                        <ol class="flex flex-col gap-4" aria-label="{{ __('app.conversations.messages_label') }}">
+                            @foreach ($messages as $message)
+                                <x-conversations.message-bubble :message="$message" :conversation="$conversation" />
+                            @endforeach
+                        </ol>
+                        <x-conversations.live-bubble :conversation="$conversation" />
+                    </div>
+                @elseif ($messages->isEmpty())
                     <p class="text-muted italic">{{ $emptyMessage }}</p>
                 @else
                     <ol class="flex flex-col gap-4" aria-label="{{ __('app.conversations.messages_label') }}">

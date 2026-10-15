@@ -1,9 +1,18 @@
 <x-layouts.app :title="$heading">
-    <section class="mx-auto flex max-w-7xl flex-col gap-6 px-5 py-6 md:gap-8 md:px-14 md:py-12">
-        <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-            <x-ui.page-header :kicker="__('app.conversations.index.kicker')" kicker-lang="es" :title="$heading" />
-            @if ($unreadCount > 0)
-                <p class="text-sm text-ink-2 tabular-nums">{{ __('app.conversations.index.unread', ['count' => $unreadCount]) }}</p>
+    <section class="mx-auto flex max-w-7xl flex-col gap-6 px-5 py-6 md:gap-8 md:px-14 md:py-12"@if ($liveList) data-live-list=""{{ $firstPage ? ' data-first-page' : '' }}@endif>
+        <div>
+            <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                <x-ui.page-header :kicker="__('app.conversations.index.kicker')" kicker-lang="es" :title="$heading" />
+                @if ($liveList)
+                    <p role="status" data-live-unread data-template="{{ __('app.conversations.index.unread') }}" class="text-sm text-ink-2 tabular-nums">{{ $unreadLine }}</p>
+                @endif
+            </div>
+
+            @if ($liveList)
+                <div role="status" data-live-notice-region></div>
+                <template data-live-notice>
+                    <p class="mt-4 border-l-3 border-l-red bg-card-unread px-4 py-3 text-sm text-ink md:mt-6">{{ __('app.conversations.index.notice') }} <a href="{{ route('conversations.index') }}" class="text-red underline">{{ __('app.conversations.index.notice_link') }}</a></p>
+                </template>
             @endif
         </div>
 

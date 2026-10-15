@@ -10,6 +10,12 @@ use Illuminate\View\Component;
 
 class MessageBubble extends Component
 {
+    public const string BASE_CLASSES = 'w-fit max-w-110 scroll-mt-16 border px-4 py-3';
+
+    public const string OTHER_CLASSES = 'bg-card border-rule -rotate-[0.4deg]';
+
+    public const string META_CLASSES = 'mt-1 flex flex-wrap items-center gap-x-3 text-[11px] text-muted';
+
     public bool $own;
 
     public bool $showsSender;

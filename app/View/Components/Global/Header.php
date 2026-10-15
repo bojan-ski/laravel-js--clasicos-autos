@@ -32,10 +32,13 @@ class Header extends Component
 
     public bool $menuSignal;
 
+    public ?string $liveChannel;
+
     public function __construct(MainNavigation $navigation, ?NavAudience $audience = null)
     {
         $user = Auth::user();
 
+        $this->liveChannel = $user?->isActiveAppUser() ? "user.{$user->id}" : null;
         $this->audience = $audience ?? NavAudience::forUser($user);
         $this->links = $navigation->linksFor($this->audience, $user);
         $this->actions = $navigation->actionsFor($this->audience, $user);

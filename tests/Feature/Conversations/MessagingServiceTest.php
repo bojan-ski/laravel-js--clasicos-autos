@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Conversations;
 
+use App\Events\MessageSent;
 use App\Models\CarListing;
 use App\Models\Conversation;
 use App\Models\Message;
@@ -158,7 +159,7 @@ class MessagingServiceTest extends TestCase
         $this->assertSame('2026-10-15 10:00:00', $conversation->fresh()->last_message_at->toDateTimeString());
     }
 
-    public function test_start_and_send_dispatch_no_application_event_and_no_notification(): void
+    public function test_start_and_send_dispatch_only_message_sent_and_no_notification(): void
     {
         $listing = CarListing::factory()->approved()->create();
         $buyer = User::factory()->create();
@@ -170,7 +171,8 @@ class MessagingServiceTest extends TestCase
 
         Notification::assertNothingSent();
         $applicationEvents = array_filter(array_keys(Event::dispatchedEvents()), fn (string $event): bool => Str::startsWith($event, 'App\\'));
-        $this->assertSame([], array_values($applicationEvents));
+        $this->assertSame([MessageSent::class], array_values($applicationEvents));
+        Event::assertDispatchedTimes(MessageSent::class, 2);
     }
 
     public function test_deleting_the_listing_removes_its_conversations_and_messages(): void

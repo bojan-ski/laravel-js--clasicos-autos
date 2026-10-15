@@ -4,6 +4,7 @@
     'legalLinks',
     'audience',
     'signal' => false,
+    'live' => false,
 ])
 
 @php
@@ -17,8 +18,8 @@
              class="relative grid size-11 cursor-pointer list-none place-items-center rounded-xs [&::-webkit-details-marker]:hidden">
         <x-icons.menu class="size-5.5 group-open:hidden" />
         <x-icons.x class="hidden size-5.5 group-open:block" />
-        @if ($signal)
-            <span data-menu-signal class="absolute top-2 right-2 size-2.5 rounded-full bg-red"></span>
+        @if ($signal || $live)
+            <span data-unread-dot {{ $signal ? 'data-menu-signal' : 'hidden' }} class="absolute top-2 right-2 size-2.5 rounded-full bg-red"></span>
         @endif
     </summary>
 
@@ -29,9 +30,9 @@
                     <a href="{{ $link->url }}" @if ($link->active) aria-current="page" @endif
                        class="flex min-h-14 items-center justify-between border-b font-heading text-[28px] {{ $rule }} {{ $link->active ? ($onDark ? 'text-gold-light' : 'text-red') : '' }}">
                         {{ $link->label }}
-                        @if ($link->count !== null && $link->countStyle === \App\Enums\NavCountStyle::Unread)
-                            <x-ui.stamp tone="red" data-nav-count class="bg-card">
-                                <span class="block px-2 py-px font-sans text-[10px] tracking-[0.16em]">{{ __('app.header.new_count', ['count' => $link->count]) }}</span>
+                        @if ($link->countStyle === \App\Enums\NavCountStyle::Unread && ($link->count !== null || $live))
+                            <x-ui.stamp tone="red" data-unread-badge :data-nav-count="$link->count !== null" :hidden="$link->count === null" :data-template="__('app.header.new_count')" class="bg-card">
+                                <span data-unread-badge-text class="block px-2 py-px font-sans text-[10px] tracking-[0.16em]">{{ __('app.header.new_count', ['count' => $link->count ?? 0]) }}</span>
                             </x-ui.stamp>
                         @elseif ($link->count !== null && $link->countStyle === \App\Enums\NavCountStyle::Selected)
                             <span data-nav-count class="font-sans text-[13px] text-gold-ink">{{ __('app.header.selected_count', ['count' => $link->count]) }}</span>

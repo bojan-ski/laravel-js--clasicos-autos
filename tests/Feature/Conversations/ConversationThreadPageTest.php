@@ -241,7 +241,47 @@ class ConversationThreadPageTest extends TestCase
         $this->show($conversation, $viewer)
             ->assertViewHas('composerAction', null)
             ->assertSee('A message to read')
-            ->assertDontSee('data-composer', false);
+            ->assertDontSee('data-composer', false)
+            ->assertDontSee('role="log"', false)
+            ->assertDontSee('data-live-', false);
+    }
+
+    public function test_a_participant_who_may_reply_gets_the_live_thread_hooks(): void
+    {
+        $conversation = $this->conversationBetween('buyer.one', 'seller.one');
+        $this->message($conversation, $conversation->receiver, 'A message from the seller');
+
+        $this->show($conversation, $conversation->sender)
+            ->assertSee('<div role="log" data-live-thread="'.$conversation->id.'" data-mark-read-url="'.route('conversations.read', $conversation).'">', false)
+            ->assertSeeInOrder(['role="log"', '<ol class="flex flex-col gap-4"', 'A message from the seller', '</ol>', '<template data-live-bubble>'], false);
+    }
+
+    public function test_the_live_bubble_template_is_an_other_style_bubble_without_actions(): void
+    {
+        $conversation = $this->conversationBetween('buyer.one', 'seller.one');
+
+        $html = $this->show($conversation, $conversation->sender)->getContent();
+        $start = strpos($html, '<template data-live-bubble>');
+        $template = substr($html, $start, strpos($html, '</template>', $start) - $start);
+
+        $this->assertStringContainsString('<li class="w-fit max-w-110 scroll-mt-16 border px-4 py-3 bg-card border-rule -rotate-[0.4deg]">', $template);
+        $this->assertStringContainsString('<span class="sr-only">seller.one: </span><span data-live-bubble-text></span>', $template);
+        $this->assertStringContainsString('<div class="mt-1 flex flex-wrap items-center gap-x-3 text-[11px] text-muted">', $template);
+        $this->assertStringContainsString('<time data-live-bubble-time></time>', $template);
+        $this->assertStringNotContainsString('<dialog', $template);
+        $this->assertStringNotContainsString('<button', $template);
+    }
+
+    public function test_a_new_conversation_page_has_no_live_thread(): void
+    {
+        $listing = CarListing::factory()->approved()->create();
+
+        $this->actingAs(User::factory()->create())
+            ->get(route('conversations.create', $listing))
+            ->assertOk()
+            ->assertSee('data-composer', false)
+            ->assertDontSee('data-live-thread', false)
+            ->assertDontSee('data-live-bubble', false);
     }
 
     public function test_a_participant_gets_one_delete_dialog_per_own_message(): void
@@ -273,12 +313,24 @@ class ConversationThreadPageTest extends TestCase
         ));
     }
 
-    public function test_an_emptied_thread_shows_its_empty_line(): void
+    public function test_an_emptied_thread_shows_its_empty_line_above_an_empty_live_list(): void
     {
         $conversation = Conversation::factory()->create();
 
         $this->show($conversation, $conversation->sender)
-            ->assertSee('There are no messages in this conversation.')
+            ->assertSeeInOrder([
+                '<p data-live-empty class="text-muted italic">There are no messages in this conversation.</p>',
+                '<div role="log" data-live-thread="'.$conversation->id.'"',
+                '<ol class="flex flex-col gap-4"',
+            ], false);
+    }
+
+    public function test_an_emptied_thread_shows_a_read_only_viewer_no_list(): void
+    {
+        $conversation = Conversation::factory()->create();
+
+        $this->show($conversation, User::factory()->admin()->create())
+            ->assertSee('<p class="text-muted italic">There are no messages in this conversation.</p>', false)
             ->assertDontSee('<ol', false);
     }
 
