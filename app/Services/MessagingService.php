@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\MessageSent;
 use App\Models\CarListing;
 use App\Models\Conversation;
 use App\Models\Message;
@@ -20,12 +21,24 @@ class MessagingService
 
     public function start(CarListing $listing, User $buyer, string $text): Message
     {
-        return DB::transaction(fn (): Message => $this->append($this->insertOrRead($listing, $buyer), $buyer, $text), attempts: 3);
+        return DB::transaction(function () use ($listing, $buyer, $text): Message {
+            $message = $this->append($this->insertOrRead($listing, $buyer), $buyer, $text);
+
+            MessageSent::dispatch($message, $listing->loadMissing('owner')->owner);
+
+            return $message;
+        }, attempts: 3);
     }
 
     public function send(Conversation $conversation, User $sender, string $text): Message
     {
-        return DB::transaction(fn (): Message => $this->append($conversation, $sender, $text));
+        return DB::transaction(function () use ($conversation, $sender, $text): Message {
+            $message = $this->append($conversation, $sender, $text);
+
+            MessageSent::dispatch($message, $conversation->loadMissing(['sender', 'receiver'])->otherParticipant($sender));
+
+            return $message;
+        });
     }
 
     public function delete(Message $message): void

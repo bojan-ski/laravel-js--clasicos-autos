@@ -32,6 +32,7 @@ return [
     'header' => [
         'admin_tag' => 'Admin',
         'new_count' => ':count NEW',
+        'unread' => 'unread',
         'selected_count' => ':count selected',
         'sign_in' => 'Sign in',
         'register' => 'Register',
@@ -732,6 +733,8 @@ return [
                 'admin' => 'No conversations yet.',
             ],
             'browse' => 'Browse listings',
+            'notice' => 'New messages —',
+            'notice_link' => 'refresh',
         ],
         'heading' => [
             'with' => 'Conversation with :username',

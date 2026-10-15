@@ -7,7 +7,7 @@
     $onDark = $audience === \App\Enums\NavAudience::Admin;
 @endphp
 
-<header data-header-variant="{{ $audience->value }}"
+<header data-header-variant="{{ $audience->value }}"@if ($liveChannel !== null) data-live-channel="{{ $liveChannel }}"@endif
         class="relative z-30 has-[details[open]]:fixed has-[details[open]]:inset-x-0 has-[details[open]]:top-0 {{ $bars[$audience->value] }}">
     <div class="mx-auto flex max-w-7xl items-center gap-8 px-5 py-4 md:px-14 md:py-5">
         <div class="mr-auto flex items-center gap-2.5">
@@ -20,7 +20,7 @@
         @if ($links !== [])
             <nav aria-label="{{ __('app.a11y.main_navigation') }}" class="hidden items-center gap-7 text-sm lg:flex">
                 @foreach ($links as $link)
-                    <x-global.nav-link :link="$link" :audience="$audience" />
+                    <x-global.nav-link :link="$link" :audience="$audience" :live="$liveChannel !== null" />
                 @endforeach
             </nav>
         @endif
@@ -33,6 +33,6 @@
             </div>
         @endif
 
-        <x-global.mobile-menu :links="$links" :actions="$actions" :legal-links="$legalLinks" :audience="$audience" :signal="$menuSignal" />
+        <x-global.mobile-menu :links="$links" :actions="$actions" :legal-links="$legalLinks" :audience="$audience" :signal="$menuSignal" :live="$liveChannel !== null" />
     </div>
 </header>

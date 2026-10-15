@@ -39,6 +39,11 @@ class Card extends Component
         return $this->conversation->latestMessage?->message;
     }
 
+    public function lastMessageId(): int
+    {
+        return $this->conversation->latestMessage?->id ?? 0;
+    }
+
     public function timeIso(): ?string
     {
         return $this->time()?->toIso8601String();
@@ -62,6 +67,11 @@ class Card extends Component
     public function unreadId(): string
     {
         return "conversation-{$this->conversation->id}-unread";
+    }
+
+    public function countTemplate(int $count): string
+    {
+        return trans_choice('app.conversations.index.stamp_count', $count, ['count' => ':count']);
     }
 
     public function render(): View

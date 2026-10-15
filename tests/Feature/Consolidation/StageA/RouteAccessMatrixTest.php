@@ -36,7 +36,7 @@ class RouteAccessMatrixTest extends TestCase
     {
         $routes = ApplicationRoutes::named();
 
-        $this->assertCount(47, $routes);
+        $this->assertCount(48, $routes);
 
         $bands = [];
 
@@ -48,7 +48,7 @@ class RouteAccessMatrixTest extends TestCase
         $census = array_count_values($bands);
         ksort($census);
 
-        $this->assertSame(['admin' => 4, 'auth' => 15, 'guest' => 8, 'messaging' => 3, 'profile' => 3, 'public' => 12, 'seller' => 2], $census);
+        $this->assertSame(['admin' => 4, 'auth' => 16, 'guest' => 8, 'messaging' => 3, 'profile' => 3, 'public' => 12, 'seller' => 2], $census);
         $this->assertSame([], array_filter($bands, fn (string $band, string $name): bool => Str::startsWith($name, 'admin.') !== ($band === RouteBand::Admin->value), ARRAY_FILTER_USE_BOTH));
     }
 

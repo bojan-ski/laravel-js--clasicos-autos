@@ -12,6 +12,7 @@ use App\Support\BackUrl;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
 
 class ConversationController extends Controller
@@ -20,11 +21,16 @@ class ConversationController extends Controller
     {
         $viewer = $request->user();
         $audience = $viewer->isAdmin() ? 'admin' : 'member';
+        $conversations = $messaging->conversationsFor($viewer);
+        $unreadCount = $messaging->unreadCountFor($viewer);
 
         return view('pages.conversations.index', [
             'heading' => __("app.conversations.index.title.{$audience}"),
-            'conversations' => $messaging->conversationsFor($viewer),
-            'unreadCount' => $messaging->unreadCountFor($viewer),
+            'conversations' => $conversations,
+            'liveList' => ! $viewer->isAdmin(),
+            'firstPage' => $conversations->onFirstPage(),
+            'unreadCount' => $unreadCount,
+            'unreadLine' => $unreadCount > 0 ? __('app.conversations.index.unread', ['count' => $unreadCount]) : '',
             'emptyMessage' => __("app.conversations.index.empty.{$audience}"),
             'browseUrl' => $viewer->isAdmin() ? null : route('listings.index'),
         ]);
@@ -63,6 +69,15 @@ class ConversationController extends Controller
         return $this->page($request->user(), $conversation->listing, $conversation, $composerAction, route('conversations.index'));
     }
 
+    public function read(Request $request, Conversation $conversation, MessagingService $messaging): Response
+    {
+        Gate::authorize('view', $conversation);
+
+        $messaging->markRead($conversation, $request->user());
+
+        return response()->noContent();
+    }
+
     private function page(User $viewer, CarListing $listing, ?Conversation $conversation, ?string $composerAction, string $backUrl): View
     {
         $sender = $conversation?->sender->username;
@@ -82,6 +97,7 @@ class ConversationController extends Controller
             'conversation' => $conversation,
             'messages' => $conversation?->messages ?? collect(),
             'composerAction' => $composerAction,
+            'markReadUrl' => $conversation !== null && $composerAction !== null ? route('conversations.read', $conversation) : null,
             'emptyMessage' => __($conversation === null ? 'app.conversations.empty.new' : 'app.conversations.empty.thread'),
             'backUrl' => $backUrl,
         ]);

@@ -331,7 +331,7 @@ class EditListingPageTest extends TestCase
         $listing = CarListing::factory()->approved()->withImages($count)->create();
         $owner = $listing->owner;
 
-        $this->expectsDatabaseQueryCount(5);
+        $this->expectsDatabaseQueryCount(6);
 
         $this->actingAs($owner)->get(route('listings.edit', $listing))->assertOk();
     }

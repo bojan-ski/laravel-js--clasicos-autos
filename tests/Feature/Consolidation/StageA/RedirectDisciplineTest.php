@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Support\ListingFormOptions;
 use App\Support\ListingFormValues;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Route as RoutingRoute;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
@@ -62,7 +63,9 @@ class RedirectDisciplineTest extends TestCase
                 $response = $this->send($route, fn (?User $user): array => $this->validPayload($name, $user));
                 $locations["{$name} (valid)"] = $response->headers->get('Location');
 
-                if ($response->getSession()?->has('errors') || $response->getSession()?->has('error')) {
+                $session = $response->baseResponse instanceof RedirectResponse ? $response->getSession() : null;
+
+                if ($session?->has('errors') || $session?->has('error')) {
                     $rejectedValidPayloads[] = $name;
                 }
             }
@@ -73,6 +76,8 @@ class RedirectDisciplineTest extends TestCase
         $this->assertArrayHasKey('cookie-consent.store (empty)', $locations);
         $this->assertSame([], $rejectedValidPayloads);
         $this->assertSame([], $offenders);
+        $this->assertArrayHasKey('conversations.read (valid)', $locations);
+        $this->assertNull($locations['conversations.read (valid)']);
     }
 
     public function test_empty_stage_d_writes_land_on_their_pinned_targets(): void
@@ -170,6 +175,7 @@ class RedirectDisciplineTest extends TestCase
             'admin.account.password.update',
             'admin.listings.approve',
             'admin.listings.reject',
+            'conversations.read',
             'conversations.store',
             'conversations.messages.store',
             'conversations.messages.destroy',

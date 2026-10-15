@@ -1,10 +1,10 @@
 <li id="message-{{ $message->id }}" {{ $attributes->class([
-    'w-fit max-w-110 scroll-mt-16 border px-4 py-3',
+    \App\View\Components\Conversations\MessageBubble::BASE_CLASSES,
     'ml-auto bg-card-unread border-red rotate-[0.4deg]' => $own,
-    'bg-card border-rule -rotate-[0.4deg]' => ! $own,
+    \App\View\Components\Conversations\MessageBubble::OTHER_CLASSES => ! $own,
 ]) }}>
     <p class="wrap-break-word">@unless ($showsSender)<span class="sr-only">{{ __('app.conversations.bubble.said', ['name' => $senderName]) }} </span>@endunless{{ $message->message }}</p>
-    <div class="mt-1 flex flex-wrap items-center gap-x-3 text-[11px] text-muted">
+    <div class="{{ \App\View\Components\Conversations\MessageBubble::META_CLASSES }}">
         @if ($showsSender)
             <span class="wrap-break-word">{{ $senderName }}</span>
         @endif

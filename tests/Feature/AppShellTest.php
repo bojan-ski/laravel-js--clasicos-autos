@@ -8,6 +8,7 @@ use App\Enums\NavCountStyle;
 use App\Models\User;
 use App\Support\MainNavigation;
 use App\Support\NavItem;
+use App\Support\UnreadMessagesCounter;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Route;
 use Tests\TestCase;
@@ -36,6 +37,14 @@ class AppShellTest extends TestCase
         $this->assertSame(['home', 'listings', 'compare'], array_column($navigation->linksFor(NavAudience::Guest, null), 'key'));
         $this->assertSame(['home', 'listings', 'compare', 'bookmarks', 'conversations'], array_column($navigation->linksFor(NavAudience::Member, User::factory()->make()), 'key'));
         $this->assertSame(['conversations'], array_column($navigation->linksFor(NavAudience::Admin, null), 'key'));
+    }
+
+    public function test_the_conversations_item_counts_unread_messages(): void
+    {
+        $items = array_column($this->app->make(MainNavigation::class)->items(), null, 'key');
+
+        $this->assertSame(UnreadMessagesCounter::class, $items['conversations']->counter);
+        $this->assertSame(NavCountStyle::Unread, $items['conversations']->countStyle);
     }
 
     public function test_guest_sees_the_guest_header(): void

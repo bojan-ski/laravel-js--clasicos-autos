@@ -19,9 +19,11 @@ class ConversationsListPageTest extends TestCase
 {
     use LazilyRefreshDatabase;
 
-    private const string UNREAD = 'bg-card-unread shadow-md border-l-3 border-l-red';
+    private const string UNREAD_VARIANTS = 'data-unread:border-l-3 data-unread:border-l-red data-unread:bg-card-unread data-unread:shadow-md"';
 
-    private const string READ = 'outline-gold-ink bg-card shadow-sm"';
+    private const string UNREAD_ATTRIBUTE = '/^<article\b[^>]*\sdata-unread(?=[\s>])/';
+
+    private const string STAMP_WRAPPER = '<div class="pointer-events-none absolute -top-2.5 -right-2.5 hidden rotate-4 group-data-unread:block">';
 
     protected function setUp(): void
     {
@@ -149,7 +151,7 @@ class ConversationsListPageTest extends TestCase
 
         $this->assertStringContainsString('Is the &lt;b&gt;engine&lt;/b&gt; original?', $card);
         $this->assertStringNotContainsString('Hello, is it still for sale?', $card);
-        $this->assertStringContainsString('<time datetime="2026-10-15T10:00:00+00:00" class="shrink-0 text-[11px] text-muted">2 hours ago</time>', $card);
+        $this->assertStringContainsString('<time datetime="2026-10-15T10:00:00+00:00" data-card-time="" class="shrink-0 text-[11px] text-muted">2 hours ago</time>', $card);
     }
 
     public function test_an_emptied_conversation_reads_no_messages_with_its_last_activity_time(): void
@@ -159,7 +161,8 @@ class ConversationsListPageTest extends TestCase
 
         $card = $this->cards($this->list($conversation->sender))[0];
 
-        $this->assertStringContainsString('text-muted italic">No messages</p>', $card);
+        $this->assertStringContainsString('data-empty:text-muted data-empty:italic" data-card-message="" data-empty>No messages</p>', $card);
+        $this->assertStringContainsString('data-last-message-id="0"', $card);
         $this->assertStringContainsString('<time datetime="2026-10-12T12:00:00+00:00"', $card);
         $this->assertStringContainsString('3 days ago', $card);
     }
@@ -171,7 +174,8 @@ class ConversationsListPageTest extends TestCase
         $card = $this->cards($this->list($conversation->sender))[0];
 
         $this->assertStringContainsString('No messages', $card);
-        $this->assertStringNotContainsString('<time', $card);
+        $this->assertStringContainsString('<time data-card-time hidden class="shrink-0 text-[11px] text-muted"></time>', $card);
+        $this->assertStringNotContainsString('datetime=', $card);
     }
 
     public function test_the_card_photo_is_the_listings_thumb(): void
@@ -230,14 +234,16 @@ class ConversationsListPageTest extends TestCase
     {
         $conversation = Conversation::factory()->create();
         $this->message($conversation, $conversation->receiver, 'First unread question.');
-        $this->message($conversation, $conversation->receiver, 'Second unread question.');
+        $latest = $this->message($conversation, $conversation->receiver, 'Second unread question.');
 
         $card = $this->cards($this->list($conversation->sender))[0];
 
         $unreadId = "conversation-{$conversation->id}-unread";
-        $this->assertStringContainsString(self::UNREAD, $card);
-        $this->assertStringContainsString('pointer-events-none absolute -top-2.5 -right-2.5 rotate-4 bg-card', $card);
-        $this->assertStringContainsString('<span class="uppercase">New</span><span id="'.$unreadId.'" class="sr-only"> 2 unread messages</span>', $card);
+        $this->assertStringContainsString(self::UNREAD_VARIANTS, $card);
+        $this->assertStringContainsString('data-conversation-card="'.$conversation->id.'" data-unread-count="2" data-last-message-id="'.$latest->id.'" data-unread>', $card);
+        $this->assertMatchesRegularExpression(self::UNREAD_ATTRIBUTE, $card);
+        $this->assertStringContainsString(self::STAMP_WRAPPER, $card);
+        $this->assertStringContainsString('<span class="uppercase">New</span><span id="'.$unreadId.'" data-card-count data-template-one=":count unread message" data-template-other=":count unread messages" class="sr-only"> 2 unread messages</span>', $card);
         $this->assertStringContainsString('<a href="'.route('conversations.show', $conversation).'" aria-describedby="'.$unreadId.'"', $card);
     }
 
@@ -268,8 +274,10 @@ class ConversationsListPageTest extends TestCase
         $response = $this->list($conversation->sender);
         $card = $this->cards($response)[0];
 
-        $this->assertStringContainsString(self::READ, $card);
-        $this->assertStringNotContainsString('bg-card-unread', $card);
+        $this->assertStringContainsString(self::UNREAD_VARIANTS, $card);
+        $this->assertStringContainsString('data-unread-count="0" data-last-message-id="', $card);
+        $this->assertDoesNotMatchRegularExpression(self::UNREAD_ATTRIBUTE, $card);
+        $this->assertStringContainsString(self::STAMP_WRAPPER, $card);
         $this->assertStringNotContainsString('sr-only"> 1 unread', $card);
         $this->assertStringNotContainsString('aria-describedby', $card);
         $response->assertDontSee('1 unread');
@@ -284,10 +292,14 @@ class ConversationsListPageTest extends TestCase
         $response = $this->list(User::factory()->admin()->create());
         $card = $this->cards($response)[0];
 
-        $this->assertStringContainsString(self::READ, $card);
-        $this->assertStringNotContainsString('bg-card-unread', $card);
+        $this->assertStringContainsString(self::UNREAD_VARIANTS, $card);
+        $this->assertDoesNotMatchRegularExpression(self::UNREAD_ATTRIBUTE, $card);
+        $this->assertStringNotContainsString('group-data-unread:block', $card);
+        $this->assertStringNotContainsString('data-conversation-card', $card);
+        $this->assertStringNotContainsString('data-card-', $card);
         $this->assertStringNotContainsString('unread message', $card);
-        $response->assertDontSee('1 unread')->assertViewHas('unreadCount', 0);
+        $response->assertDontSee('1 unread')->assertViewHas('unreadCount', 0)
+            ->assertDontSee('data-live-', false);
     }
 
     public function test_the_unread_line_counts_messages_on_every_page(): void
@@ -304,15 +316,61 @@ class ConversationsListPageTest extends TestCase
 
         $this->list($seller)
             ->assertViewHas('unreadCount', 20)
-            ->assertSeeInOrder(['My Conversations', '<p class="text-sm text-ink-2 tabular-nums">20 unread</p>'], false);
+            ->assertSeeInOrder(['My Conversations', '<p role="status" data-live-unread data-template=":count unread" class="text-sm text-ink-2 tabular-nums">20 unread</p>'], false);
     }
 
-    public function test_the_unread_line_is_absent_at_zero(): void
+    public function test_the_unread_line_is_an_empty_status_at_zero(): void
     {
         $conversation = Conversation::factory()->create();
         $this->message($conversation, $conversation->sender, 'Nobody has answered yet.');
 
-        $this->list($conversation->sender)->assertDontSee('text-sm text-ink-2 tabular-nums', false);
+        $this->list($conversation->sender)
+            ->assertSee('<p role="status" data-live-unread data-template=":count unread" class="text-sm text-ink-2 tabular-nums"></p>', false);
+    }
+
+    public function test_a_participants_list_is_live_with_the_notice_region_and_its_template(): void
+    {
+        $conversation = Conversation::factory()->create();
+
+        $response = $this->list($conversation->sender);
+
+        $response->assertSee('data-live-list="" data-first-page>', false)
+            ->assertSeeInOrder([
+                '<div role="status" data-live-notice-region></div>',
+                '<template data-live-notice>',
+                '<p class="mt-4 border-l-3 border-l-red bg-card-unread px-4 py-3 text-sm text-ink md:mt-6">New messages — <a href="'.route('conversations.index').'" class="text-red underline">refresh</a></p>',
+                '<article',
+            ], false);
+    }
+
+    public function test_a_later_page_is_live_without_the_first_page_marker(): void
+    {
+        $seller = User::factory()->create();
+        $listing = CarListing::factory()->approved()->for($seller, 'owner')->create();
+        foreach (range(1, 19) as $minutesAgo) {
+            $this->buyerOn($listing, "buyer {$minutesAgo} min", now()->subMinutes($minutesAgo)->toDateTimeString());
+        }
+
+        $this->list($seller, ['page' => 2])
+            ->assertSee('data-live-list="">', false)
+            ->assertDontSee('data-first-page', false);
+    }
+
+    public function test_an_empty_participant_list_stays_live_with_its_notice_region(): void
+    {
+        $this->list(User::factory()->create())
+            ->assertSee('data-live-list="" data-first-page>', false)
+            ->assertSeeInOrder(['<div role="status" data-live-notice-region></div>', 'You have no active conversations'], false)
+            ->assertSee('data-live-unread', false);
+    }
+
+    public function test_an_admins_list_is_never_live(): void
+    {
+        Conversation::factory()->create();
+
+        $this->list(User::factory()->admin()->create())
+            ->assertDontSee('data-live-', false)
+            ->assertDontSee('<template data-live-notice>', false);
     }
 
     public function test_a_member_without_conversations_is_invited_to_browse_listings(): void
@@ -359,8 +417,9 @@ class ConversationsListPageTest extends TestCase
         foreach ([$list, $thread, $new] as $page) {
             $this->assertMatchesRegularExpression($current, $page);
         }
-        $this->assertStringNotContainsString('data-nav-count', $list);
-        $this->assertStringNotContainsString('data-menu-signal', $list);
+        $this->assertStringContainsString('data-nav-count', $list);
+        $this->assertStringNotContainsString('data-nav-count', $thread);
+        $this->assertStringNotContainsString('data-menu-signal', $thread);
     }
 
     public function test_many_cards_load_without_lazy_loading_and_a_constant_query_count(): void
