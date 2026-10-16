@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>500 — {{ __('app.errors.500.title') }}</title>
+    <x-global.robots-meta :status="500" />
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         body { margin: 0; min-height: 100vh; display: flex; flex-direction: column; background: #efe7d6; color: #201f1d; font-family: Georgia, 'Times New Roman', serif; }

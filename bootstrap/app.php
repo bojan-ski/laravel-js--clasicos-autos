@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\AddRobotsTag;
 use App\Http\Middleware\EndSuspendedSessions;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -16,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->prepend(AddRobotsTag::class);
         $middleware->redirectUsersTo(fn (Request $request): string => route($request->user()->landingRoute()));
         $middleware->web(append: EndSuspendedSessions::class);
         $middleware->prependToPriorityList(before: SubstituteBindings::class, prepend: EndSuspendedSessions::class);

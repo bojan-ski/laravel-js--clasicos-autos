@@ -1,4 +1,4 @@
-<x-layouts.app :title="$listing->name">
+<x-layouts.app :title="$listing->name" :seo="$seo">
     <x-ui.back-link :href="$backUrl">
         @can('update', $listing)
             <x-ui.button variant="secondary" size="responsive" :href="route('listings.edit', $listing)">

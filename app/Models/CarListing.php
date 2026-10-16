@@ -15,6 +15,7 @@ use App\Enums\SeatMaterial;
 use App\Enums\Transmission;
 use App\Enums\UserStatus;
 use App\Enums\VehicleCondition;
+use App\Support\Seo\CanonicalUrl;
 use Database\Factories\CarListingFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -177,6 +178,17 @@ class CarListing extends Model
     public function isOwnedBy(?User $user): bool
     {
         return $this->owner()->is($user);
+    }
+
+    /**
+     * @return array{loc: string, lastmod: ?string}
+     */
+    public function toSitemapArray(): array
+    {
+        return [
+            'loc' => CanonicalUrl::route('listings.show', $this),
+            'lastmod' => $this->updated_at?->toAtomString(),
+        ];
     }
 
     public function hasCustomModel(): bool
