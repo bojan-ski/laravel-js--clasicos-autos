@@ -14,9 +14,12 @@ class Footer extends Component
      */
     public array $legalLinks;
 
+    public string $copyright;
+
     public function __construct(MainNavigation $navigation)
     {
         $this->legalLinks = $navigation->legalLinks();
+        $this->copyright = __('app.footer.copyright', ['year' => now()->year]);
     }
 
     public function render(): View

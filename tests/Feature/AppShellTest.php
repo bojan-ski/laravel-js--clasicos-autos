@@ -59,7 +59,7 @@ class AppShellTest extends TestCase
     {
         $this->blade('<x-global.header :audience="\App\Enums\NavAudience::Member" />')
             ->assertSee('class="mx-auto flex max-w-7xl items-center gap-8 px-5 py-4 md:px-14 md:py-5 lg:gap-5 lg:px-8 xl:gap-8 xl:px-14"', false)
-            ->assertSee('class="mr-auto flex items-center gap-2.5 whitespace-nowrap"', false)
+            ->assertSee('class="mr-auto flex items-center gap-1.5 whitespace-nowrap"', false)
             ->assertSee('class="hidden items-center gap-5 text-sm whitespace-nowrap lg:flex xl:gap-7"', false)
             ->assertSee('class="hidden items-center gap-2.5 whitespace-nowrap lg:flex"', false)
             ->assertSee('data-desktop-query="(min-width: 64rem)" class="group lg:hidden"', false);
@@ -153,16 +153,35 @@ class AppShellTest extends TestCase
 
     public function test_the_wordmark_is_gold_light_on_the_dark_admin_bar_and_red_on_paper(): void
     {
-        $dark = (string) $this->blade('<x-global.music-toggle :on-dark="true" />');
-        $light = (string) $this->blade('<x-global.music-toggle />');
+        $this->actingAs(User::factory()->make());
+        $dark = (string) $this->blade('<x-global.header :audience="\App\Enums\NavAudience::Admin" />');
+        $light = (string) $this->blade('<x-global.header :audience="\App\Enums\NavAudience::Guest" />');
 
-        $this->assertMatchesRegularExpression('/<button[^>]*data-music-toggle[^>]*class="[^"]*\btext-gold-light\b/', $dark);
-        $this->assertDoesNotMatchRegularExpression('/<button[^>]*data-music-toggle[^>]*class="[^"]*\btext-red\b/', $dark);
-        $this->assertStringContainsString('data-[state=on]:text-gold-light', $dark);
-        $this->assertStringNotContainsString('data-[state=on]:text-red', $dark);
+        $this->assertMatchesRegularExpression('/<a[^>]*data-wordmark[^>]*class="[^"]*\btext-gold-light\b/', $dark);
+        $this->assertDoesNotMatchRegularExpression('/<a[^>]*data-wordmark[^>]*class="[^"]*\btext-red\b/', $dark);
+        $this->assertStringContainsString('group-data-[state=on]:text-gold-light', $dark);
+        $this->assertStringNotContainsString('group-data-[state=on]:text-red', $dark);
 
-        $this->assertMatchesRegularExpression('/<button[^>]*data-music-toggle[^>]*class="[^"]*\btext-red\b/', $light);
-        $this->assertStringContainsString('data-[state=on]:text-red', $light);
+        $this->assertMatchesRegularExpression('/<a[^>]*data-wordmark[^>]*class="[^"]*\btext-red\b/', $light);
+        $this->assertStringContainsString('group-data-[state=on]:text-red', $light);
+    }
+
+    public function test_the_wordmark_links_home_and_only_the_speaker_toggles_the_music(): void
+    {
+        $header = (string) $this->blade('<x-global.header :audience="\App\Enums\NavAudience::Guest" />');
+
+        $this->assertMatchesRegularExpression('/<a href="'.preg_quote(route('home'), '/').'" data-wordmark[^>]*>'.preg_quote(e(__('app.name')), '/').'<\/a>/', $header);
+        $this->assertMatchesRegularExpression('/<button type="button" data-music-toggle hidden\s+aria-label="'.preg_quote(e(__('app.music.label')), '/').'"/', $header);
+        $this->assertDoesNotMatchRegularExpression('/data-music-toggle[^>]*>[^<]*'.preg_quote(e(__('app.name')), '/').'/', $header);
+    }
+
+    public function test_the_footer_shows_the_copyright_with_the_current_year(): void
+    {
+        $this->travelTo(now()->setDate(2031, 5, 1));
+
+        $this->get('/')
+            ->assertSee('<p data-copyright', false)
+            ->assertSee(__('app.footer.copyright', ['year' => 2031]));
     }
 
     public function test_admin_layout_forces_the_admin_header(): void
@@ -282,9 +301,8 @@ class AppShellTest extends TestCase
             ->assertSee('data-back-to-top', false)
             ->assertSee('data-mobile-menu', false)
             ->assertSee('data-music-toggle', false)
-            ->assertSee('aria-label="'.e(__('app.music.label', ['name' => __('app.name')])).'"', false)
-            ->assertSee('data-music-audio', false)
-            ->assertSee('data-music-indicator', false);
+            ->assertSee('aria-label="'.e(__('app.music.label')).'"', false)
+            ->assertSee('data-music-audio', false);
     }
 
     public function test_page_references_no_third_party_font_host_and_no_autoplay(): void

@@ -54,9 +54,9 @@ return [
     ],
 
     'music' => [
-        'label' => ':name — background music',
-        'on' => 'Music on — click the logo to mute',
-        'off' => 'Music off — click the logo to play',
+        'label' => 'Background music',
+        'on' => 'Music on — click to mute',
+        'off' => 'Music off — click to play',
     ],
 
     'flash' => [
@@ -83,6 +83,10 @@ return [
         'notice' => 'Clásicos Autos uses only the cookies it needs to work: your session, form security and the remember-me option. No analytics, no advertising.',
         'policy' => 'Cookie policy',
         'accept' => 'Accept',
+    ],
+
+    'footer' => [
+        'copyright' => '© :year Clásicos Autos. All rights reserved. code BPdevelopment',
     ],
 
     'legal' => [
