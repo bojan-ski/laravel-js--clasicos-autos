@@ -24,6 +24,7 @@ class ReferenceDataPolicyTest extends TestCase
     {
         return [
             'maker viewAny' => ['viewAny', 'maker class'],
+            'maker view' => ['view', 'maker'],
             'maker create' => ['create', 'maker class'],
             'maker update' => ['update', 'maker'],
             'maker delete' => ['delete', 'maker'],

@@ -40,7 +40,7 @@ class AppShellTest extends TestCase
 
         $this->assertSame(['home', 'listings', 'compare'], array_column($navigation->linksFor(NavAudience::Guest, null), 'key'));
         $this->assertSame(['home', 'listings', 'compare', 'bookmarks', 'conversations', 'contact'], array_column($navigation->linksFor(NavAudience::Member, User::factory()->make()), 'key'));
-        $this->assertSame(['users', 'admin-listings', 'admin-reports', 'admin-feedback', 'conversations'], array_column($navigation->linksFor(NavAudience::Admin, null), 'key'));
+        $this->assertSame(['users', 'admin-listings', 'admin-reports', 'admin-feedback', 'admin-makers', 'conversations'], array_column($navigation->linksFor(NavAudience::Admin, null), 'key'));
     }
 
     public function test_the_feedback_item_counts_new_messages_in_the_queue_style(): void

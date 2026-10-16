@@ -10,6 +10,8 @@ use App\Enums\ReportStatus;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
 use App\Models\CarListing;
+use App\Models\CarMaker;
+use App\Models\CarModel;
 use App\Models\ContactMessage;
 use App\Models\Conversation;
 use App\Models\ListingImage;
@@ -97,6 +99,18 @@ class ReviewSeederTest extends TestCase
         $this->assertGreaterThanOrEqual(4, $public->pluck('car_maker_id')->unique()->count());
         $this->assertFalse($public->contains(fn (CarListing $listing): bool => $listing->car_model_id === null));
         $this->assertSame(1, $public->filter(fn (CarListing $listing): bool => $listing->images()->exists())->count());
+    }
+
+    public function test_it_seeds_an_unused_inactive_maker_and_an_unused_inactive_model_under_an_active_seeded_maker(): void
+    {
+        $this->seed([DatabaseSeeder::class, ReviewSeeder::class]);
+
+        $maker = CarMaker::query()->where('is_active', false)->sole();
+        $model = CarModel::query()->where('is_active', false)->sole();
+
+        $this->assertSame(['Tucker', true], [$maker->name, $maker->isDeletable()]);
+        $this->assertSame(['Prototype', true, true], [$model->name, $model->isDeletable(), $model->maker->is_active]);
+        $this->assertSame(0, CarListing::query()->whereHas('carModel', fn ($query) => $query->where('is_active', false))->count());
     }
 
     public function test_the_review_user_owns_a_pending_and_a_rejected_listing_with_a_reason(): void

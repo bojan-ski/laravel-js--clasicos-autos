@@ -29,4 +29,11 @@ export function initDialogs() {
         const opener = openers.get(event.target)
         if (opener?.isConnected && document.activeElement !== opener) opener.focus()
     }, true)
+
+    const autoOpen = document.querySelector('dialog[data-dialog-autoopen]')
+    if (autoOpen instanceof HTMLDialogElement && !autoOpen.open) {
+        const opener = document.querySelector(`[data-dialog-open="${CSS.escape(autoOpen.id)}"]`)
+        if (opener) openers.set(autoOpen, opener)
+        autoOpen.showModal()
+    }
 }

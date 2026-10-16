@@ -3,6 +3,7 @@
 namespace Tests\Feature\Consolidation\StageA;
 
 use App\Models\CarListing;
+use App\Models\CarMaker;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\User;
@@ -44,6 +45,10 @@ class RedirectDisciplineTest extends TestCase
         'contact.store' => 'contact',
         'admin.feedback.status' => 'admin.feedback',
         'admin.listings.promote' => 'admin.listings',
+        'admin.makers.active' => 'admin.makers',
+        'admin.makers.destroy' => 'admin.makers',
+        'admin.makers.store' => 'admin.makers',
+        'admin.makers.update' => 'admin.makers',
         'admin.reports.resolve' => 'admin.reports',
         'admin.users.destroy' => 'admin.users',
         'admin.users.suspend' => 'admin.users',
@@ -132,6 +137,20 @@ class RedirectDisciplineTest extends TestCase
         $this->assertSame(array_fill_keys(array_keys(self::STAGE_F_PINNED_TARGETS), true), $landed);
     }
 
+    public function test_empty_model_writes_land_on_their_makers_page(): void
+    {
+        $writes = $this->writeRoutes();
+        $names = ['admin.makers.models.active', 'admin.makers.models.destroy', 'admin.makers.models.store', 'admin.makers.models.update'];
+        $landed = [];
+
+        foreach ($names as $name) {
+            $location = $this->send($writes[$name], fn (?User $user): array => [])->headers->get('Location');
+            $landed[$name] = $location === route('admin.makers.show', CarMaker::query()->latest('id')->value('id'));
+        }
+
+        $this->assertSame(array_fill_keys($names, true), $landed);
+    }
+
     public function test_an_empty_report_lands_on_the_reported_message_in_its_thread(): void
     {
         $location = $this->send($this->writeRoutes()['conversations.messages.report'], fn (?User $user): array => [])->headers->get('Location');
@@ -211,6 +230,14 @@ class RedirectDisciplineTest extends TestCase
             'admin.listings.approve',
             'admin.listings.promote',
             'admin.listings.reject',
+            'admin.makers.active',
+            'admin.makers.destroy',
+            'admin.makers.models.active',
+            'admin.makers.models.destroy',
+            'admin.makers.models.store',
+            'admin.makers.models.update',
+            'admin.makers.store',
+            'admin.makers.update',
             'admin.reports.resolve',
             'admin.users.destroy',
             'admin.users.suspend',
@@ -274,6 +301,11 @@ class RedirectDisciplineTest extends TestCase
                 'year_from' => config('listings.min_year'),
                 'year_to' => config('listings.max_year'),
             ],
+            'admin.makers.store' => ['name' => 'Redirect Motors'],
+            'admin.makers.update' => ['name' => 'Renamed Motors'],
+            'admin.makers.active', 'admin.makers.models.active' => ['active' => '0'],
+            'admin.makers.models.store' => ['name' => 'Redirect Roadster', 'year_from' => config('listings.min_year'), 'year_to' => config('listings.max_year')],
+            'admin.makers.models.update' => ['name' => 'Renamed Roadster', 'year_from' => config('listings.min_year'), 'year_to' => config('listings.max_year')],
             'admin.users.suspend' => ['reason' => 'Repeated abusive messages.', 'duration' => '30_days'],
             'admin.reports.resolve' => ['outcome' => 'dismissed'],
             'contact.store' => ['subject' => 'A question about listings', 'message' => 'How long does approval usually take?'],

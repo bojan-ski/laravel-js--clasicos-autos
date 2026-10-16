@@ -7,6 +7,7 @@
         'status-pending' => ['outer' => 'border-status-pending text-gold-ink bg-status-pending/10', 'inner' => 'border-status-pending'],
         'status-approved' => ['outer' => 'border-status-approved text-status-approved bg-status-approved/10', 'inner' => 'border-status-approved'],
         'status-rejected' => ['outer' => 'border-status-rejected text-status-rejected bg-status-rejected/10', 'inner' => 'border-status-rejected'],
+        'status-info' => ['outer' => 'border-status-info text-status-info bg-status-info/10', 'inner' => 'border-status-info'],
     ];
 @endphp
 

@@ -69,6 +69,7 @@ class ReviewSeeder extends Seeder
         $this->seedCustomModelListing($stranger, $models[0]->car_maker_id);
         $this->seedReports($strangerMessage, $user, $reviewerReply, $buyer, $moderatorId);
         $this->seedContactMessages($user, $buyer, $moderatorId);
+        $this->seedInactiveReferenceData($models[0]->car_maker_id);
     }
 
     private function appUser(string $username, string $email, string $phone): User
@@ -249,6 +250,18 @@ class ReviewSeeder extends Seeder
             'created_at' => $now->subDays(2),
             'updated_at' => $now->subDay(),
         ]);
+    }
+
+    private function seedInactiveReferenceData(int $makerId): void
+    {
+        $maker = new CarMaker(['name' => 'Tucker']);
+        $maker->is_active = false;
+        $maker->save();
+
+        $model = new CarModel(['name' => 'Prototype', 'year_from' => 1950, 'year_to' => 1955]);
+        $model->car_maker_id = $makerId;
+        $model->is_active = false;
+        $model->save();
     }
 
     /**

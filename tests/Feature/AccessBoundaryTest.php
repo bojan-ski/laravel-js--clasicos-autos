@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\CarListing;
+use App\Models\CarMaker;
+use App\Models\CarModel;
 use App\Models\ContactMessage;
 use App\Models\MessageReport;
 use App\Models\User;
@@ -48,6 +50,16 @@ class AccessBoundaryTest extends TestCase
             'PATCH admin reports resolve' => ['patch', 'admin.reports.resolve'],
             'GET admin feedback' => ['get', 'admin.feedback'],
             'PATCH admin feedback status' => ['patch', 'admin.feedback.status'],
+            'GET admin makers' => ['get', 'admin.makers'],
+            'POST admin makers store' => ['post', 'admin.makers.store'],
+            'GET admin makers show' => ['get', 'admin.makers.show'],
+            'PATCH admin makers update' => ['patch', 'admin.makers.update'],
+            'PATCH admin makers active' => ['patch', 'admin.makers.active'],
+            'DELETE admin makers destroy' => ['delete', 'admin.makers.destroy'],
+            'POST admin makers models store' => ['post', 'admin.makers.models.store'],
+            'PATCH admin makers models update' => ['patch', 'admin.makers.models.update'],
+            'PATCH admin makers models active' => ['patch', 'admin.makers.models.active'],
+            'DELETE admin makers models destroy' => ['delete', 'admin.makers.models.destroy'],
             'GET contact' => ['get', 'contact'],
             'POST contact' => ['post', 'contact.store'],
         ];
@@ -80,6 +92,16 @@ class AccessBoundaryTest extends TestCase
             'appUser PATCH admin reports resolve' => ['appUser', 'patch', 'admin.reports.resolve'],
             'appUser GET admin feedback' => ['appUser', 'get', 'admin.feedback'],
             'appUser PATCH admin feedback status' => ['appUser', 'patch', 'admin.feedback.status'],
+            'appUser GET admin makers' => ['appUser', 'get', 'admin.makers'],
+            'appUser POST admin makers store' => ['appUser', 'post', 'admin.makers.store'],
+            'appUser GET admin makers show' => ['appUser', 'get', 'admin.makers.show'],
+            'appUser PATCH admin makers update' => ['appUser', 'patch', 'admin.makers.update'],
+            'appUser PATCH admin makers active' => ['appUser', 'patch', 'admin.makers.active'],
+            'appUser DELETE admin makers destroy' => ['appUser', 'delete', 'admin.makers.destroy'],
+            'appUser POST admin makers models store' => ['appUser', 'post', 'admin.makers.models.store'],
+            'appUser PATCH admin makers models update' => ['appUser', 'patch', 'admin.makers.models.update'],
+            'appUser PATCH admin makers models active' => ['appUser', 'patch', 'admin.makers.models.active'],
+            'appUser DELETE admin makers models destroy' => ['appUser', 'delete', 'admin.makers.models.destroy'],
             'admin GET contact' => ['admin', 'get', 'contact'],
             'admin POST contact' => ['admin', 'post', 'contact.store'],
         ];
@@ -162,6 +184,12 @@ class AccessBoundaryTest extends TestCase
             str_starts_with($route, 'admin.listings.') => route($route, CarListing::factory()->customModel()->create()),
             str_starts_with($route, 'admin.reports.') => route($route, MessageReport::factory()->create()),
             str_starts_with($route, 'admin.feedback.') => route($route, ContactMessage::factory()->create()),
+            in_array($route, ['admin.makers.models.update', 'admin.makers.models.active', 'admin.makers.models.destroy'], true) => (function () use ($route): string {
+                $model = CarModel::factory()->create();
+
+                return route($route, ['maker' => $model->car_maker_id, 'model' => $model->id]);
+            })(),
+            str_starts_with($route, 'admin.makers.') && $route !== 'admin.makers.store' => route($route, CarMaker::factory()->create()),
             default => route($route),
         };
     }
