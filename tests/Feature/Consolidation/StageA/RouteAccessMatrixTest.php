@@ -175,7 +175,7 @@ class RouteAccessMatrixTest extends TestCase
         }
 
         if ($band === RouteBand::Public) {
-            return $response->status() === 204 || ($response->isRedirect() && ! $response->isRedirect(route('login')));
+            return $response->isSuccessful() || ($response->isRedirect() && ! $response->isRedirect(route('login')));
         }
 
         return $response->status() < 500

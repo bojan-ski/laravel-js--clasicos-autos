@@ -51,6 +51,41 @@ class BookmarkFlowTest extends TestCase
         $this->assertDatabaseMissing('user_bookmarks', ['user_id' => $user->id, 'car_listing_id' => $listing->id]);
     }
 
+    public function test_a_json_store_answers_with_the_new_state_instead_of_redirecting(): void
+    {
+        $user = User::factory()->create();
+        $listing = CarListing::factory()->approved()->create();
+
+        $this->actingAs($user)->postJson(route('bookmarks.store', $listing))
+            ->assertOk()
+            ->assertExactJson(['bookmarked' => true, 'message' => __('app.bookmarks.flash.added')])
+            ->assertSessionMissing('success');
+        $this->assertDatabaseHas('user_bookmarks', ['user_id' => $user->id, 'car_listing_id' => $listing->id]);
+    }
+
+    public function test_a_json_destroy_answers_with_the_new_state(): void
+    {
+        $user = User::factory()->create();
+        $listing = CarListing::factory()->approved()->create();
+        $user->bookmarks()->attach($listing->id);
+
+        $this->actingAs($user)->deleteJson(route('bookmarks.destroy', $listing))
+            ->assertOk()
+            ->assertExactJson(['bookmarked' => false, 'message' => __('app.bookmarks.flash.removed')])
+            ->assertSessionMissing('success');
+        $this->assertDatabaseMissing('user_bookmarks', ['user_id' => $user->id, 'car_listing_id' => $listing->id]);
+    }
+
+    public function test_json_writes_are_refused_for_a_guest_and_the_owner(): void
+    {
+        $owner = User::factory()->create();
+        $listing = CarListing::factory()->approved()->for($owner, 'owner')->create();
+
+        $this->postJson(route('bookmarks.store', $listing))->assertUnauthorized();
+        $this->actingAs($owner)->postJson(route('bookmarks.store', $listing))->assertForbidden();
+        $this->assertDatabaseCount('user_bookmarks', 0);
+    }
+
     public function test_bookmarking_twice_keeps_one_row_with_its_original_time_and_flashes_success(): void
     {
         $user = User::factory()->create();

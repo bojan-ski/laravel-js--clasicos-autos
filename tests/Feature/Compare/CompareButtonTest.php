@@ -58,6 +58,29 @@ class CompareButtonTest extends TestCase
         $this->assertStringContainsString('d="M20 6 9 17l-5-5"', $form);
     }
 
+    public function test_the_pressed_look_follows_aria_pressed_so_a_script_can_flip_it(): void
+    {
+        $listing = CarListing::factory()->approved()->create();
+
+        $form = (string) $this->compareForm((string) $this->get(route('listings.show', $listing))->getContent(), $listing);
+
+        $this->assertStringContainsString('aria-pressed:border-red aria-pressed:bg-red/10 aria-pressed:text-red', $form);
+        $this->assertMatchesRegularExpression('/<span class="[^"]*\bhidden\b[^"]*\bgroup-aria-pressed:flex\b[^"]*">\s*<svg[^>]*>\s*<path d="M20 6 9 17l-5-5"/', $form);
+    }
+
+    public function test_a_page_with_toggles_carries_the_flash_templates_once_and_a_page_without_none(): void
+    {
+        CarListing::factory()->approved()->count(2)->create();
+        $this->actingAs(User::factory()->create());
+
+        $withToggles = (string) $this->get(route('listings.index'))->getContent();
+        $without = (string) $this->get(route('contact'))->getContent();
+
+        $this->assertSame(1, substr_count($withToggles, '<template data-flash-template="success">'));
+        $this->assertSame(1, substr_count($withToggles, '<template data-flash-template="error">'));
+        $this->assertStringNotContainsString('data-flash-template', $without);
+    }
+
     public function test_the_accessible_name_is_the_same_whether_held_or_not(): void
     {
         [$held, $free] = CarListing::factory()->approved()->count(2)->create();

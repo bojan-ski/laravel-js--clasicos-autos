@@ -51,7 +51,8 @@ class CompareNavTest extends TestCase
         $response = $this->get(route('home'));
 
         $response->assertSee(__('app.nav.compare'))
-            ->assertDontSee('data-nav-count', false);
+            ->assertDontSee('data-nav-count', false)
+            ->assertSee('<span data-selected-count data-template="'.e(__('app.header.selected_count')).'" hidden', false);
     }
 
     public function test_only_public_held_listings_are_counted(): void

@@ -238,6 +238,50 @@ class CompareFlowTest extends TestCase
         $this->assertSame([], $writes);
     }
 
+    public function test_a_json_add_answers_with_the_new_state_and_count_instead_of_redirecting(): void
+    {
+        [$held, $listing] = CarListing::factory()->approved()->count(2)->create();
+        $this->hold([$held->id]);
+
+        $this->postJson(route('compare.add', $listing))
+            ->assertOk()
+            ->assertExactJson(['selected' => true, 'count' => 2, 'message' => __('app.compare.flash.added')])
+            ->assertSessionMissing('success');
+        $this->assertSame([$held->id, $listing->id], $this->held());
+    }
+
+    public function test_a_json_add_past_the_limit_is_a_conflict_with_the_full_message(): void
+    {
+        $listings = CarListing::factory()->approved()->count(3)->create();
+        $this->hold([$listings[0]->id, $listings[1]->id]);
+
+        $this->postJson(route('compare.add', $listings[2]))
+            ->assertConflict()
+            ->assertExactJson(['message' => __('app.compare.flash.full')])
+            ->assertSessionMissing('error');
+        $this->assertSame([$listings[0]->id, $listings[1]->id], $this->held());
+    }
+
+    public function test_a_json_remove_answers_with_the_new_state_and_count(): void
+    {
+        [$first, $second] = CarListing::factory()->approved()->count(2)->create();
+        $this->hold([$first->id, $second->id]);
+
+        $this->deleteJson(route('compare.remove', $first))
+            ->assertOk()
+            ->assertExactJson(['selected' => false, 'count' => 1, 'message' => __('app.compare.flash.removed')])
+            ->assertSessionMissing('success');
+        $this->assertSame([$second->id], $this->held());
+    }
+
+    public function test_a_json_add_of_a_non_public_listing_is_not_found(): void
+    {
+        $listing = CarListing::factory()->create();
+
+        $this->postJson(route('compare.add', $listing))->assertNotFound();
+        $this->assertNull($this->held());
+    }
+
     private function actAs(string $viewer): void
     {
         match ($viewer) {

@@ -13,6 +13,7 @@ import { initMobileMenu } from './modules/mobile-menu'
 import { initModelSelect } from './modules/model-select'
 import { initMusic } from './modules/music'
 import { initPhotoInput } from './modules/photo-input'
+import { initToggleForms } from './modules/toggle-forms'
 
 document.addEventListener('DOMContentLoaded', () => {
     initFlash()
@@ -28,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initPhotoInput()
     initFormProgress()
     initComposer()
+    initToggleForms()
     initErrorFocus()
     initLiveMessages()
 })
