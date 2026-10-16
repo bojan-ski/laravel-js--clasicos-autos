@@ -1,6 +1,6 @@
 <li id="message-{{ $message->id }}" {{ $attributes->class([
     \App\View\Components\Conversations\MessageBubble::BASE_CLASSES,
-    'ml-auto bg-card-unread border-red rotate-[0.4deg]' => $own,
+    \App\View\Components\Conversations\MessageBubble::OWN_CLASSES => $own,
     \App\View\Components\Conversations\MessageBubble::OTHER_CLASSES => ! $own,
 ]) }}>
     <p id="{{ $textId() }}" class="wrap-break-word">@unless ($showsSender)<span class="sr-only">{{ __('app.conversations.bubble.said', ['name' => $senderName]) }} </span>@endunless{{ $message->message }}</p>
@@ -17,7 +17,7 @@
             @endif
         @endcan
         @can('delete', $message)
-            <x-conversations.delete-message-dialog :message="$message" :action="$deleteAction()" :time="$time()" />
+            <x-conversations.delete-message-dialog :id="$deleteDialogId()" :action="$deleteAction()" :time="$time()" />
         @endcan
     </div>
 </li>

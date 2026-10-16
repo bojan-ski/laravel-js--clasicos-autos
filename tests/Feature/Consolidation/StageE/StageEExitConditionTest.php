@@ -63,7 +63,7 @@ class StageEExitConditionTest extends TestCase
         $this->assertSame(1, $conversation->messages()->count());
         $this->assertSame([$this->seller->id], $this->recipientsOfDispatches());
         $this->as($this->buyer)->post(route('conversations.store', $this->listing), ['message' => self::SECOND])
-            ->assertRedirect(route('conversations.show', $conversation).'#message-'.$this->messageWith(self::SECOND)->id);
+            ->assertRedirect(route('conversations.show', $conversation));
         $this->assertSame(1, Conversation::query()->count());
         $this->assertSame(2, $conversation->messages()->count());
         $this->assertSame([$this->seller->id, $this->seller->id], $this->recipientsOfDispatches());

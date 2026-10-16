@@ -1,4 +1,5 @@
 import { api } from '../lib/api'
+import { insertBubble } from '../lib/thread'
 
 export function initLiveMessages() {
     const header = document.querySelector('header[data-live-channel]')
@@ -10,16 +11,32 @@ export function initLiveMessages() {
 
         const channel = header.dataset.liveChannel
         const handled = new Set()
+        let missedPushes = false
 
-        const subscribe = () => echo.private(channel).listen('.message.sent', (payload) => {
-            if (handled.has(payload.id)) return
-            handled.add(payload.id)
+        const setLive = (live) => header.toggleAttribute('data-live-connected', live && !missedPushes)
+        const markMissed = () => {
+            missedPushes = true
+            setLive(false)
+        }
 
-            receive(payload)
+        const subscribe = () => echo.private(channel)
+            .listen('.message.sent', (payload) => {
+                if (handled.has(payload.id)) return
+                handled.add(payload.id)
+
+                receive(payload)
+            })
+            .subscribed(() => setLive(true))
+
+        echo.connector.pusher.connection.bind('state_change', ({ previous, current }) => {
+            if (previous === 'connected' && current !== 'connected') markMissed()
         })
 
         subscribe()
-        window.addEventListener('pagehide', () => echo.leave(channel))
+        window.addEventListener('pagehide', () => {
+            markMissed()
+            echo.leave(channel)
+        })
         window.addEventListener('pageshow', (event) => {
             if (event.persisted) subscribe()
         })
@@ -45,31 +62,13 @@ function appendToThread(thread, payload) {
     const template = thread.querySelector('template[data-live-bubble]')
     if (!list || !template || document.getElementById(`message-${payload.id}`)) return
 
-    const endInView = list.getBoundingClientRect().bottom <= window.innerHeight
-    const bubble = template.content.firstElementChild.cloneNode(true)
-    const time = bubble.querySelector('[data-live-bubble-time]')
-    const placeholder = template.dataset.liveBubblePlaceholder
+    const endInView = list.getBoundingClientRect().bottom <= Math.min(thread.getBoundingClientRect().bottom, window.innerHeight) + 1
+    const bubble = insertBubble(list, template, template.dataset.liveBubblePlaceholder, payload)
 
-    if (placeholder) replacePlaceholder(bubble, placeholder, String(payload.id))
-    bubble.id = `message-${payload.id}`
-    bubble.querySelector('[data-live-bubble-text]').textContent = payload.message
-    time.dateTime = payload.created_at
-    time.textContent = payload.created_at_human
-    list.append(bubble)
-    list.hidden = false
+    if (!bubble || !endInView) return
 
-    const empty = document.querySelector('[data-live-empty]')
-    if (empty) empty.hidden = true
-
-    if (endInView) bubble.scrollIntoView({ block: 'nearest' })
-}
-
-function replacePlaceholder(root, placeholder, value) {
-    for (const element of [root, ...root.querySelectorAll('*')]) {
-        for (const attribute of element.attributes) {
-            if (attribute.value.includes(placeholder)) attribute.value = attribute.value.replaceAll(placeholder, value)
-        }
-    }
+    thread.scrollIntoView({ block: 'nearest' })
+    thread.scrollTop = thread.scrollHeight
 }
 
 let readPending = false

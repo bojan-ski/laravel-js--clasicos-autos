@@ -44,7 +44,7 @@ class MessageWritesTest extends TestCase
     }
 
     #[DataProvider('participants')]
-    public function test_a_participant_reply_is_stored_and_lands_on_its_anchor_without_a_flash(string $role): void
+    public function test_a_participant_reply_is_stored_and_lands_on_the_thread_without_a_flash(string $role): void
     {
         $this->travelTo('2026-10-15 10:00:00');
         $conversation = Conversation::factory()->create();
@@ -54,7 +54,7 @@ class MessageWritesTest extends TestCase
         $response = $this->actingAs($author)->post(route('conversations.messages.store', $conversation), ['message' => 'See you on Saturday.']);
 
         $message = Message::query()->sole();
-        $response->assertRedirect(route('conversations.show', $conversation).'#message-'.$message->id)
+        $response->assertRedirect(route('conversations.show', $conversation))
             ->assertSessionMissing('success');
         $this->assertSame([$author->id, 'See you on Saturday.'], [$message->sender_id, $message->message]);
         $this->assertSame('2026-10-15 11:00:00', $conversation->fresh()->last_message_at->toDateTimeString());
@@ -88,6 +88,20 @@ class MessageWritesTest extends TestCase
             ->assertSessionHasInput('message', 'abcd');
 
         $this->assertSame(0, Message::query()->count());
+    }
+
+    public function test_an_invalid_reply_without_js_shows_the_error_in_the_composers_error_line(): void
+    {
+        $conversation = Conversation::factory()->create();
+
+        $this->actingAs($conversation->sender)
+            ->followingRedirects()
+            ->post(route('conversations.messages.store', $conversation), ['message' => 'abcd'])
+            ->assertOk()
+            ->assertSee('aria-describedby="message-counter message-error"', false)
+            ->assertSee('aria-invalid="true"', false)
+            ->assertSee('<p id="message-error" class="text-xs text-red-deep empty:hidden" role="alert" data-composer-error>The message field must be at least 5 characters.</p>', false)
+            ->assertSee('value="abcd"', false);
     }
 
     /**

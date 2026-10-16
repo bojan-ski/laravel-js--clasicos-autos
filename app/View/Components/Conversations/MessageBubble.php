@@ -12,6 +12,8 @@ class MessageBubble extends Component
 {
     public const string BASE_CLASSES = 'w-fit max-w-110 scroll-mt-16 border px-4 py-3';
 
+    public const string OWN_CLASSES = 'ml-auto bg-card-unread border-red rotate-[0.4deg]';
+
     public const string OTHER_CLASSES = 'bg-card border-rule -rotate-[0.4deg]';
 
     public const string META_CLASSES = 'mt-1 flex flex-wrap items-center gap-x-3 text-[11px] text-muted';
@@ -46,6 +48,11 @@ class MessageBubble extends Component
     public function deleteAction(): string
     {
         return route('conversations.messages.destroy', [$this->conversation, $this->message]);
+    }
+
+    public function deleteDialogId(): string
+    {
+        return 'delete-message-'.$this->message->id;
     }
 
     public function reported(): bool

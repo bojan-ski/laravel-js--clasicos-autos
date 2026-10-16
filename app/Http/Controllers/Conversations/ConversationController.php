@@ -56,7 +56,7 @@ class ConversationController extends Controller
     {
         $message = $messaging->start($listing, $request->user(), $request->text());
 
-        return redirect()->route('conversations.show', $message->conversation_id)->withFragment('message-'.$message->id);
+        return redirect()->route('conversations.show', $message->conversation_id);
     }
 
     public function show(Request $request, Conversation $conversation, MessagingService $messaging): View
@@ -88,6 +88,7 @@ class ConversationController extends Controller
             $conversation->hasParticipant($viewer) => $conversation->otherParticipant($viewer)->username,
             default => null,
         };
+        $repliesInThread = $conversation !== null && $composerAction !== null;
 
         return view('pages.conversations.show', [
             'heading' => $counterpart !== null
@@ -98,7 +99,8 @@ class ConversationController extends Controller
             'conversation' => $conversation,
             'messages' => $conversation?->messages ?? collect(),
             'composerAction' => $composerAction,
-            'markReadUrl' => $conversation !== null && $composerAction !== null ? route('conversations.read', $conversation) : null,
+            'asyncComposer' => $repliesInThread,
+            'markReadUrl' => $repliesInThread ? route('conversations.read', $conversation) : null,
             'emptyMessage' => __($conversation === null ? 'app.conversations.empty.new' : 'app.conversations.empty.thread'),
             'backUrl' => $backUrl,
         ]);
