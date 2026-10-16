@@ -4,12 +4,11 @@ namespace App\Http\Resources\Conversations;
 
 use App\Models\Message;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * @mixin Message
  */
-class MessageSentResource extends JsonResource
+class MessageSentResource extends MessageResource
 {
     public function __construct(Message $message, private int $unreadCount)
     {
@@ -22,11 +21,7 @@ class MessageSentResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'conversation_id' => $this->conversation_id,
-            'message' => $this->message,
-            'created_at' => $this->created_at->toIso8601String(),
-            'created_at_human' => $this->created_at->diffForHumans(),
+            ...parent::toArray($request),
             'unread_count' => $this->unreadCount,
         ];
     }

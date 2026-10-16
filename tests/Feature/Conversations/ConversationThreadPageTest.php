@@ -243,7 +243,8 @@ class ConversationThreadPageTest extends TestCase
             ->assertSee('A message to read')
             ->assertDontSee('data-composer', false)
             ->assertDontSee('role="log"', false)
-            ->assertDontSee('data-live-', false);
+            ->assertDontSee('data-live-', false)
+            ->assertDontSee('data-own-bubble', false);
     }
 
     public function test_a_suspended_participant_in_a_live_session_is_signed_out_of_the_thread(): void
@@ -265,7 +266,8 @@ class ConversationThreadPageTest extends TestCase
         $this->message($conversation, $conversation->receiver, 'A message from the seller');
 
         $this->show($conversation, $conversation->sender)
-            ->assertSee('<div role="log" aria-label="Messages" data-live-thread="'.$conversation->id.'" data-mark-read-url="'.route('conversations.read', $conversation).'">', false)
+            ->assertSee('<div role="log" aria-label="Messages" data-live-thread="'.$conversation->id.'" data-mark-read-url="'.route('conversations.read', $conversation).'"', false)
+            ->assertSee('tabindex="0" class="flex min-h-40 flex-1 flex-col-reverse overflow-x-hidden overflow-y-auto overscroll-contain px-1 py-2">', false)
             ->assertSeeInOrder(['role="log"', '<ol role="list" class="flex flex-col gap-4">', 'A message from the seller', '</ol>', '<template data-live-bubble data-live-bubble-placeholder="__message__">'], false);
     }
 
@@ -289,6 +291,38 @@ class ConversationThreadPageTest extends TestCase
         $this->assertStringNotContainsString('delete-message', $template);
     }
 
+    public function test_the_own_bubble_template_is_an_own_style_bubble_with_only_the_delete_control(): void
+    {
+        $conversation = $this->conversationBetween('buyer.one', 'seller.one');
+
+        $html = $this->show($conversation, $conversation->sender)->getContent();
+        $start = strpos($html, '<template data-own-bubble data-own-bubble-placeholder="__message__">');
+        $this->assertNotFalse($start);
+        $template = substr($html, $start, strpos($html, '</template>', $start) - $start);
+
+        $this->assertStringContainsString('<li class="w-fit max-w-110 scroll-mt-16 border px-4 py-3 ml-auto bg-card-unread border-red rotate-[0.4deg]">', $template);
+        $this->assertStringContainsString('<p id="message-__message__-text" class="wrap-break-word"><span class="sr-only">You: </span><span data-live-bubble-text></span></p>', $template);
+        $this->assertStringContainsString('<time data-live-bubble-time></time>', $template);
+        $this->assertStringContainsString('data-dialog-open="delete-message-__message__"', $template);
+        $this->assertStringContainsString('<span class="sr-only" data-delete-context data-template=" message sent :time"></span>', $template);
+        $this->assertStringContainsString('<dialog id="delete-message-__message__"', $template);
+        $this->assertStringContainsString('action="'.route('conversations.messages.destroy', [$conversation, '__message__']).'"', $template);
+        $this->assertStringNotContainsString('report-message', $template);
+    }
+
+    public function test_the_thread_composer_sends_without_reload_and_carries_a_hidden_error_line(): void
+    {
+        $conversation = Conversation::factory()->create();
+
+        $this->show($conversation, $conversation->sender)
+            ->assertViewHas('asyncComposer', true)
+            ->assertSee('data-composer data-sticky-bar data-composer-async', false)
+            ->assertSee('<p id="message-error" class="text-xs text-red-deep empty:hidden" role="alert" data-composer-error></p>', false)
+            ->assertSee('aria-describedby="message-counter"', false)
+            ->assertSee('class="h-12 min-w-0 flex-1 rounded-xs border border-rule-input bg-card-input px-3 text-base text-ink placeholder:text-muted aria-invalid:border-red md:h-11 md:text-sm"', false)
+            ->assertDontSee('aria-invalid="true"', false);
+    }
+
     public function test_a_new_conversation_page_has_no_live_thread(): void
     {
         $listing = CarListing::factory()->approved()->create();
@@ -296,9 +330,13 @@ class ConversationThreadPageTest extends TestCase
         $this->actingAs(User::factory()->create())
             ->get(route('conversations.create', $listing))
             ->assertOk()
+            ->assertViewHas('asyncComposer', false)
             ->assertSee('data-composer', false)
+            ->assertDontSee('data-composer-async', false)
+            ->assertDontSee('data-composer-error', false)
             ->assertDontSee('data-live-thread', false)
-            ->assertDontSee('data-live-bubble', false);
+            ->assertDontSee('data-live-bubble', false)
+            ->assertDontSee('data-own-bubble', false);
     }
 
     public function test_a_participant_gets_one_delete_dialog_per_own_message(): void
@@ -308,7 +346,8 @@ class ConversationThreadPageTest extends TestCase
         $second = $this->message($conversation, $conversation->sender, 'Second own message');
         $other = $this->message($conversation, $conversation->receiver, 'Seller message here');
 
-        $html = $this->show($conversation, $conversation->sender)->getContent();
+        $page = $this->show($conversation, $conversation->sender)->getContent();
+        $html = substr($page, 0, strpos($page, '<template data-live-bubble'));
 
         $this->assertSame(1, substr_count($html, '<dialog id="delete-message-'.$first->id.'"'));
         $this->assertSame(1, substr_count($html, '<dialog id="delete-message-'.$second->id.'"'));
@@ -316,6 +355,8 @@ class ConversationThreadPageTest extends TestCase
         $this->assertSame(2, substr_count($html, 'Are you sure you want to delete the message?'));
         $this->assertStringContainsString('action="'.route('conversations.messages.destroy', [$conversation, $first]).'"', $html);
         $this->assertStringContainsString('This can&#039;t be undone.', $html);
+        $this->assertMatchesRegularExpression('/data-dialog-open="delete-message-'.$first->id.'" commandfor="delete-message-'.$first->id.'" command="show-modal">\s*Delete<span class="sr-only"> message sent [^<]+ ago<\/span>\s*<\/button>/', $html);
+        $this->assertStringNotContainsString('data-delete-context', $html);
     }
 
     public function test_an_admin_gets_a_delete_dialog_on_every_message(): void
@@ -348,7 +389,21 @@ class ConversationThreadPageTest extends TestCase
         $this->message($conversation, $conversation->receiver, 'A message to read');
 
         $this->show($conversation, User::factory()->admin()->create())
-            ->assertSee('<ol role="list" class="flex flex-col gap-4" aria-label="Messages">', false);
+            ->assertSee('<div role="region" aria-label="Messages"', false)
+            ->assertSeeInOrder([
+                'tabindex="0" class="flex min-h-40 flex-1 flex-col-reverse overflow-x-hidden overflow-y-auto overscroll-contain px-1 py-2">',
+                '<ol role="list" class="flex flex-col gap-4">',
+                'A message to read',
+            ], false);
+    }
+
+    public function test_the_thread_column_is_bounded_to_the_viewport_with_the_composer_at_its_foot(): void
+    {
+        $conversation = Conversation::factory()->create();
+
+        $this->show($conversation, $conversation->sender)
+            ->assertSee('class="flex h-[calc(100dvh-11.625rem-var(--cookie-banner-h,0px))] min-h-fit min-w-0 flex-col gap-6 md:h-[calc(100dvh-13.8125rem-var(--cookie-banner-h,0px))]"', false)
+            ->assertSee('md:bg-transparent md:px-0 mt-auto"', false);
     }
 
     public function test_the_mobile_headers_listing_link_is_a_44_px_target(): void

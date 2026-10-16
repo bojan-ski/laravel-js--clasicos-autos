@@ -7,7 +7,7 @@ use Illuminate\View\Component;
 
 class Composer extends Component
 {
-    public function __construct(public string $action) {}
+    public function __construct(public string $action, public bool $async = false) {}
 
     public function min(): int
     {

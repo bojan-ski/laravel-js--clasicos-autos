@@ -6,6 +6,7 @@ use App\Exceptions\MessageAlreadyReportedException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Conversations\ReportMessageRequest;
 use App\Http\Requests\Conversations\StoreMessageRequest;
+use App\Http\Resources\Conversations\MessageResource;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Services\MessageReportService;
@@ -15,11 +16,15 @@ use Illuminate\Support\Facades\Gate;
 
 class MessageController extends Controller
 {
-    public function store(StoreMessageRequest $request, Conversation $conversation, MessagingService $messaging): RedirectResponse
+    public function store(StoreMessageRequest $request, Conversation $conversation, MessagingService $messaging): MessageResource|RedirectResponse
     {
         $message = $messaging->send($conversation, $request->user(), $request->text());
 
-        return redirect()->route('conversations.show', $conversation)->withFragment('message-'.$message->id);
+        if ($request->expectsJson()) {
+            return MessageResource::make($message);
+        }
+
+        return redirect()->route('conversations.show', $conversation);
     }
 
     public function report(ReportMessageRequest $request, Conversation $conversation, Message $message, MessageReportService $reports): RedirectResponse

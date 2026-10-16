@@ -1,6 +1,6 @@
 @php($hasError = $errors->has('message'))
 
-<form method="POST" action="{{ $action }}" data-composer data-sticky-bar
+<form method="POST" action="{{ $action }}" data-composer data-sticky-bar{{ $async ? ' data-composer-async' : '' }}
       {{ $attributes->merge(['class' => 'sticky bottom-(--cookie-banner-h,0px) z-10 -mx-5 -mb-6 flex flex-col gap-1.5 border-t-2 border-dashed border-gold bg-paper px-5 py-4 md:static md:mx-0 md:mb-0 md:bg-transparent md:px-0']) }}>
     @csrf
     <label for="message" class="text-xs text-ink/70">{{ __('app.conversations.composer.label') }}</label>
@@ -11,16 +11,14 @@
                aria-describedby="message-counter{{ $hasError ? ' message-error' : '' }}"
                @if ($hasError) aria-invalid="true" @endif
                data-composer-input
-               @class([
-                   'h-12 min-w-0 flex-1 rounded-xs border bg-card-input px-3 text-base text-ink placeholder:text-muted md:h-11 md:text-sm',
-                   'border-rule-input' => ! $hasError,
-                   'border-red' => $hasError,
-               ])>
+               class="h-12 min-w-0 flex-1 rounded-xs border border-rule-input bg-card-input px-3 text-base text-ink placeholder:text-muted aria-invalid:border-red md:h-11 md:text-sm">
         <x-ui.button type="submit" variant="primary" size="responsive" class="aria-disabled:cursor-not-allowed aria-disabled:opacity-45" data-composer-submit>{{ __('app.conversations.composer.send') }}</x-ui.button>
     </div>
     <p id="message-counter" class="text-xs text-muted tabular-nums" data-composer-counter
        data-template="{{ $counterTemplate() }}" data-min="{{ $min() }}" data-max="{{ $max() }}">{{ $counter() }}</p>
-    @if ($hasError)
+    @if ($async)
+        <p id="message-error" class="text-xs text-red-deep empty:hidden" role="alert" data-composer-error>{{ $errors->first('message') }}</p>
+    @elseif ($hasError)
         <p id="message-error" class="text-xs text-red-deep">{{ $errors->first('message') }}</p>
     @endif
 </form>

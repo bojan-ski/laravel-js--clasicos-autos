@@ -16,7 +16,15 @@ export async function api(path, options = {}) {
     })
 
     if (!response.ok) {
-        throw new Error(`${response.status}: ${await response.text()}`)
+        const text = await response.text()
+        const error = new Error(`${response.status}: ${text}`)
+        error.status = response.status
+        try {
+            error.body = JSON.parse(text)
+        } catch {
+            error.body = null
+        }
+        throw error
     }
 
     return response.status === 204 ? null : response.json()

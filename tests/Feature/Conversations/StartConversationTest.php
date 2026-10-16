@@ -78,7 +78,7 @@ class StartConversationTest extends TestCase
 
         $conversation = Conversation::query()->sole();
         $message = Message::query()->sole();
-        $response->assertRedirect(route('conversations.show', $conversation).'#message-'.$message->id)
+        $response->assertRedirect(route('conversations.show', $conversation))
             ->assertSessionMissing('success');
         $this->assertSame([$buyer->id, $listing->user_id, $listing->id], [$conversation->sender_id, $conversation->receiver_id, $conversation->listing_id]);
         $this->assertSame([$buyer->id, 'Is it still available?'], [$message->sender_id, $message->message]);
