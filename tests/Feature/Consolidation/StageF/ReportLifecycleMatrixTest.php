@@ -95,6 +95,8 @@ class ReportLifecycleMatrixTest extends TestCase
             'suspend_author' => 'R',
             'suspend_author_already_suspended' => 'G',
             'sender_delete' => 'KEEP',
+            'admin_thread_delete' => 'KEEP',
+            'delete_message_after_admin_thread_delete' => 'G',
         ];
         $resolved = [
             're_report' => 'DUPLICATE',
@@ -104,11 +106,13 @@ class ReportLifecycleMatrixTest extends TestCase
             'suspend_author' => 'G',
             'suspend_author_already_suspended' => 'G',
             'sender_delete' => 'KEEP',
+            'admin_thread_delete' => 'KEEP',
+            'delete_message_after_admin_thread_delete' => 'G',
         ];
         $states = [
             'open' => $open,
             'resolved dismissed' => $resolved,
-            'resolved message_deleted' => [...$resolved, 're_report' => 'NOT_FOUND', 'sender_delete' => 'NOT_FOUND'],
+            'resolved message_deleted' => [...$resolved, 're_report' => 'NOT_FOUND', 'sender_delete' => 'NOT_FOUND', 'admin_thread_delete' => 'NOT_FOUND'],
             'resolved user_suspended' => $resolved,
         ];
 
@@ -135,6 +139,12 @@ class ReportLifecycleMatrixTest extends TestCase
 
         if ($action === 'delete_message_after_sender_delete' && $this->messageExists()) {
             $this->actingAs($this->author)->delete(route('conversations.messages.destroy', [$this->conversation, $this->message]))->assertRedirect();
+            $this->app['auth']->forgetGuards();
+        }
+
+        if ($action === 'delete_message_after_admin_thread_delete' && $this->messageExists()) {
+            $this->actingAs($this->admin)->delete(route('conversations.messages.destroy', [$this->conversation, $this->message]))->assertRedirect();
+            $this->assertFalse($this->messageExists());
             $this->app['auth']->forgetGuards();
         }
 
@@ -238,9 +248,10 @@ class ReportLifecycleMatrixTest extends TestCase
         return match ($action) {
             're_report' => $this->actingAs($this->reporter)->post(route('conversations.messages.report', [$this->conversation, $this->message->id]), ['reason' => 'abusive']),
             'dismiss' => $resolve(['outcome' => 'dismissed']),
-            'delete_message', 'delete_message_after_sender_delete' => $resolve(['outcome' => 'message_deleted']),
+            'delete_message', 'delete_message_after_sender_delete', 'delete_message_after_admin_thread_delete' => $resolve(['outcome' => 'message_deleted']),
             'suspend_author', 'suspend_author_already_suspended' => $resolve(['outcome' => 'user_suspended', 'reason' => self::REASON, 'duration' => '7_days']),
             'sender_delete' => $this->actingAs($this->author)->delete(route('conversations.messages.destroy', [$this->conversation, $this->message->id])),
+            'admin_thread_delete' => $this->actingAs($this->admin)->delete(route('conversations.messages.destroy', [$this->conversation, $this->message->id])),
         };
     }
 
