@@ -40,7 +40,7 @@
                             <span data-nav-count class="font-sans text-[13px] text-gold-ink">{{ __('app.header.selected_count', ['count' => $link->count]) }}</span>
                         @elseif ($link->count !== null && $link->countStyle === \App\Enums\NavCountStyle::Queue)
                             <x-ui.stamp tone="gold" data-nav-count>
-                                <span class="block px-2 py-px font-sans text-[11px] tabular-nums">{{ $link->count }}@if ($link->countLabel !== null)<span class="sr-only"> {{ $link->countLabel }}</span>@endif</span>
+                                <span class="block px-2 py-px font-sans text-[11px] tabular-nums {{ $onDark ? 'text-gold-light' : '' }}">{{ $link->count }}@if ($link->countLabel !== null)<span class="sr-only"> {{ $link->countLabel }}</span>@endif</span>
                             </x-ui.stamp>
                         @endif
                     </a>

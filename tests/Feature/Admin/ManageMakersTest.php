@@ -250,6 +250,18 @@ class ManageMakersTest extends TestCase
         $this->assertModelExists($maker);
     }
 
+    public function test_the_controller_turns_the_maker_in_use_guard_into_an_error_flash(): void
+    {
+        $maker = CarMaker::factory()->create(['name' => 'Hudson']);
+        $this->mock(ReferenceDataService::class)->shouldReceive('deleteMaker')->once()->andThrow(new ReferenceDataInUseException('in use'));
+
+        $this->asAdmin()->delete(route('admin.makers.destroy', $maker))
+            ->assertRedirect(route('admin.makers'))
+            ->assertSessionHas('error', 'Hudson is still used by models or listings, so it was not deleted. Deactivate it instead.');
+
+        $this->assertModelExists($maker);
+    }
+
     /**
      * @return array<string, array{string, string}>
      */

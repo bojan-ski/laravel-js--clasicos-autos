@@ -62,6 +62,16 @@ class PendingListingsCounterTest extends TestCase
         }
     }
 
+    public function test_the_badge_digits_use_the_light_gold_on_the_dark_admin_menu(): void
+    {
+        CarListing::factory()->count(3)->create();
+
+        $html = $this->actingAs(User::factory()->admin()->create())->get(route('admin.users'))->assertOk()->getContent();
+        $menu = substr($html, (int) strpos($html, '<details data-mobile-menu'));
+
+        $this->assertStringContainsString('<span class="block px-2 py-px font-sans text-[11px] tabular-nums text-gold-light">3<span class="sr-only"> pending</span>', $menu);
+    }
+
     public function test_an_app_user_never_sees_the_listings_queue_badge(): void
     {
         CarListing::factory()->count(3)->create();
