@@ -13,7 +13,10 @@ use App\Enums\Transmission;
 use App\Models\CarListing;
 use App\Models\CarMaker;
 use App\Models\CarModel;
+use App\Models\Conversation;
 use App\Models\ListingImage;
+use App\Models\Message;
+use App\Models\MessageReport;
 use App\Models\User;
 use App\Services\ListingImageService;
 use App\Support\ListingFormValues;
@@ -34,6 +37,8 @@ class ListingLifecycleMatrixTest extends TestCase
     private const string OLD_REASON = 'The first review found blurry photos.';
 
     private const string REASON = 'The engine bay photo is missing.';
+
+    private const string PROMOTED_MODEL = 'Nomad';
 
     private const array OWNER_OR_ADMIN_ACTIONS = ['edit', 'add_image', 'delete_image', 'set_primary', 'set_primary_on_primary', 'delete'];
 
@@ -147,6 +152,66 @@ class ListingLifecycleMatrixTest extends TestCase
         $response = $this->perform($action, $listing, $this->admin)
             ->assertRedirect(route('listings.show', $listing));
 
+        $this->assertModerationCell($response, $cell, $listing, $before, $files);
+    }
+
+    #[DataProvider('moderationWrites')]
+    public function test_an_admin_moderation_from_the_queue_lands_in_its_cell_and_returns_to_the_queue(string $action, ListingStatus $from, string $cell): void
+    {
+        $listing = $this->listingIn($from, User::factory()->create());
+        $before = $this->columns($listing);
+        $files = $this->files($listing);
+
+        $response = $this->perform($action, $listing, $this->admin, ['return' => 'queue'])
+            ->assertRedirect(route('admin.listings'));
+
+        $this->assertModerationCell($response, $cell, $listing, $before, $files);
+    }
+
+    /**
+     * @return array<string, array{ListingStatus, bool, string}>
+     */
+    public static function promotions(): array
+    {
+        return [
+            'promote a pending custom model' => [ListingStatus::Pending, true, 'P'],
+            'promote a pending listed model' => [ListingStatus::Pending, false, 'G'],
+            'promote an approved custom model' => [ListingStatus::Approved, true, 'G'],
+            'promote a rejected custom model' => [ListingStatus::Rejected, true, 'G'],
+        ];
+    }
+
+    #[DataProvider('promotions')]
+    public function test_a_promotion_links_the_model_without_a_transition(ListingStatus $from, bool $customModel, string $cell): void
+    {
+        $listing = $this->listingIn($from, User::factory()->create(), $customModel);
+        $before = $this->columns($listing);
+        $beforeModel = $this->modelColumns($listing);
+        $models = CarModel::query()->count();
+
+        $response = $this->perform('promote', $listing, $this->admin)->assertRedirect(route('admin.listings'));
+
+        $this->assertSame($before, $this->columns($listing));
+
+        if ($cell === 'G') {
+            $response->assertSessionHas('error', __('app.admin.listings.promote.not_promotable'));
+            $this->assertSame($beforeModel, $this->modelColumns($listing));
+            $this->assertSame($models, CarModel::query()->count());
+
+            return;
+        }
+
+        $promoted = CarModel::query()->where('name', self::PROMOTED_MODEL)->sole();
+        $response->assertSessionHas('success', __('app.admin.listings.promote.flash.created', ['model' => self::PROMOTED_MODEL]));
+        $this->assertSame(['car_model_id' => $promoted->id, 'model' => self::PROMOTED_MODEL, 'updated_at' => now()->toDateTimeString()], $this->modelColumns($listing));
+    }
+
+    /**
+     * @param  array{status: string, submitted_at: ?string, approved_at: ?string, rejected_at: ?string, rejection_reason: ?string, moderated_by: ?int}  $before
+     * @param  list<string>  $files
+     */
+    private function assertModerationCell(TestResponse $response, string $cell, CarListing $listing, array $before, array $files): void
+    {
         $now = now()->toDateTimeString();
         $expected = match ($cell) {
             'A' => [...$before, 'status' => 'approved', 'approved_at' => $now, 'rejected_at' => null, 'rejection_reason' => null, 'moderated_by' => $this->admin->id],
@@ -184,6 +249,11 @@ class ListingLifecycleMatrixTest extends TestCase
         $other = $this->listingIn(ListingStatus::Approved, User::factory()->create());
         $otherFiles = $this->files($other);
         User::factory()->create()->bookmarks()->attach([$listing->id, $other->id]);
+        [$conversation, $report] = $this->conversationOn($listing);
+        [$otherConversation] = $this->conversationOn($other);
+        $messageIds = $conversation->messages()->pluck('id')->all();
+        $this->assertCount(2, $messageIds);
+        $this->assertModelExists($report);
 
         $this->perform('delete', $listing, $actor === 'admin' ? $this->admin : $owner)
             ->assertRedirect(route($actor === 'admin' ? 'admin.listings' : 'profile'))
@@ -195,6 +265,11 @@ class ListingLifecycleMatrixTest extends TestCase
         $this->assertFalse(Storage::disk('public')->directoryExists("listings/{$listing->id}"));
         $this->assertSame(1, DB::table('user_bookmarks')->where('car_listing_id', $other->id)->count());
         $this->assertSame($otherFiles, $this->files($other));
+        $this->assertModelMissing($conversation);
+        $this->assertSame(0, Message::query()->whereIn('id', $messageIds)->count());
+        $this->assertModelMissing($report);
+        $this->assertModelExists($otherConversation);
+        $this->assertSame(2, $otherConversation->messages()->count());
     }
 
     public function test_create_is_the_entry_edge_pending_with_submitted_at_now_and_two_images(): void
@@ -266,7 +341,10 @@ class ListingLifecycleMatrixTest extends TestCase
         }
     }
 
-    private function perform(string $action, CarListing $listing, ?User $actor): TestResponse
+    /**
+     * @param  array<string, string>  $query
+     */
+    private function perform(string $action, CarListing $listing, ?User $actor, array $query = []): TestResponse
     {
         if ($actor === null) {
             $this->app['auth']->forgetGuards();
@@ -275,6 +353,7 @@ class ListingLifecycleMatrixTest extends TestCase
         }
 
         $version = $listing->refresh()->moderationVersion();
+        $moderated = [$listing, ...$query];
 
         return match ($action) {
             'edit' => $this->put(route('listings.update', $listing), ListingFormValues::for($listing)),
@@ -283,16 +362,21 @@ class ListingLifecycleMatrixTest extends TestCase
             'set_primary' => $this->patch(route('listings.images.primary', [$listing, $this->imageAt($listing, 1)])),
             'set_primary_on_primary' => $this->patch(route('listings.images.primary', [$listing, $this->imageAt($listing, 0)])),
             'delete' => $this->delete(route('listings.destroy', $listing)),
-            'approve' => $this->patch(route('admin.listings.approve', $listing), ['version' => $version]),
-            'reject' => $this->patch(route('admin.listings.reject', $listing), ['version' => $version, 'rejection_reason' => '  '.self::REASON.'  ']),
-            'approve_stale' => $this->patch(route('admin.listings.approve', $listing), ['version' => $version - 1]),
-            'reject_stale' => $this->patch(route('admin.listings.reject', $listing), ['version' => $version - 1, 'rejection_reason' => self::REASON]),
+            'approve' => $this->patch(route('admin.listings.approve', $moderated), ['version' => $version]),
+            'reject' => $this->patch(route('admin.listings.reject', $moderated), ['version' => $version, 'rejection_reason' => '  '.self::REASON.'  ']),
+            'approve_stale' => $this->patch(route('admin.listings.approve', $moderated), ['version' => $version - 1]),
+            'reject_stale' => $this->patch(route('admin.listings.reject', $moderated), ['version' => $version - 1, 'rejection_reason' => self::REASON]),
+            'promote' => $this->patch(route('admin.listings.promote', $moderated), ['name' => self::PROMOTED_MODEL, 'year_from' => 1955, 'year_to' => 1961, 'version' => $version]),
         };
     }
 
-    private function listingIn(ListingStatus $status, User $owner): CarListing
+    private function listingIn(ListingStatus $status, User $owner, bool $customModel = false): CarListing
     {
-        $listing = CarListing::factory()->forCarModel($this->belAir)->for($owner, 'owner')->create([
+        $factory = $customModel
+            ? CarListing::factory()->customModel()->state(['car_maker_id' => $this->belAir->car_maker_id, 'model' => 'Bel Air Wagon'])
+            : CarListing::factory()->forCarModel($this->belAir);
+
+        $listing = $factory->for($owner, 'owner')->create([
             'year' => 1957,
             'status' => $status,
             'submitted_at' => now()->subDays(10),
@@ -343,6 +427,26 @@ class ListingLifecycleMatrixTest extends TestCase
             'rejected_at' => null,
             'rejection_reason' => null,
         ];
+    }
+
+    /**
+     * @return array{car_model_id: ?int, model: string, updated_at: string}
+     */
+    private function modelColumns(CarListing $listing): array
+    {
+        return (array) DB::table('car_listings')->where('id', $listing->id)->first(['car_model_id', 'model', 'updated_at']);
+    }
+
+    /**
+     * @return array{Conversation, MessageReport}
+     */
+    private function conversationOn(CarListing $listing): array
+    {
+        $conversation = Conversation::factory()->for($listing, 'listing')->create();
+        Message::factory()->for($conversation)->create(['sender_id' => $conversation->sender_id]);
+        $ownersMessage = Message::factory()->for($conversation)->create(['sender_id' => $conversation->receiver_id]);
+
+        return [$conversation, MessageReport::factory()->create(['message_id' => $ownersMessage->id])];
     }
 
     private function imageAt(CarListing $listing, int $position): ListingImage

@@ -46,6 +46,10 @@ class SuspensionLifecycleMatrixTest extends TestCase
 
     private CarListing $rejected;
 
+    private Conversation $buying;
+
+    private Conversation $selling;
+
     private MessageReport $openAgainst;
 
     private MessageReport $resolvedAgainst;
@@ -83,6 +87,7 @@ class SuspensionLifecycleMatrixTest extends TestCase
             'sign_in' => ['active' => 'IN', 'timed' => 'OUT', 'expired' => 'A+IN', 'indefinite' => 'OUT'],
             'next_request' => ['active' => 'IN', 'timed' => 'OUT', 'expired' => 'A+IN', 'indefinite' => 'OUT'],
             'delete' => ['active' => 'D', 'timed' => 'D', 'expired' => 'D', 'indefinite' => 'D'],
+            'self_delete' => ['active' => "D'", 'timed' => 'OUT', 'expired' => "D'", 'indefinite' => 'OUT'],
         ];
 
         foreach ($rows as $action => $byState) {
@@ -99,6 +104,10 @@ class SuspensionLifecycleMatrixTest extends TestCase
         $before = $this->snapshot($target);
         $notice = $target->isSuspended() ? SuspensionText::notice($target) : null;
 
+        if (str_starts_with($cell, 'D')) {
+            $this->assertTargetRowsExist();
+        }
+
         $response = $this->perform($action, $target);
 
         match ($cell) {
@@ -110,6 +119,7 @@ class SuspensionLifecycleMatrixTest extends TestCase
             'A+IN' => $this->assertLiftedAndServedCell($response, $target, $before, $action),
             'OUT' => $this->assertSignedOutCell($response, $target, $before, $notice, $action),
             'D' => $this->assertDeletedCell($response, $target),
+            "D'" => $this->assertSelfDeletedCell($response, $target),
         };
     }
 
@@ -183,15 +193,17 @@ class SuspensionLifecycleMatrixTest extends TestCase
         $this->insertSessionRow($target);
         $this->bystanderSession = $this->insertSessionRow($this->bystander);
 
-        $buying = Conversation::factory()->for($target, 'sender')->create();
-        $this->openAgainst = MessageReport::factory()->create(['message_id' => Message::factory()->for($buying)->create()->id]);
+        $this->bystander->bookmarks()->attach($this->approved->id);
+
+        $this->buying = Conversation::factory()->for($target, 'sender')->create();
+        $this->openAgainst = MessageReport::factory()->create(['message_id' => Message::factory()->for($this->buying)->create()->id]);
         $this->resolvedAgainst = MessageReport::factory()->resolved()->create([
-            'message_id' => Message::factory()->for($buying)->create()->id,
+            'message_id' => Message::factory()->for($this->buying)->create()->id,
             'resolved_by' => $this->previousAdmin->id,
             'resolved_at' => now()->subDays(3),
         ]);
-        $selling = Conversation::factory()->for($this->bystander, 'sender')->for($this->approved, 'listing')->create();
-        $this->filed = MessageReport::factory()->create(['message_id' => Message::factory()->for($selling)->create()->id]);
+        $this->selling = Conversation::factory()->for($this->bystander, 'sender')->for($this->approved, 'listing')->create();
+        $this->filed = MessageReport::factory()->create(['message_id' => Message::factory()->for($this->selling)->create()->id]);
         $this->othersReport = MessageReport::factory()->create();
         ContactMessage::factory()->for($target)->create();
 
@@ -210,6 +222,7 @@ class SuspensionLifecycleMatrixTest extends TestCase
             'sign_in' => $this->post(route('login.store'), ['email' => $target->email, 'password' => 'password']),
             'next_request' => $this->actingAs($target)->get(route('profile')),
             'delete' => $this->actingAs($this->admin)->delete(route('admin.users.destroy', $target)),
+            'self_delete' => $this->actingAs($target)->delete(route('profile.destroy'), ['delete_password' => 'password']),
         };
     }
 
@@ -235,6 +248,7 @@ class SuspensionLifecycleMatrixTest extends TestCase
         $this->assertSame($before['listings'], $after['listings']);
         $this->assertSame([$this->openAgainst->id => ['resolved', ReportOutcome::UserSuspended->value, $this->admin->id, self::NOW, $this->openAgainst->message_id]] + $before['reports'], $after['reports']);
         $this->assertSame($before['conversation'], $after['conversation']);
+        $this->assertSame($before['bookmarks'], $after['bookmarks']);
         $this->assertVisibility(approvedIsPublic: false);
     }
 
@@ -304,7 +318,7 @@ class SuspensionLifecycleMatrixTest extends TestCase
         $this->assertGuest();
         $after = $this->snapshot($target);
 
-        if ($action === 'next_request') {
+        if (in_array($action, ['next_request', 'self_delete'], true)) {
             $this->assertNotSame(self::TOKEN, $after['token']);
             $before['token'] = $after['token'];
         }
@@ -316,7 +330,34 @@ class SuspensionLifecycleMatrixTest extends TestCase
     {
         $response->assertRedirect(route('admin.users'))->assertSessionHas('success', __('app.admin.users.flash.deleted'));
 
+        $this->assertTargetRowsGone($target);
+    }
+
+    private function assertSelfDeletedCell(TestResponse $response, User $target): void
+    {
+        $response->assertRedirect(route('home'))->assertSessionHas('success', __('app.profile.delete.deleted'));
+        $this->assertGuest();
+
+        $this->assertTargetRowsGone($target);
+    }
+
+    private function assertTargetRowsExist(): void
+    {
+        foreach ([$this->approved, $this->pending, $this->rejected, $this->buying, $this->selling, $this->openAgainst, $this->resolvedAgainst, $this->filed] as $model) {
+            $this->assertModelExists($model);
+        }
+        $this->assertSame([2, 1], [$this->buying->messages()->count(), $this->selling->messages()->count()]);
+        $this->assertSame([$this->approved->id], DB::table('user_bookmarks')->where('user_id', $this->bystander->id)->pluck('car_listing_id')->all());
+    }
+
+    private function assertTargetRowsGone(User $target): void
+    {
         $this->assertModelMissing($target);
+        foreach ([$this->buying, $this->selling] as $conversation) {
+            $this->assertModelMissing($conversation);
+            $this->assertSame(0, Message::query()->where('conversation_id', $conversation->id)->count());
+        }
+        $this->assertSame(0, DB::table('user_bookmarks')->where('car_listing_id', $this->approved->id)->count());
         foreach ([$this->approved, $this->pending, $this->rejected] as $listing) {
             $this->assertModelMissing($listing);
             $this->assertFalse(Storage::disk('public')->directoryExists("listings/{$listing->id}"));
@@ -341,7 +382,7 @@ class SuspensionLifecycleMatrixTest extends TestCase
     }
 
     /**
-     * @return array{columns: array<string, ?string>, token: ?string, sessions: list<string>, listings: array<int, string>, reports: array<int, list<int|string|null>>, conversation: array{int, int}}
+     * @return array{columns: array<string, ?string>, token: ?string, sessions: list<string>, listings: array<int, string>, reports: array<int, list<int|string|null>>, conversation: array{int, int}, bookmarks: list<int>}
      */
     private function snapshot(User $target): array
     {
@@ -360,6 +401,7 @@ class SuspensionLifecycleMatrixTest extends TestCase
                 ->mapWithKeys(fn (object $row): array => [$row->id => [$row->status, $row->outcome, $row->resolved_by, $row->resolved_at, $row->message_id]])
                 ->all(),
             'conversation' => [Conversation::query()->count(), Message::query()->count()],
+            'bookmarks' => DB::table('user_bookmarks')->where('user_id', $this->bystander->id)->pluck('car_listing_id')->all(),
         ];
     }
 }
