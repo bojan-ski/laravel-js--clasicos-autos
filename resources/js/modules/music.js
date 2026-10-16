@@ -6,19 +6,13 @@ export function initMusic() {
     const audio = document.querySelector('[data-music-audio]')
     if (!toggle || !audio) return
 
-    const indicator = document.querySelector('[data-music-indicator]')
     let enabled = readEnabled()
 
     const render = () => {
-        const label = enabled ? toggle.dataset.labelOn : toggle.dataset.labelOff
         toggle.setAttribute('aria-pressed', String(enabled))
-        toggle.title = label
-
-        if (indicator) {
-            indicator.dataset.state = enabled ? 'on' : 'off'
-            indicator.title = label
-            indicator.hidden = false
-        }
+        toggle.title = enabled ? toggle.dataset.labelOn : toggle.dataset.labelOff
+        toggle.dataset.state = enabled ? 'on' : 'off'
+        toggle.hidden = false
     }
 
     const stopWaiting = () => {

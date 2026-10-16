@@ -16,7 +16,13 @@
 <header data-header-variant="{{ $audience->value }}"@if ($liveChannel !== null) data-live-channel="{{ $liveChannel }}"@endif
         class="relative z-30 has-[details[open]]:fixed has-[details[open]]:inset-x-0 has-[details[open]]:top-0 {{ $bars[$audience->value] }}">
     <div class="mx-auto flex max-w-7xl items-center gap-8 px-5 py-4 md:px-14 md:py-5 lg:gap-5 lg:px-8 xl:gap-8 xl:px-14">
-        <div class="mr-auto flex items-center gap-2.5 whitespace-nowrap">
+        <div class="mr-auto flex items-center gap-1.5 whitespace-nowrap">
+            <a href="{{ route('home') }}" data-wordmark
+               @class([
+                   'inline-flex min-h-11 items-center font-heading text-2xl leading-none italic md:min-h-0 md:text-[30px]',
+                   'text-gold-light' => $onDark,
+                   'text-red' => ! $onDark,
+               ])>{{ __('app.name') }}</a>
             <x-global.music-toggle :on-dark="$onDark" />
             @if ($onDark)
                 <span class="border border-gold px-2 py-0.5 text-[10px] uppercase tracking-[0.2em] text-gold-light">{{ __('app.header.admin_tag') }}</span>
