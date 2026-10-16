@@ -7,6 +7,17 @@ return [
         'default_title' => 'Clásicos Autos — Classic Cars Marketplace',
     ],
 
+    'seo' => [
+        'description' => 'Browse, compare and bookmark classic cars from 1900 to 1989, and message their owners directly. A vintage-car marketplace with a Havana postcard soul.',
+        'listings_description' => 'Approved classic cars from 1900 to 1989, newest first. Search by name, maker or model, or filter by brand.',
+        'legal' => [
+            'privacy' => 'How Clásicos Autos collects, uses and protects the personal data of its buyers and sellers.',
+            'terms' => 'The terms for browsing, listing and messaging on the Clásicos Autos classic-car marketplace.',
+            'cookies' => 'The three first-party cookies Clásicos Autos sets (session, remember-me and cookie consent), and no analytics.',
+        ],
+        'share_image_alt' => 'Clásicos Autos — classic cars on a Havana postcard',
+    ],
+
     'a11y' => [
         'skip_to_content' => 'Skip to content',
         'main_navigation' => 'Main navigation',

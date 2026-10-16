@@ -1,0 +1,14 @@
+{
+    "name": "Clásicos Autos",
+    "short_name": "Clásicos Autos",
+    "icons": [
+        {
+            "src": "/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "theme_color": "#c22d24",
+    "background_color": "#efe7d6",
+    "display": "browser"
+}

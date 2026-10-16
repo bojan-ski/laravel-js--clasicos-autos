@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Legal;
 use App\Http\Controllers\Controller;
 use App\Support\BackUrl;
 use App\Support\Legal\LegalDocument;
+use App\Support\Seo\PageSeo;
 use Illuminate\Contracts\View\View;
 
 class LegalController extends Controller
@@ -26,9 +27,12 @@ class LegalController extends Controller
 
     private function show(string $key, BackUrl $backUrl): View
     {
+        $document = LegalDocument::fromLang($key);
+
         return view('pages.legal.show', [
-            'document' => LegalDocument::fromLang($key),
+            'document' => $document,
             'backUrl' => $backUrl->resolve(),
+            'seo' => PageSeo::legal($document, $key),
         ]);
     }
 }

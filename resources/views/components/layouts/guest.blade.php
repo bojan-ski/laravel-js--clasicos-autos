@@ -11,8 +11,6 @@
 @endphp
 
 <x-layouts.app :title="$title">
-    <x-slot:head>{{ $head ?? '' }}</x-slot:head>
-
     <div class="{{ $containers[$width] }}">
         {{ $slot }}
     </div>

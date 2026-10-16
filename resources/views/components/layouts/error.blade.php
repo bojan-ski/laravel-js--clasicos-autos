@@ -6,6 +6,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $code }} — {{ $title }}</title>
+    <x-global.robots-meta :status="$code" />
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32.png') }}">
     @vite('resources/css/app.css')
 </head>
 <body class="flex min-h-screen flex-col">

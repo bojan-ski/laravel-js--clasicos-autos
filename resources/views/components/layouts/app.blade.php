@@ -1,12 +1,13 @@
 @props([
     'title' => null,
     'audience' => null,
+    'seo' => null,
 ])
 
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="has-data-cookie-banner:scroll-pb-60 md:has-data-cookie-banner:scroll-pb-28 max-md:[&:has([data-sticky-bar]):not(:has([data-cookie-banner]))]:scroll-pb-24 max-md:[&:has([data-sticky-bar]):has([data-cookie-banner])]:scroll-pb-[calc(var(--cookie-banner-h,15rem)+6rem)]">
 <head>
-    <x-global.head :title="$title">{{ $head ?? '' }}</x-global.head>
+    <x-global.head :title="$title" :seo="$seo" />
 </head>
 <body class="flex min-h-screen flex-col">
     <a href="#main" class="sr-only z-80 bg-card px-4 py-2 text-sm text-red focus:not-sr-only focus:fixed focus:top-3 focus:left-3 [body:has([data-header-variant=admin])_&]:outline-gold-light">{{ __('app.a11y.skip_to_content') }}</a>

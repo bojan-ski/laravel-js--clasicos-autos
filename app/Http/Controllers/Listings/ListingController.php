@@ -9,6 +9,8 @@ use App\Models\CarListing;
 use App\Services\ListingBrowseService;
 use App\Support\BackUrl;
 use App\Support\ListingSpecs;
+use App\Support\Seo\ListingSeo;
+use App\Support\Seo\PageSeo;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -24,6 +26,7 @@ class ListingController extends Controller
             'filters' => $filters,
             'filtered' => $request->hasFilters(),
             'makers' => $listings->brandMakers(),
+            'seo' => PageSeo::listingsIndex(),
         ]);
     }
 
@@ -50,6 +53,7 @@ class ListingController extends Controller
             'specs' => new ListingSpecs($listing),
             'viewerIsOwner' => $listing->isOwnedBy($request->user()),
             'backUrl' => $backUrl->resolve(route('listings.index')),
+            'seo' => ListingSeo::for($listing),
         ]);
     }
 }

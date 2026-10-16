@@ -1,4 +1,4 @@
-<x-layouts.app :title="__('app.listings.index.title')">
+<x-layouts.app :title="__('app.listings.index.title')" :seo="$seo">
     <section class="mx-auto flex max-w-7xl flex-col gap-6 px-5 py-6 md:gap-8 md:px-14 md:py-12">
         <div class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
             <x-ui.page-header :kicker="__('app.listings.index.kicker')" kicker-lang="es" :title="__('app.listings.index.title')" />
