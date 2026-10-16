@@ -25,13 +25,6 @@ class BookmarkButton extends Component
         return route($this->bookmarked() ? 'bookmarks.destroy' : 'bookmarks.store', $this->listing);
     }
 
-    public function stateClasses(): string
-    {
-        return $this->bookmarked()
-            ? 'border-red bg-red/10'
-            : 'border-rule hover:bg-ink/7';
-    }
-
     public function render(): View
     {
         return view('components.listings.bookmark-button');

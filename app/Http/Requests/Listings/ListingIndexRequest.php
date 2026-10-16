@@ -2,10 +2,11 @@
 
 namespace App\Http\Requests\Listings;
 
+use App\Models\CarMaker;
+use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\Attributes\RedirectToRoute;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 #[RedirectToRoute('listings.index')]
 class ListingIndexRequest extends FormRequest
@@ -22,18 +23,21 @@ class ListingIndexRequest extends FormRequest
     {
         return [
             'search' => ['nullable', 'string', 'max:100'],
-            'maker' => ['nullable', 'integer', Rule::exists('car_makers', 'id')->where('is_active', true)],
+            'maker' => ['nullable', 'array', 'list', $this->activeMakers(...)],
         ];
     }
 
     /**
-     * @return array{search: string, maker: int|null}
+     * @return array{search: string, makers: list<int>}
      */
     public function filters(): array
     {
+        $makers = array_values(array_unique(array_map(intval(...), (array) $this->input('maker', []))));
+        sort($makers);
+
         return [
             'search' => $this->string('search')->trim()->toString(),
-            'maker' => $this->filled('maker') ? $this->integer('maker') : null,
+            'makers' => $makers,
         ];
     }
 
@@ -41,6 +45,29 @@ class ListingIndexRequest extends FormRequest
     {
         $filters = $this->filters();
 
-        return $filters['search'] !== '' || $filters['maker'] !== null;
+        return $filters['search'] !== '' || $filters['makers'] !== [];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $maker = $this->input('maker');
+
+        if (is_string($maker) && $maker !== '') {
+            $this->merge(['maker' => [$maker]]);
+        }
+    }
+
+    private function activeMakers(string $attribute, mixed $value, Closure $fail): void
+    {
+        if (! is_array($value)) {
+            return;
+        }
+
+        $integers = array_filter($value, fn (mixed $id): bool => filter_var($id, FILTER_VALIDATE_INT) !== false);
+        $ids = array_unique(array_map(intval(...), $integers));
+
+        if (count($integers) !== count($value) || CarMaker::query()->active()->whereKey($ids)->count() !== count($ids)) {
+            $fail('validation.exists')->translate();
+        }
     }
 }

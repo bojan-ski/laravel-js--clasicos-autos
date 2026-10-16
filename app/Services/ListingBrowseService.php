@@ -54,7 +54,7 @@ class ListingBrowseService
     ];
 
     /**
-     * @param  array{search: string, maker: int|null}  $filters
+     * @param  array{search: string, makers: list<int>}  $filters
      * @return LengthAwarePaginator<int, CarListing>
      */
     public function paginate(array $filters): LengthAwarePaginator
@@ -68,7 +68,7 @@ class ListingBrowseService
                     ->orWhere('model', 'like', $pattern)
                     ->orWhereHas('maker', fn (Builder $maker) => $maker->where('name', 'like', $pattern)));
             })
-            ->when($filters['maker'] !== null, fn (Builder $query) => $query->where('car_maker_id', $filters['maker']))
+            ->when($filters['makers'] !== [], fn (Builder $query) => $query->whereIn('car_maker_id', $filters['makers']))
             ->paginate(config('listings.per_page.listings'))
             ->withQueryString();
     }

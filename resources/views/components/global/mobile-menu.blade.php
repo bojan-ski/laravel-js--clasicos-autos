@@ -36,8 +36,8 @@
                             <x-ui.stamp tone="red" data-unread-badge :data-nav-count="$link->count !== null" :hidden="$link->count === null" :data-template="__('app.header.new_count')" class="bg-card">
                                 <span data-unread-badge-text class="block px-2 py-px font-sans text-[10px] tracking-[0.16em]">{{ __('app.header.new_count', ['count' => $link->count ?? 0]) }}</span>
                             </x-ui.stamp>
-                        @elseif ($link->count !== null && $link->countStyle === \App\Enums\NavCountStyle::Selected)
-                            <span data-nav-count class="font-sans text-[13px] text-gold-ink">{{ __('app.header.selected_count', ['count' => $link->count]) }}</span>
+                        @elseif ($link->countStyle === \App\Enums\NavCountStyle::Selected)
+                            <span data-selected-count data-template="{{ __('app.header.selected_count') }}" {{ $link->count !== null ? 'data-nav-count' : 'hidden' }} class="font-sans text-[13px] text-gold-ink">{{ __('app.header.selected_count', ['count' => $link->count ?? 0]) }}</span>
                         @elseif ($link->count !== null && $link->countStyle === \App\Enums\NavCountStyle::Queue)
                             <x-ui.stamp tone="gold" data-nav-count>
                                 <span class="block px-2 py-px font-sans text-[11px] tabular-nums {{ $onDark ? 'text-gold-light' : '' }}">{{ $link->count }}@if ($link->countLabel !== null)<span class="sr-only"> {{ $link->countLabel }}</span>@endif</span>

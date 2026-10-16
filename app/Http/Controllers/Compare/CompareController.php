@@ -8,8 +8,11 @@ use App\Services\CompareService;
 use App\Support\BackUrl;
 use App\Support\ComparisonRows;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Symfony\Component\HttpFoundation\Response;
 
 class CompareController extends Controller
 {
@@ -24,22 +27,28 @@ class CompareController extends Controller
         ]);
     }
 
-    public function add(CarListing $listing, CompareService $compare, BackUrl $backUrl): RedirectResponse
+    public function add(Request $request, CarListing $listing, CompareService $compare, BackUrl $backUrl): JsonResponse|RedirectResponse
     {
         Gate::authorize('compare', $listing);
 
-        $redirect = redirect($backUrl->resolve(route('listings.index')));
+        if (! $compare->add($listing)) {
+            return $request->expectsJson()
+                ? response()->json(['message' => __('app.compare.flash.full')], Response::HTTP_CONFLICT)
+                : redirect($backUrl->resolve(route('listings.index')))->with('error', __('app.compare.flash.full'));
+        }
 
-        return $compare->add($listing)
-            ? $redirect->with('success', __('app.compare.flash.added'))
-            : $redirect->with('error', __('app.compare.flash.full'));
+        return $request->expectsJson()
+            ? $this->state($compare, true, __('app.compare.flash.added'))
+            : redirect($backUrl->resolve(route('listings.index')))->with('success', __('app.compare.flash.added'));
     }
 
-    public function remove(CarListing $listing, CompareService $compare, BackUrl $backUrl): RedirectResponse
+    public function remove(Request $request, CarListing $listing, CompareService $compare, BackUrl $backUrl): JsonResponse|RedirectResponse
     {
         $compare->remove($listing);
 
-        return redirect($backUrl->resolve(route('compare.show')))->with('success', __('app.compare.flash.removed'));
+        return $request->expectsJson()
+            ? $this->state($compare, false, __('app.compare.flash.removed'))
+            : redirect($backUrl->resolve(route('compare.show')))->with('success', __('app.compare.flash.removed'));
     }
 
     public function clear(CompareService $compare, BackUrl $backUrl): RedirectResponse
@@ -47,5 +56,14 @@ class CompareController extends Controller
         $compare->clear();
 
         return redirect($backUrl->resolve(route('compare.show')))->with('success', __('app.compare.flash.cleared'));
+    }
+
+    private function state(CompareService $compare, bool $selected, string $message): JsonResponse
+    {
+        return response()->json([
+            'selected' => $selected,
+            'count' => count($compare->ids()),
+            'message' => $message,
+        ]);
     }
 }

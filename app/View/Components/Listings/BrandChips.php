@@ -11,7 +11,7 @@ class BrandChips extends Component
 {
     /**
      * @param  Collection<int, CarMaker>  $makers
-     * @param  array{search: string, maker: int|null}  $filters
+     * @param  array{search: string, makers: list<int>}  $filters
      */
     public function __construct(
         public Collection $makers,
@@ -23,17 +23,21 @@ class BrandChips extends Component
      */
     public function chips(): array
     {
+        $selected = $this->filters['makers'];
+
         $chips = [[
             'label' => __('app.listings.index.all'),
-            'url' => $this->url(null),
-            'active' => $this->filters['maker'] === null,
+            'url' => $this->url([]),
+            'active' => $selected === [],
         ]];
 
         foreach ($this->makers as $maker) {
+            $active = in_array($maker->id, $selected, true);
+
             $chips[] = [
                 'label' => $maker->name,
-                'url' => $this->url($maker->id),
-                'active' => $this->filters['maker'] === $maker->id,
+                'url' => $this->url($active ? array_diff($selected, [$maker->id]) : [...$selected, $maker->id]),
+                'active' => $active,
             ];
         }
 
@@ -45,11 +49,17 @@ class BrandChips extends Component
         return view('components.listings.brand-chips');
     }
 
-    private function url(?int $makerId): string
+    /**
+     * @param  array<int, int>  $makerIds
+     */
+    private function url(array $makerIds): string
     {
+        $makerIds = array_values($makerIds);
+        sort($makerIds);
+
         return route('listings.index', array_filter([
             'search' => $this->filters['search'],
-            'maker' => $makerId,
-        ], fn (string|int|null $value): bool => $value !== null && $value !== ''));
+            'maker' => $makerIds,
+        ], fn (string|array $value): bool => $value !== '' && $value !== []));
     }
 }

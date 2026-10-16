@@ -24,13 +24,6 @@ class CompareButton extends Component
         return route($this->selected() ? 'compare.remove' : 'compare.add', $this->listing);
     }
 
-    public function stateClasses(): string
-    {
-        return $this->selected()
-            ? 'border-red bg-red/10 text-red'
-            : 'border-rule text-ink-2 hover:bg-ink/7';
-    }
-
     public function render(): View
     {
         return view('components.listings.compare-button');
