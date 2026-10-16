@@ -15,9 +15,9 @@ class UnreadNavCountTest extends TestCase
 {
     use LazilyRefreshDatabase;
 
-    private const string PILL_CLASSES = 'class="absolute -top-2.5 -right-4 h-4.5 min-w-4.5 rounded-full bg-red px-1.25 text-center text-[11px] leading-4.5 text-cream-on-dark tabular-nums"';
+    private const string PILL_CLASSES = 'class="absolute -top-2.5 -right-4 h-4.5 min-w-4.5 rounded-full bg-red px-1.25 text-center text-[11px] leading-4.5 text-cream-on-dark tabular-nums motion-public:data-bump:animate-pop"';
 
-    private const string DOT_CLASSES = 'class="absolute top-2 right-2 size-2.5 rounded-full bg-red"';
+    private const string DOT_CLASSES = 'class="absolute top-2 right-2 size-2.5 rounded-full bg-red motion-public:data-bump:animate-pop"';
 
     private const string DOT_TEXT = '<span class="sr-only"> (unread messages)</span></span>';
 

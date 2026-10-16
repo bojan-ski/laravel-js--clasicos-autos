@@ -19,7 +19,7 @@ class LiveBubble extends Component
 
     public function __construct(public Conversation $conversation)
     {
-        $this->classes = MessageBubble::BASE_CLASSES.' '.MessageBubble::OTHER_CLASSES;
+        $this->classes = MessageBubble::BASE_CLASSES.' '.MessageBubble::OTHER_CLASSES.' '.MessageBubble::ARRIVE_CLASSES;
         $this->metaClasses = MessageBubble::META_CLASSES;
         $this->senderName = $conversation->otherParticipant(Auth::user())->username;
     }

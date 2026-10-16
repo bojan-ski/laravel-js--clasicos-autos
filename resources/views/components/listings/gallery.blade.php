@@ -7,8 +7,8 @@
         </div>
     @else
         <div data-gallery class="flex flex-col gap-3">
-            <img data-gallery-main src="{{ $images->first()->url() }}" alt="{{ $name }}" width="1600" height="900"
-                 class="aspect-video w-full object-cover photo-grade">
+            <img data-gallery-main data-develop src="{{ $images->first()->url() }}" alt="{{ $name }}" width="1600" height="900"
+                 class="aspect-video w-full object-cover photo-grade motion-public:transition-[opacity,filter] motion-public:duration-700 motion-public:data-swapped:animate-swap-in motion-public:data-developing:photo-developing motion-public:data-developing:transition-none">
 
             @if ($images->count() > 1)
                 <ul class="flex flex-wrap gap-2.5" aria-label="{{ __('app.listings.show.gallery.label') }}">

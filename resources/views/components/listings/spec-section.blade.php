@@ -1,7 +1,7 @@
 @props(['title', 'rows'])
 
 <div {{ $attributes }}>
-    <details class="group border-b border-rule md:hidden">
+    <details class="group border-b border-rule md:hidden motion-public:details-smooth">
         <summary class="flex min-h-12 cursor-pointer list-none items-center justify-between gap-4 py-2 [&::-webkit-details-marker]:hidden">
             <span class="font-heading text-2xl text-red italic">{{ $title }}</span>
             <span aria-hidden="true" class="font-heading text-3xl leading-none text-red transition-transform group-open:rotate-45">+</span>

@@ -11,7 +11,8 @@
         data-label-on="{{ __('app.music.on') }}"
         data-label-off="{{ __('app.music.off') }}"
         class="group grid size-11 cursor-pointer place-items-center md:size-8">
-    <span class="grid size-6.5 place-items-center rounded-full border transition-colors duration-150 {{ $indicator }}">
+    <span class="relative grid size-6.5 place-items-center rounded-full border transition-colors duration-150 {{ $indicator }}">
+        <span aria-hidden="true" class="pointer-events-none absolute -inset-px hidden rounded-full border border-red motion-public:group-data-playing:block motion-public:animate-ring"></span>
         <x-icons.volume-2 class="hidden size-3.5 group-data-[state=on]:block" />
         <x-icons.volume-x class="hidden size-3.5 group-data-[state=off]:block" />
     </span>

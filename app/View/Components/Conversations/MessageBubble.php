@@ -16,6 +16,8 @@ class MessageBubble extends Component
 
     public const string OTHER_CLASSES = 'bg-card border-rule -rotate-[0.4deg]';
 
+    public const string ARRIVE_CLASSES = 'motion-public:animate-arrive';
+
     public const string META_CLASSES = 'mt-1 flex flex-wrap items-center gap-x-3 text-[11px] text-muted';
 
     public bool $own;

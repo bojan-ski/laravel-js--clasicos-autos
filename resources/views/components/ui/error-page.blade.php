@@ -9,7 +9,7 @@
     <x-ui.postcard tilt="right" class="relative md:p-4 md:pb-5.5">
         <img src="{{ asset('assets/images/hero.jpg') }}" alt="" width="1184" height="672"
              class="h-55 w-full object-cover photo-grade-strong md:h-95">
-        <span lang="es" class="absolute top-5 -right-2 rotate-12 border-3 border-double border-red bg-card/85 px-4.5 py-2 text-sm uppercase tracking-[0.22em] text-red md:top-10 md:-right-4.5">{{ $stamp }}</span>
+        <span lang="es" class="absolute top-5 -right-2 rotate-12 border-3 border-double border-red bg-card/85 px-4.5 py-2 text-sm uppercase tracking-[0.22em] text-red md:top-10 md:-right-4.5 motion-public:animate-stamp-in-late">{{ $stamp }}</span>
     </x-ui.postcard>
 
     <div class="flex flex-col gap-4.5">
