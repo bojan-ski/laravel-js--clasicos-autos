@@ -34,7 +34,7 @@
     </div>
 
     @if ($isParticipant)
-        <div class="pointer-events-none absolute -top-2.5 -right-2.5 hidden rotate-4 group-data-unread:block">
+        <div class="pointer-events-none absolute -top-2.5 -right-2.5 hidden rotate-4 group-data-unread:block motion-public:animate-stamp-in">
             <x-ui.stamp tone="red" class="bg-card">
                 <span class="block px-2 py-0.5 text-[10px] tracking-[0.16em]"><span class="uppercase">{{ __('app.conversations.index.stamp') }}</span><span id="{{ $unreadId() }}" data-card-count data-template-one="{{ $countTemplate(1) }}" data-template-other="{{ $countTemplate(2) }}" class="sr-only"> {{ trans_choice('app.conversations.index.stamp_count', $unreadCount()) }}</span></span>
             </x-ui.stamp>

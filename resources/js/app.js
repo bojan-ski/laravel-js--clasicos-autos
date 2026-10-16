@@ -12,6 +12,7 @@ import { initLoadingOverlay } from './modules/loading-overlay'
 import { initMobileMenu } from './modules/mobile-menu'
 import { initModelSelect } from './modules/model-select'
 import { initMusic } from './modules/music'
+import { initPhotoDevelop } from './modules/photo-develop'
 import { initPhotoInput } from './modules/photo-input'
 import { initToggleForms } from './modules/toggle-forms'
 
@@ -24,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initDialogs()
     initCookieBanner()
     initGallery()
+    initPhotoDevelop()
     initBrandChips()
     initModelSelect()
     initPhotoInput()

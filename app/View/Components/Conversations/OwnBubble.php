@@ -16,7 +16,7 @@ class OwnBubble extends Component
 
     public function __construct(public Conversation $conversation)
     {
-        $this->classes = MessageBubble::BASE_CLASSES.' '.MessageBubble::OWN_CLASSES;
+        $this->classes = MessageBubble::BASE_CLASSES.' '.MessageBubble::OWN_CLASSES.' '.MessageBubble::ARRIVE_CLASSES;
         $this->metaClasses = MessageBubble::META_CLASSES;
         $this->senderName = __('app.conversations.bubble.you');
     }

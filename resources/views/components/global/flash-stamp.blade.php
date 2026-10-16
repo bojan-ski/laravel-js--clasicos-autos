@@ -15,7 +15,7 @@
     ];
 @endphp
 
-<x-ui.stamp :tone="$styles[$type]['tone']" class="max-w-full bg-card shadow-lg {{ $styles[$type]['tilt'] }}"
+<x-ui.stamp :tone="$styles[$type]['tone']" class="max-w-full bg-card shadow-lg motion-public:animate-stamp-in {{ $styles[$type]['tilt'] }}"
             role="{{ $styles[$type]['role'] }}" aria-live="{{ $styles[$type]['live'] }}">
     <span class="flex items-center gap-4 px-6 py-5 md:px-8">
         <span class="grid size-11 shrink-0 place-items-center rounded-full border {{ $styles[$type]['icon'] }}">

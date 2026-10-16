@@ -1,4 +1,5 @@
 import { api } from '../lib/api'
+import { replay } from '../lib/replay'
 import { insertBubble } from '../lib/thread'
 
 export function initLiveMessages() {
@@ -99,10 +100,12 @@ function setUnreadBadges(count) {
         const text = badge.querySelector('[data-unread-badge-text]')
         if (text) text.textContent = badge.dataset.template.replace(':count', String(count))
         badge.hidden = count === 0
+        replay(badge, 'data-bump')
     })
 
     document.querySelectorAll('[data-unread-dot]').forEach((dot) => {
         dot.hidden = count === 0
+        replay(dot, 'data-bump')
     })
 }
 

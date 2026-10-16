@@ -1,7 +1,7 @@
-<article {{ $attributes->merge(['class' => 'relative flex flex-col gap-3 bg-card p-3 pb-4 shadow-sm']) }}>
+<article {{ $attributes->merge(['class' => 'group/card relative flex flex-col gap-3 bg-card p-3 pb-4 shadow-sm']) }}>
     @if ($imageUrl() !== null)
-        <img src="{{ $imageUrl() }}" alt="{{ $listing->name }}" width="800" height="600" loading="lazy"
-             class="h-50 w-full object-cover photo-grade">
+        <img data-develop src="{{ $imageUrl() }}" alt="{{ $listing->name }}" width="800" height="600" loading="lazy"
+             class="h-50 w-full object-cover photo-grade motion-public:transition-[opacity,filter] motion-public:duration-700 motion-public:group-hover/card:photo-warm motion-public:data-developing:photo-developing motion-public:data-developing:transition-none">
     @else
         <div class="flex h-50 w-full items-center justify-center border border-rule bg-paper text-muted">
             <x-icons.image class="size-10" />

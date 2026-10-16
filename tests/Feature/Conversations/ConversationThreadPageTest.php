@@ -279,7 +279,7 @@ class ConversationThreadPageTest extends TestCase
         $start = strpos($html, '<template data-live-bubble data-live-bubble-placeholder="__message__">');
         $template = substr($html, $start, strpos($html, '</template>', $start) - $start);
 
-        $this->assertStringContainsString('<li class="w-fit max-w-110 scroll-mt-16 border px-4 py-3 bg-card border-rule -rotate-[0.4deg]">', $template);
+        $this->assertStringContainsString('<li class="w-fit max-w-110 scroll-mt-16 border px-4 py-3 bg-card border-rule -rotate-[0.4deg] motion-public:animate-arrive">', $template);
         $this->assertStringContainsString('<p id="message-__message__-text" class="wrap-break-word"><span class="sr-only">seller.one: </span><span data-live-bubble-text></span></p>', $template);
         $this->assertStringContainsString('<div class="mt-1 flex flex-wrap items-center gap-x-3 text-[11px] text-muted">', $template);
         $this->assertStringContainsString('<time data-live-bubble-time></time>', $template);
@@ -300,7 +300,7 @@ class ConversationThreadPageTest extends TestCase
         $this->assertNotFalse($start);
         $template = substr($html, $start, strpos($html, '</template>', $start) - $start);
 
-        $this->assertStringContainsString('<li class="w-fit max-w-110 scroll-mt-16 border px-4 py-3 ml-auto bg-card-unread border-red rotate-[0.4deg]">', $template);
+        $this->assertStringContainsString('<li class="w-fit max-w-110 scroll-mt-16 border px-4 py-3 ml-auto bg-card-unread border-red rotate-[0.4deg] motion-public:animate-arrive">', $template);
         $this->assertStringContainsString('<p id="message-__message__-text" class="wrap-break-word"><span class="sr-only">You: </span><span data-live-bubble-text></span></p>', $template);
         $this->assertStringContainsString('<time data-live-bubble-time></time>', $template);
         $this->assertStringContainsString('data-dialog-open="delete-message-__message__"', $template);

@@ -21,16 +21,16 @@
         <x-icons.menu class="size-5.5 group-open:hidden" />
         <x-icons.x class="hidden size-5.5 group-open:block" />
         @if ($signal || $live)
-            <span data-unread-dot {{ $signal ? 'data-menu-signal' : 'hidden' }} class="absolute top-2 right-2 size-2.5 rounded-full bg-red"><span class="sr-only"> {{ __('app.a11y.menu_unread') }}</span></span>
+            <span data-unread-dot {{ $signal ? 'data-menu-signal' : 'hidden' }} class="absolute top-2 right-2 size-2.5 rounded-full bg-red motion-public:data-bump:animate-pop"><span class="sr-only"> {{ __('app.a11y.menu_unread') }}</span></span>
         @endif
     </summary>
 
-    <div class="fixed inset-0 -z-10 flex flex-col overflow-y-auto pt-19.25 {{ $panel }}">
+    <div class="fixed inset-0 -z-10 flex flex-col overflow-y-auto pt-19.25 motion-public:group-open:animate-fade-in {{ $panel }}">
         @if ($links !== [])
             <nav aria-label="{{ __('app.a11y.mobile_navigation') }}" class="flex flex-col px-5 py-3">
                 @foreach ($links as $link)
-                    <a href="{{ $link->url }}" @if ($link->active) aria-current="page" @endif
-                       class="flex min-h-14 items-center justify-between border-b font-heading text-[28px] {{ $rule }} {{ $link->active ? ($onDark ? 'text-gold-light' : 'text-red') : '' }}">
+                    <a href="{{ $link->url }}" @if ($link->active) aria-current="page" @endif style="animation-delay: {{ $loop->index * 40 }}ms"
+                       class="flex min-h-14 items-center justify-between border-b font-heading text-[28px] motion-public:group-open:animate-menu-link {{ $rule }} {{ $link->active ? ($onDark ? 'text-gold-light' : 'text-red') : '' }}">
                         {{ $link->label }}
                         @if ($link->countStyle === \App\Enums\NavCountStyle::Unread && ($link->count !== null || $live))
                             <x-ui.stamp tone="red" data-unread-badge :data-nav-count="$link->count !== null" :hidden="$link->count === null" :data-template="__('app.header.new_count')" class="bg-card">

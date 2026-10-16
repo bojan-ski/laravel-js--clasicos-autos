@@ -34,6 +34,9 @@ export function initMusic() {
         ACTIVATION_EVENTS.forEach((type) => document.addEventListener(type, onFirstInteraction, true))
     }
 
+    audio.addEventListener('playing', () => toggle.setAttribute('data-playing', ''))
+    audio.addEventListener('pause', () => toggle.removeAttribute('data-playing'))
+
     toggle.addEventListener('click', () => {
         if (enabled && audio.paused) {
             audio.play().catch(() => {})

@@ -23,7 +23,7 @@ class ConversationsListPageTest extends TestCase
 
     private const string UNREAD_ATTRIBUTE = '/^<article\b[^>]*\sdata-unread(?=[\s>])/';
 
-    private const string STAMP_WRAPPER = '<div class="pointer-events-none absolute -top-2.5 -right-2.5 hidden rotate-4 group-data-unread:block">';
+    private const string STAMP_WRAPPER = '<div class="pointer-events-none absolute -top-2.5 -right-2.5 hidden rotate-4 group-data-unread:block motion-public:animate-stamp-in">';
 
     protected function setUp(): void
     {

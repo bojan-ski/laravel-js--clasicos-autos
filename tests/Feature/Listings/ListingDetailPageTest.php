@@ -476,7 +476,7 @@ class ListingDetailPageTest extends TestCase
 
         $response = $this->show($listing);
 
-        $response->assertSee('data-gallery-main src="'.$images[0]->url().'"', false);
+        $response->assertSee('data-gallery-main data-develop src="'.$images[0]->url().'"', false);
         $response->assertSeeInOrder($images->map(fn (ListingImage $image): string => 'href="'.$image->url().'" data-gallery-thumb')->all(), false);
         $this->assertMatchesRegularExpression('/href="'.preg_quote($images[0]->url(), '/').'" data-gallery-thumb\s+aria-current="true"/', $response->getContent());
         $this->assertMatchesRegularExpression('/src="'.preg_quote($images[7]->thumbUrl(), '/').'" alt="Bel Air, photo 8"\s+width="320" height="240"/', $response->getContent());

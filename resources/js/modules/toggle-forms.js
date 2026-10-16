@@ -46,7 +46,9 @@ async function toggle(form) {
 }
 
 function setPressed(form, pressed) {
-    form.querySelector('[aria-pressed]')?.setAttribute('aria-pressed', String(pressed))
+    const button = form.querySelector('[aria-pressed]')
+    button?.setAttribute('aria-pressed', String(pressed))
+    button?.setAttribute('data-toggled', '')
 
     const method = form.querySelector('input[name="_method"]')
     if (pressed && !method) {
