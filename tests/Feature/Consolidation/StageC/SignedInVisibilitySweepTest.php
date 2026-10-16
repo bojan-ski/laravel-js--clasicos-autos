@@ -23,7 +23,7 @@ class SignedInVisibilitySweepTest extends TestCase
 
     private const array LISTING_PAGES = ['bookmarks.index', 'users.listings'];
 
-    private const array GUARDED_PAGES = ['profile', 'listings.create', 'listings.edit', 'listings.images.edit', 'conversations.create', 'conversations.show', 'conversations.index'];
+    private const array GUARDED_PAGES = ['profile', 'listings.create', 'listings.edit', 'listings.images.edit', 'conversations.create', 'conversations.show', 'conversations.index', 'contact'];
 
     private const string CONTROL = 'Sweep Control Public';
 

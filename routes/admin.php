@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AccountController;
+use App\Http\Controllers\Admin\FeedbackController;
 use App\Http\Controllers\Admin\ListingModerationController;
 use App\Http\Controllers\Admin\ListingQueueController;
 use App\Http\Controllers\Admin\ReportController;
@@ -23,4 +24,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'can:access-admin'])
 
     Route::get('/reports', [ReportController::class, 'index'])->name('reports');
     Route::patch('/reports/{report}/resolve', [ReportController::class, 'resolve'])->name('reports.resolve')->whereNumber('report');
+
+    Route::get('/feedback', [FeedbackController::class, 'index'])->name('feedback');
+    Route::patch('/feedback/{contactMessage}/status', [FeedbackController::class, 'updateStatus'])->name('feedback.status')->whereNumber('contactMessage');
 });

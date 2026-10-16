@@ -22,7 +22,9 @@ return [
         'bookmarks' => 'Bookmarks',
         'users' => 'Users',
         'reports' => 'Reports',
+        'feedback' => 'Feedback',
         'conversations' => 'Conversations',
+        'contact' => 'Contact',
     ],
 
     'pagination' => [
@@ -39,6 +41,7 @@ return [
         'count_labels' => [
             'pending' => 'pending',
             'open' => 'open',
+            'new' => 'new',
         ],
         'selected_count' => ':count selected',
         'sign_in' => 'Sign in',
@@ -831,6 +834,36 @@ return [
         ],
     ],
 
+    'contact' => [
+        'kicker' => 'Escríbenos',
+        'title' => 'Contact',
+        'reply' => 'The admin replies by email to :email, outside the app.',
+        'fields' => [
+            'subject' => 'Subject',
+            'message' => 'Message',
+        ],
+        'hints' => [
+            'subject' => 'Max 120 characters.',
+            'message' => 'Max 1000 characters.',
+        ],
+        'submit' => 'Send message',
+        'flash' => [
+            'sent' => 'Your message has been sent.',
+        ],
+        'throttle' => '{1} You have sent too many messages. Try again in :minutes minute.|[2,*] You have sent too many messages. Try again in :minutes minutes.',
+        'attributes' => [
+            'subject' => 'subject',
+            'message' => 'message',
+        ],
+    ],
+
+    'feedback' => [
+        'status' => [
+            'new' => 'New',
+            'handled' => 'Handled',
+        ],
+    ],
+
     'admin' => [
         'account' => [
             'kicker' => 'Mi cuenta',
@@ -991,6 +1024,43 @@ return [
                 'message_deleted' => 'The message has been deleted. The report keeps a copy.',
                 'user_suspended' => 'The user has been suspended and their open reports are resolved.',
                 'error' => 'This report can no longer be resolved that way.',
+            ],
+        ],
+        'feedback' => [
+            'kicker' => 'Buzón',
+            'title' => 'Feedback',
+            'chips_label' => 'Filter by status',
+            'chips' => [
+                'new' => 'New',
+                'handled' => 'Handled',
+            ],
+            'columns' => [
+                'sender' => 'Sender',
+                'subject' => 'Subject',
+                'message' => 'Message',
+                'received' => 'Received',
+                'status' => 'Status',
+                'actions' => 'Actions',
+            ],
+            'handled_by' => 'by :username',
+            'handled_by_removed' => 'by a removed admin',
+            'action_context' => '— :username, :time',
+            'actions' => [
+                'mark_handled' => 'Mark handled',
+                'mark_new' => 'Mark as new',
+            ],
+            'empty' => [
+                'new' => 'No new messages.',
+                'handled' => 'No handled messages yet.',
+            ],
+            'attributes' => [
+                'status' => 'status',
+                'target_status' => 'status',
+            ],
+            'flash' => [
+                'handled' => 'The message is marked as handled.',
+                'new' => 'The message is marked as new.',
+                'error' => 'This message has already changed. Nothing was updated.',
             ],
         ],
     ],

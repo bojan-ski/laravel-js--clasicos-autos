@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\ContactMessageStatus;
 use App\Enums\ListingStatus;
 use App\Enums\ReportOutcome;
 use App\Enums\ReportReason;
@@ -9,6 +10,7 @@ use App\Enums\ReportStatus;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
 use App\Models\CarListing;
+use App\Models\ContactMessage;
 use App\Models\Conversation;
 use App\Models\ListingImage;
 use App\Models\Message;
@@ -256,6 +258,23 @@ class ReviewSeederTest extends TestCase
         $this->assertSame(1, User::query()->where('role', UserRole::Admin)->count());
     }
 
+    public function test_the_reviewer_has_a_new_contact_message_and_the_buyers_was_handled_by_the_admin_a_day_ago(): void
+    {
+        $this->freezeSecond();
+        $this->seed([DatabaseSeeder::class, ReviewSeeder::class]);
+        $reviewer = User::query()->where('email', 'review@example.com')->sole();
+        $buyer = User::query()->where('email', 'buyer@example.com')->sole();
+        $admin = User::query()->where('role', UserRole::Admin)->sole();
+
+        $new = ContactMessage::query()->inStatus(ContactMessageStatus::New)->sole();
+        $this->assertSame([$reviewer->id, null, null], [$new->user_id, $new->handled_at, $new->handled_by]);
+
+        $handled = ContactMessage::query()->inStatus(ContactMessageStatus::Handled)->sole();
+        $this->assertSame([$buyer->id, $admin->id], [$handled->user_id, $handled->handled_by]);
+        $this->assertTrue($handled->handled_at->equalTo(now()->subDay()));
+        $this->assertSame(1, User::query()->where('role', UserRole::Admin)->count());
+    }
+
     public function test_without_an_admin_the_moderated_listings_have_no_moderator(): void
     {
         $this->seed([CarMakerSeeder::class, CarModelSeeder::class, ReviewSeeder::class]);
@@ -263,6 +282,7 @@ class ReviewSeederTest extends TestCase
         $this->assertSame(0, User::query()->where('role', UserRole::Admin)->count());
         $this->assertSame([null], CarListing::query()->distinct()->pluck('moderated_by')->all());
         $this->assertSame([null], MessageReport::query()->distinct()->pluck('resolved_by')->all());
+        $this->assertSame([null], ContactMessage::query()->distinct()->pluck('handled_by')->all());
     }
 
     public function test_a_second_run_adds_nothing(): void
@@ -279,6 +299,7 @@ class ReviewSeederTest extends TestCase
 
         $this->assertSame(2, Conversation::query()->count());
         $this->assertSame(2, MessageReport::query()->count());
+        $this->assertSame(2, ContactMessage::query()->count());
         $this->assertSame($messages, Message::query()->count());
         $this->assertSame($users, User::query()->count());
         $this->assertSame($listings, CarListing::query()->count());

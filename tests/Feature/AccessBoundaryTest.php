@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\CarListing;
+use App\Models\ContactMessage;
 use App\Models\MessageReport;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
@@ -45,6 +46,10 @@ class AccessBoundaryTest extends TestCase
             'PATCH admin listings promote' => ['patch', 'admin.listings.promote'],
             'GET admin reports' => ['get', 'admin.reports'],
             'PATCH admin reports resolve' => ['patch', 'admin.reports.resolve'],
+            'GET admin feedback' => ['get', 'admin.feedback'],
+            'PATCH admin feedback status' => ['patch', 'admin.feedback.status'],
+            'GET contact' => ['get', 'contact'],
+            'POST contact' => ['post', 'contact.store'],
         ];
     }
 
@@ -73,6 +78,10 @@ class AccessBoundaryTest extends TestCase
             'appUser PATCH admin listings promote' => ['appUser', 'patch', 'admin.listings.promote'],
             'appUser GET admin reports' => ['appUser', 'get', 'admin.reports'],
             'appUser PATCH admin reports resolve' => ['appUser', 'patch', 'admin.reports.resolve'],
+            'appUser GET admin feedback' => ['appUser', 'get', 'admin.feedback'],
+            'appUser PATCH admin feedback status' => ['appUser', 'patch', 'admin.feedback.status'],
+            'admin GET contact' => ['admin', 'get', 'contact'],
+            'admin POST contact' => ['admin', 'post', 'contact.store'],
         ];
     }
 
@@ -152,6 +161,7 @@ class AccessBoundaryTest extends TestCase
             str_starts_with($route, 'admin.users.') => route($route, User::factory()->create()),
             str_starts_with($route, 'admin.listings.') => route($route, CarListing::factory()->customModel()->create()),
             str_starts_with($route, 'admin.reports.') => route($route, MessageReport::factory()->create()),
+            str_starts_with($route, 'admin.feedback.') => route($route, ContactMessage::factory()->create()),
             default => route($route),
         };
     }

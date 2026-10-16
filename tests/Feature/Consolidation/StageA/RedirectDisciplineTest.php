@@ -41,6 +41,8 @@ class RedirectDisciplineTest extends TestCase
     ];
 
     private const array STAGE_F_PINNED_TARGETS = [
+        'contact.store' => 'contact',
+        'admin.feedback.status' => 'admin.feedback',
         'admin.listings.promote' => 'admin.listings',
         'admin.reports.resolve' => 'admin.reports',
         'admin.users.destroy' => 'admin.users',
@@ -204,6 +206,8 @@ class RedirectDisciplineTest extends TestCase
             'profile.password.update',
             'profile.destroy',
             'admin.account.password.update',
+            'contact.store',
+            'admin.feedback.status',
             'admin.listings.approve',
             'admin.listings.promote',
             'admin.listings.reject',
@@ -272,6 +276,8 @@ class RedirectDisciplineTest extends TestCase
             ],
             'admin.users.suspend' => ['reason' => 'Repeated abusive messages.', 'duration' => '30_days'],
             'admin.reports.resolve' => ['outcome' => 'dismissed'],
+            'contact.store' => ['subject' => 'A question about listings', 'message' => 'How long does approval usually take?'],
+            'admin.feedback.status' => ['target_status' => 'handled'],
             'conversations.messages.report' => ['reason' => 'spam'],
             'conversations.store', 'conversations.messages.store' => ['message' => 'Is this car still available?'],
             default => [],

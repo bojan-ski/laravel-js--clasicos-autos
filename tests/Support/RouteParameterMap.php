@@ -3,6 +3,7 @@
 namespace Tests\Support;
 
 use App\Models\CarListing;
+use App\Models\ContactMessage;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\MessageReport;
@@ -55,6 +56,10 @@ final class RouteParameterMap
 
         if ($name === 'admin.reports.resolve') {
             return ['report' => (string) MessageReport::factory()->create()->id];
+        }
+
+        if ($name === 'admin.feedback.status') {
+            return ['contactMessage' => (string) ContactMessage::factory()->create()->id];
         }
 
         if (in_array($name, ['listings.edit', 'listings.update', 'listings.destroy', 'listings.images.edit', 'listings.images.store'], true)) {
