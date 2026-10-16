@@ -8,6 +8,7 @@ use App\Enums\UserStatus;
 use App\Models\CarListing;
 use App\Models\CarMaker;
 use App\Models\CarModel;
+use App\Models\ContactMessage;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\MessageReport;
@@ -67,6 +68,7 @@ class ReviewSeeder extends Seeder
         $reviewerReply = $this->seedSellerConversation($photographedListing, $user, $buyer);
         $this->seedCustomModelListing($stranger, $models[0]->car_maker_id);
         $this->seedReports($strangerMessage, $user, $reviewerReply, $buyer, $moderatorId);
+        $this->seedContactMessages($user, $buyer, $moderatorId);
     }
 
     private function appUser(string $username, string $email, string $phone): User
@@ -223,6 +225,27 @@ class ReviewSeeder extends Seeder
             'reason' => ReportReason::Scam,
             'resolved_by' => $moderatorId,
             'resolved_at' => $now->subDay(),
+            'created_at' => $now->subDays(2),
+            'updated_at' => $now->subDay(),
+        ]);
+    }
+
+    private function seedContactMessages(User $reviewer, User $buyer, ?int $moderatorId): void
+    {
+        $now = now()->toImmutable();
+
+        ContactMessage::factory()->for($reviewer)->create([
+            'subject' => 'How long does approval usually take?',
+            'message' => "I listed my 1957 Bel Air two days ago and it is still pending.\nIs there anything I should add to the listing?",
+            'created_at' => $now->subHour(),
+            'updated_at' => $now->subHour(),
+        ]);
+
+        ContactMessage::factory()->handled()->for($buyer)->create([
+            'subject' => 'Changing my phone number',
+            'message' => 'Could you tell me how to update the phone number shown on my account?',
+            'handled_by' => $moderatorId,
+            'handled_at' => $now->subDay(),
             'created_at' => $now->subDays(2),
             'updated_at' => $now->subDay(),
         ]);

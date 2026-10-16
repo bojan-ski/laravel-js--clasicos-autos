@@ -11,9 +11,11 @@
     $onDark = $audience === \App\Enums\NavAudience::Admin;
     $panel = $onDark ? 'bg-charcoal text-cream-on-dark' : 'bg-paper text-ink';
     $rule = $onDark ? 'border-cream-on-dark/20' : 'border-rule';
+    $menuClass = $onDark ? 'group xl:hidden' : 'group lg:hidden';
+    $desktopQuery = $onDark ? '(min-width: 80rem)' : '(min-width: 64rem)';
 @endphp
 
-<details data-mobile-menu class="group lg:hidden">
+<details data-mobile-menu data-desktop-query="{{ $desktopQuery }}" class="{{ $menuClass }}">
     <summary class="relative grid size-11 cursor-pointer list-none place-items-center rounded-xs [&::-webkit-details-marker]:hidden">
         <span class="sr-only">{{ __('app.a11y.menu') }}</span>
         <x-icons.menu class="size-5.5 group-open:hidden" />

@@ -9,6 +9,7 @@ use App\Models\CarListing;
 use App\Models\User;
 use App\Support\MainNavigation;
 use App\Support\NavItem;
+use App\Support\NewFeedbackCounter;
 use App\Support\PendingListingsCounter;
 use App\Support\UnreadMessagesCounter;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
@@ -38,8 +39,40 @@ class AppShellTest extends TestCase
         $navigation = $this->app->make(MainNavigation::class);
 
         $this->assertSame(['home', 'listings', 'compare'], array_column($navigation->linksFor(NavAudience::Guest, null), 'key'));
-        $this->assertSame(['home', 'listings', 'compare', 'bookmarks', 'conversations'], array_column($navigation->linksFor(NavAudience::Member, User::factory()->make()), 'key'));
-        $this->assertSame(['users', 'admin-listings', 'admin-reports', 'conversations'], array_column($navigation->linksFor(NavAudience::Admin, null), 'key'));
+        $this->assertSame(['home', 'listings', 'compare', 'bookmarks', 'conversations', 'contact'], array_column($navigation->linksFor(NavAudience::Member, User::factory()->make()), 'key'));
+        $this->assertSame(['users', 'admin-listings', 'admin-reports', 'admin-feedback', 'conversations'], array_column($navigation->linksFor(NavAudience::Admin, null), 'key'));
+    }
+
+    public function test_the_feedback_item_counts_new_messages_in_the_queue_style(): void
+    {
+        $items = array_column($this->app->make(MainNavigation::class)->items(), null, 'key');
+
+        $this->assertSame(NewFeedbackCounter::class, $items['admin-feedback']->counter);
+        $this->assertSame(NavCountStyle::Queue, $items['admin-feedback']->countStyle);
+        $this->assertSame('app.header.count_labels.new', $items['admin-feedback']->countLabelKey);
+        $this->assertSame([NavAudience::Admin], $items['admin-feedback']->audiences);
+        $this->assertNull($items['contact']->counter);
+        $this->assertSame([NavAudience::Member], $items['contact']->audiences);
+    }
+
+    public function test_the_member_header_tightens_between_lg_and_xl_and_never_wraps(): void
+    {
+        $this->blade('<x-global.header :audience="\App\Enums\NavAudience::Member" />')
+            ->assertSee('class="mx-auto flex max-w-7xl items-center gap-8 px-5 py-4 md:px-14 md:py-5 lg:gap-5 lg:px-8 xl:gap-8 xl:px-14"', false)
+            ->assertSee('class="mr-auto flex items-center gap-2.5 whitespace-nowrap"', false)
+            ->assertSee('class="hidden items-center gap-5 text-sm whitespace-nowrap lg:flex xl:gap-7"', false)
+            ->assertSee('class="hidden items-center gap-2.5 whitespace-nowrap lg:flex"', false)
+            ->assertSee('data-desktop-query="(min-width: 64rem)" class="group lg:hidden"', false);
+    }
+
+    public function test_the_admin_header_switches_to_its_horizontal_nav_at_xl(): void
+    {
+        $this->blade('<x-global.header :audience="\App\Enums\NavAudience::Admin" />')
+            ->assertSee('class="hidden items-center gap-5 text-sm whitespace-nowrap xl:flex xl:gap-7"', false)
+            ->assertSee('class="hidden items-center gap-2.5 whitespace-nowrap xl:flex"', false)
+            ->assertSee('data-desktop-query="(min-width: 80rem)" class="group xl:hidden"', false)
+            ->assertDontSee('lg:flex', false)
+            ->assertDontSee('lg:hidden', false);
     }
 
     public function test_the_admin_listings_item_counts_pending_listings_in_the_queue_style(): void

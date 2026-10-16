@@ -1,5 +1,3 @@
-const DESKTOP_QUERY = '(min-width: 1024px)'
-
 export function initMobileMenu() {
     const menu = document.querySelector('[data-mobile-menu]')
     if (!menu) return
@@ -29,7 +27,7 @@ export function initMobileMenu() {
         if (event.target.closest('a[href]')) close()
     })
 
-    window.matchMedia(DESKTOP_QUERY).addEventListener('change', (event) => {
+    window.matchMedia(menu.dataset.desktopQuery).addEventListener('change', (event) => {
         if (event.matches) close()
     })
 }
