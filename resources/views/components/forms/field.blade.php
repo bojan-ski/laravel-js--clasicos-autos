@@ -8,14 +8,16 @@
     'autocomplete' => null,
     'value' => null,
     'id' => null,
+    'bag' => null,
 ])
 
 @php
     $fieldId = $id ?? $name;
     $errorId = $fieldId.'-error';
     $hintId = $fieldId.'-hint';
-    $hasError = $errors->has($name);
-    $oldValue = old($name, $value);
+    $fieldErrors = $bag === null ? $errors : $errors->getBag($bag);
+    $hasError = $fieldErrors->has($name);
+    $oldValue = $bag === null || $fieldErrors->any() ? old($name, $value) : $value;
     $inputValue = $type === 'password' ? null : (is_array($oldValue) ? $value : $oldValue);
     $describedBy = trim(($hint !== null ? $hintId : '').' '.($hasError ? $errorId : ''));
 @endphp
@@ -37,6 +39,6 @@
         <p id="{{ $hintId }}" class="text-xs text-muted">{{ $hint }}</p>
     @endif
     @if ($hasError)
-        <p id="{{ $errorId }}" class="text-xs text-red-deep">{{ $errors->first($name) }}</p>
+        <p id="{{ $errorId }}" class="text-xs text-red-deep">{{ $fieldErrors->first($name) }}</p>
     @endif
 </div>

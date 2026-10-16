@@ -12,6 +12,11 @@ class CarMakerPolicy
         return $user->isAdmin();
     }
 
+    public function view(User $user, CarMaker $carMaker): bool
+    {
+        return $user->isAdmin();
+    }
+
     public function create(User $user): bool
     {
         return $user->isAdmin();

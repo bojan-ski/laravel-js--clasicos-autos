@@ -3,6 +3,8 @@
 namespace Tests\Support;
 
 use App\Models\CarListing;
+use App\Models\CarMaker;
+use App\Models\CarModel;
 use App\Models\ContactMessage;
 use App\Models\Conversation;
 use App\Models\Message;
@@ -86,6 +88,16 @@ final class RouteParameterMap
 
         if ($name === 'admin.users.unsuspend') {
             return ['user' => (string) User::factory()->suspended(now()->addDays(30))->create()->id];
+        }
+
+        if (in_array($name, ['admin.makers.show', 'admin.makers.update', 'admin.makers.active', 'admin.makers.destroy', 'admin.makers.models.store'], true)) {
+            return ['maker' => (string) CarMaker::factory()->create()->id];
+        }
+
+        if (in_array($name, ['admin.makers.models.update', 'admin.makers.models.active', 'admin.makers.models.destroy'], true)) {
+            $model = CarModel::factory()->create();
+
+            return ['maker' => (string) $model->car_maker_id, 'model' => (string) $model->id];
         }
 
         if ($name === 'users.listings') {

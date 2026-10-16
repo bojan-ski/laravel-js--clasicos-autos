@@ -30,6 +30,7 @@ class MainNavigation
             new NavItem('admin-listings', 'app.nav.listings', 'admin.listings', 'admin.listings', [NavAudience::Admin], PendingListingsCounter::class, NavCountStyle::Queue, 'app.header.count_labels.pending'),
             new NavItem('admin-reports', 'app.nav.reports', 'admin.reports', 'admin.reports', [NavAudience::Admin], OpenReportsCounter::class, NavCountStyle::Queue, 'app.header.count_labels.open'),
             new NavItem('admin-feedback', 'app.nav.feedback', 'admin.feedback', 'admin.feedback', [NavAudience::Admin], NewFeedbackCounter::class, NavCountStyle::Queue, 'app.header.count_labels.new'),
+            new NavItem('admin-makers', 'app.nav.makers', 'admin.makers', ['admin.makers', 'admin.makers.show'], [NavAudience::Admin]),
             new NavItem('conversations', 'app.nav.conversations', 'conversations.index', 'conversations.*', [NavAudience::Member, NavAudience::Admin], UnreadMessagesCounter::class, NavCountStyle::Unread),
             new NavItem('contact', 'app.nav.contact', 'contact', 'contact', [NavAudience::Member]),
         ];
