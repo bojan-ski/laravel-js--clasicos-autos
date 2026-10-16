@@ -13,9 +13,9 @@
             <span class="sr-only">{{ __('app.listings.index.advanced_link') }}</span>
         </a>
     </div>
-    @if ($filters['maker'] !== null)
-        <input type="hidden" name="maker" value="{{ $filters['maker'] }}">
-    @endif
+    @foreach ($filters['makers'] as $makerId)
+        <input type="hidden" name="maker[]" value="{{ $makerId }}">
+    @endforeach
     <x-ui.button type="submit" variant="primary" size="responsive">{{ __('app.listings.index.search_button') }}</x-ui.button>
     <a href="{{ route('listings.advanced') }}" class="hidden text-sm text-ink-2 hover:underline md:inline">{{ __('app.listings.index.advanced_link') }}</a>
 </form>

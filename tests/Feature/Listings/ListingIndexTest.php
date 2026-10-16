@@ -201,13 +201,50 @@ class ListingIndexTest extends TestCase
             $this->approved(['name' => "Match {$index}"], $carModel);
         }
 
-        $response = $this->get(route('listings.index', ['search' => 'Match', 'maker' => $maker->id, 'page' => 2]));
+        $response = $this->get(route('listings.index', ['search' => 'Match', 'maker' => [$maker->id], 'page' => 2]));
 
         $response
-            ->assertSee(e(route('listings.index', ['search' => 'Match', 'maker' => $maker->id, 'page' => 1])), false)
+            ->assertSee(e(route('listings.index', ['search' => 'Match', 'maker' => [$maker->id], 'page' => 1])), false)
             ->assertSee(e(route('listings.index', ['search' => 'Match'])).'"', false)
-            ->assertSee(e(route('listings.index', ['search' => 'Match', 'maker' => $otherMaker->id])).'"', false)
-            ->assertSee('<input type="hidden" name="maker" value="'.$maker->id.'">', false);
+            ->assertSee(e(route('listings.index', ['search' => 'Match', 'maker' => [$maker->id, $otherMaker->id]])).'"', false)
+            ->assertSee('<input type="hidden" name="maker[]" value="'.$maker->id.'">', false);
+    }
+
+    public function test_several_makers_list_the_listings_of_any_of_them(): void
+    {
+        [$first, $second, $third] = CarMaker::factory()->count(3)->create();
+        $this->approved(['name' => 'First Coupe'], CarModel::factory()->for($first, 'maker')->create());
+        $this->approved(['name' => 'Second Coupe'], CarModel::factory()->for($second, 'maker')->create());
+        $this->approved(['name' => 'Third Coupe'], CarModel::factory()->for($third, 'maker')->create());
+
+        $this->assertSame(['Second Coupe', 'First Coupe'], $this->namesFor(['maker' => [$first->id, $second->id]]));
+        $this->assertSame(['Second Coupe', 'First Coupe'], $this->namesFor(['maker' => [$second->id, $first->id, $second->id]]));
+    }
+
+    public function test_each_chip_toggles_its_maker_in_the_current_selection(): void
+    {
+        [$alfa, $austin, $buick] = [
+            CarMaker::factory()->create(['name' => 'Alfa Romeo']),
+            CarMaker::factory()->create(['name' => 'Austin']),
+            CarMaker::factory()->create(['name' => 'Buick']),
+        ];
+
+        $response = $this->get(route('listings.index', ['maker' => [$buick->id, $alfa->id]]));
+        $nav = Str::between($response->getContent(), 'aria-label="'.__('app.listings.index.chips_label').'"', '</nav>');
+
+        $this->assertSame(2, substr_count($nav, 'aria-current="true"'));
+        $this->assertMatchesRegularExpression('/href="'.preg_quote(e(route('listings.index', ['maker' => [$buick->id]])), '/').'"\s+aria-current="true"[^>]*>\s*<svg[^>]*>.*?<\/svg>\s*Alfa Romeo</s', $nav);
+        $this->assertMatchesRegularExpression('/href="'.preg_quote(e(route('listings.index', ['maker' => [$alfa->id, $austin->id, $buick->id]])), '/').'"[^>]*>Austin</s', $nav);
+        $this->assertMatchesRegularExpression('/href="'.preg_quote(e(route('listings.index')), '/').'"[^>]*>.*?'.__('app.listings.index.all').'</s', $nav);
+    }
+
+    public function test_a_single_maker_link_without_brackets_still_filters(): void
+    {
+        $maker = CarMaker::factory()->create();
+        $this->approved(['name' => 'Legacy Coupe'], CarModel::factory()->for($maker, 'maker')->create());
+        $this->approved(['name' => 'Other Coupe']);
+
+        $this->assertSame(['Legacy Coupe'], $this->namesFor(['maker' => (string) $maker->id]));
     }
 
     public function test_chips_list_all_then_every_active_maker_by_name_with_one_active(): void
@@ -254,7 +291,8 @@ class ListingIndexTest extends TestCase
         return [
             'unknown maker' => [['maker' => 999999], 'maker'],
             'non-integer maker' => [['maker' => 'abc'], 'maker'],
-            'array maker' => [['maker' => [1]], 'maker'],
+            'nested array maker' => [['maker' => [[1]]], 'maker'],
+            'keyed maker list' => [['maker' => [5 => 1]], 'maker'],
             'search over 100 characters' => [['search' => str_repeat('a', 101)], 'search'],
             'array search' => [['search' => ['Bel Air']], 'search'],
         ];
@@ -278,6 +316,18 @@ class ListingIndexTest extends TestCase
         $this->get(route('listings.index', ['maker' => $maker->id]))
             ->assertRedirect(route('listings.index'))
             ->assertSessionHasErrors('maker');
+    }
+
+    public function test_one_unknown_or_inactive_maker_among_valid_ones_invalidates_the_filter(): void
+    {
+        $active = CarMaker::factory()->create();
+        $inactive = CarMaker::factory()->inactive()->create();
+
+        foreach ([[$active->id, $inactive->id], [$active->id, 999999], [$active->id, 'abc']] as $makers) {
+            $this->get(route('listings.index', ['maker' => $makers]))
+                ->assertRedirect(route('listings.index'))
+                ->assertSessionHasErrors(['maker' => __('validation.exists', ['attribute' => 'maker'])]);
+        }
     }
 
     public function test_the_index_shows_the_validation_error_in_an_alert(): void
