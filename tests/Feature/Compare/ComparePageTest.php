@@ -52,6 +52,27 @@ class ComparePageTest extends TestCase
         $this->assertSame(array_fill(0, 24, '-'), array_column($response->viewData('rows'), 'second'));
     }
 
+    public function test_the_postcard_photo_is_decorative_because_its_heading_names_the_car(): void
+    {
+        $listing = CarListing::factory()->approved()->withImages()->create(['name' => 'Bel Air']);
+        $this->hold([$listing->id]);
+
+        $this->get(route('compare.show'))
+            ->assertSee('src="'.$listing->images()->sole()->cardUrl().'" alt="" width="800"', false)
+            ->assertDontSee('alt="Bel Air"', false);
+    }
+
+    public function test_clear_all_and_remove_are_48_px_touch_targets_below_md(): void
+    {
+        $listing = CarListing::factory()->approved()->create();
+        $this->hold([$listing->id]);
+
+        $html = (string) $this->get(route('compare.show'))->getContent();
+
+        $this->assertMatchesRegularExpression('/<button type="submit" class="[^"]*min-h-12[^"]*md:min-h-9[^"]*">\s*Clear All\s*<\/button>/', $html);
+        $this->assertMatchesRegularExpression('/<button type="submit" class="[^"]*min-h-12[^"]*md:min-h-9[^"]*">\s*Remove<span class="sr-only">/', $html);
+    }
+
     public function test_two_listings_appear_in_the_order_they_were_added_not_database_order(): void
     {
         [$older, $newer] = CarListing::factory()->approved()->withImages()->count(2)->create();

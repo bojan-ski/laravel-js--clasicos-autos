@@ -1,6 +1,6 @@
 <article {{ $attributes->merge(['class' => 'group/card relative flex flex-col gap-3 bg-card p-3 pb-4 shadow-sm']) }}>
     @if ($imageUrl() !== null)
-        <img data-develop src="{{ $imageUrl() }}" alt="{{ $listing->name }}" width="800" height="600" loading="lazy"
+        <img data-develop src="{{ $imageUrl() }}" alt="" width="800" height="600" loading="lazy"
              class="h-50 w-full object-cover photo-grade motion-public:transition-[opacity,filter] motion-public:duration-700 motion-public:group-hover/card:photo-warm motion-public:data-developing:photo-developing motion-public:data-developing:transition-none">
     @else
         <div class="flex h-50 w-full items-center justify-center border border-rule bg-paper text-muted">
@@ -17,8 +17,9 @@
             <h{{ $headingLevel }} class="line-clamp-2 font-heading text-[22px] leading-tight text-red italic wrap-break-word">{{ $listing->name }}</h{{ $headingLevel }}>
             <p class="text-xs text-muted">{{ $posted() }}</p>
             @if ($showsStatus())
+                <span class="sr-only">{{ __('app.listings.card.status') }}</span>
                 <x-listings.status-stamp :status="$listing->status" class="self-start" />
-                @if ($listing->isRejected() && $listing->rejection_reason !== null)
+                @if ($listing->hasRejectionReason())
                     <p class="text-xs text-red-deep wrap-break-word"><span class="sr-only">{{ __('app.listings.show.status.reason') }} </span>{{ $listing->rejection_reason }}</p>
                 @endif
             @endif

@@ -40,7 +40,7 @@
         <span class="w-32 shrink-0 text-[11px] tracking-[0.12em] text-muted uppercase lg:hidden">{{ __('app.admin.listings.columns.status') }}</span>
         <span class="flex min-w-0 flex-col items-start gap-1">
             <x-listings.status-stamp :status="$listing->status" />
-            @if ($listing->isRejected())
+            @if ($listing->hasRejectionReason())
                 <span class="text-xs text-red-deep wrap-anywhere">{{ $listing->rejection_reason }}</span>
             @endif
         </span>

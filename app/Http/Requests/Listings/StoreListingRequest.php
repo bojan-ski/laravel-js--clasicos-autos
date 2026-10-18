@@ -31,7 +31,7 @@ class StoreListingRequest extends ListingRequest
      */
     public function attributes(): array
     {
-        $images = __('app.listings.form.fields.images.label', ['max' => config('listings.images.max')]);
+        $images = __('app.listings.form.fields.images.attribute');
 
         return [...parent::attributes(), 'images' => $images, 'images.*' => $images];
     }

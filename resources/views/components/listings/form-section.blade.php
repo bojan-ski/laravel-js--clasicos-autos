@@ -12,7 +12,7 @@
     @if ($note !== null)
         <div class="clear-left mt-1 text-xs text-muted">{{ $note }}</div>
     @endif
-    <div class="clear-left mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div class="clear-left mt-5 grid grid-cols-1 gap-4 lg:grid-cols-2">
         {{ $slot }}
     </div>
 </fieldset>

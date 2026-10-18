@@ -310,7 +310,7 @@ class ListingDetailPageTest extends TestCase
 
         $html = $this->show($listing, $this->viewer($viewer, $owner))->getContent();
 
-        $this->assertMatchesRegularExpression('/<div class="ml-auto flex flex-wrap items-center justify-end gap-2">\s*<a href="'.preg_quote(route('listings.edit', $listing), '/').'"[^>]*border-rule[^>]*>\s*Edit listing\s*<\/a>\s*<a href="'.preg_quote(route('listings.images.edit', $listing), '/').'"[^>]*border-rule[^>]*>\s*Edit images\s*<\/a>\s*<div\s*>\s*<button type="button"[^>]*data-dialog-open="delete-listing"/', $html);
+        $this->assertMatchesRegularExpression('/<div class="ml-auto flex flex-wrap items-center justify-end gap-2 max-md:basis-full">\s*<div class="grid w-full grid-cols-2 gap-2 md:flex md:w-auto md:items-center">\s*<a href="'.preg_quote(route('listings.edit', $listing), '/').'"[^>]*border-rule[^>]*>\s*Edit listing\s*<\/a>\s*<a href="'.preg_quote(route('listings.images.edit', $listing), '/').'"[^>]*border-rule[^>]*>\s*Edit images\s*<\/a>\s*<div class="col-span-2 grid md:block">\s*<button type="button"[^>]*data-dialog-open="delete-listing"/', $html);
         $this->assertMatchesRegularExpression('/<button type="button"[^>]*border-red-deep[^>]*data-dialog-open="delete-listing" commandfor="delete-listing" command="show-modal">\s*Delete\s*<\/button>/', $html);
         $this->assertMatchesRegularExpression('/<dialog id="delete-listing" aria-labelledby="delete-listing-title"/', $html);
         $this->assertStringContainsString('<h2 id="delete-listing-title" class="text-[26px] leading-tight text-red italic">Are you sure you want to delete the car listing ?</h2>', $html);
@@ -350,7 +350,7 @@ class ListingDetailPageTest extends TestCase
         $this->assertStringContainsString('<h2 id="reject-listing-title" class="text-[26px] leading-tight text-red italic">'.e(__('app.listings.moderation.reject_title')).'</h2>', $html);
         $this->assertMatchesRegularExpression('/<form method="POST" action="'.$reject.'"[^>]*>\s*<input type="hidden" name="_token"[^>]*>\s*<input type="hidden" name="_method" value="PATCH">\s*<input type="hidden" name="version" value="'.$version.'">\s*<p aria-hidden="true" class="text-xs text-muted">\* Required<\/p>/', $html);
         $this->assertMatchesRegularExpression('/<textarea id="rejection_reason" name="rejection_reason"\s*required aria-required="true"\s*aria-describedby="rejection_reason-hint"[^>]*maxlength="1000"/', $html);
-        $this->assertStringContainsString('<p id="rejection_reason-hint" class="text-xs text-muted">'.e(__('app.listings.moderation.reason_hint')).'</p>', $html);
+        $this->assertStringContainsString('<p id="rejection_reason-hint" class="text-xs text-muted">Up to 1000 characters. The seller sees this reason on the listing and on their profile.</p>', $html);
         $this->assertMatchesRegularExpression('/<div class="flex flex-col-reverse gap-3 md:flex-row md:justify-end">\s*<button type="button"[^>]*border-rule[^>]*data-dialog-close="data-dialog-close" commandfor="reject-listing" command="close">\s*Cancel\s*<\/button>\s*<button type="submit"[^>]*border-red-deep[^>]*>\s*Reject\s*<\/button>/', $html);
         $this->assertStringNotContainsString('return=queue', $html);
     }

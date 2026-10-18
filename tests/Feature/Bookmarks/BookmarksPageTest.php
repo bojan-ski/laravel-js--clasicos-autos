@@ -129,7 +129,7 @@ class BookmarksPageTest extends TestCase
             ->assertSee(__('app.bookmarks.empty'))
             ->assertSee('<a href="'.route('listings.index').'" class="inline-flex min-h-11 items-center text-red underline underline-offset-4 hover:no-underline md:min-h-0">'.__('app.bookmarks.browse').'</a>', false)
             ->assertDontSee(__('app.bookmarks.saved', ['count' => 0]))
-            ->assertDontSee('md:grid-cols-3', false)
+            ->assertDontSee('grid gap-9 md:grid-cols-2 lg:grid-cols-3', false)
             ->assertDontSee(__('app.pagination.label'));
     }
 

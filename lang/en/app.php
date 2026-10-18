@@ -43,6 +43,7 @@ return [
         'label' => 'Pagination',
         'previous' => 'Prev',
         'next' => 'Next',
+        'page' => 'Page',
         'page_of' => 'Page :current of :last',
     ],
 
@@ -483,6 +484,7 @@ return [
             'price' => 'Price',
             'posted' => 'Posted :diff',
             'details' => 'Details',
+            'status' => 'Status:',
         ],
         'status' => [
             'pending' => 'Pending',
@@ -550,7 +552,7 @@ return [
                 'location_state' => ['label' => 'State', 'placeholder' => 'Enter the state name'],
                 'location_zipcode' => ['label' => 'Zipcode', 'placeholder' => 'Enter the zipcode'],
                 'description' => ['label' => 'Car description', 'placeholder' => 'Enter car description', 'hint' => 'Up to :max characters'],
-                'images' => ['label' => 'Car images - max :max'],
+                'images' => ['label' => 'Car images - max :max', 'attribute' => 'car images'],
             ],
             'other_model' => 'Other (specify)',
             'production_years' => 'The :model was built :years',
@@ -600,7 +602,7 @@ return [
             'reject' => 'Reject',
             'reject_title' => 'Reject this listing?',
             'reason_label' => 'Reason for rejection',
-            'reason_hint' => 'Up to 1000 characters. The seller sees this reason on the listing and on their profile.',
+            'reason_hint' => 'Up to :max characters. The seller sees this reason on the listing and on their profile.',
             'cancel' => 'Cancel',
             'confirm_reject' => 'Reject',
             'approved' => 'Car listing approved.',

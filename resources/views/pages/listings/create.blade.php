@@ -26,14 +26,14 @@
                         <x-listings.form-fields :options="$options" />
 
                         <x-listings.form-section id="section-description" number="VI" :title="__('app.listings.form.sections.description.title')">
-                            <div class="md:col-span-2 lg:col-span-4">
+                            <div class="lg:col-span-2">
                                 <x-forms.textarea name="description" required
                                                   :label="__('app.listings.form.fields.description.label')"
                                                   :placeholder="__('app.listings.form.fields.description.placeholder')"
-                                                  :hint="__('app.listings.form.fields.description.hint', ['max' => 5000])"
-                                                  maxlength="5000" />
+                                                  :hint="__('app.listings.form.fields.description.hint', ['max' => \App\Http\Requests\Listings\ListingRequest::DESCRIPTION_MAX])"
+                                                  :maxlength="\App\Http\Requests\Listings\ListingRequest::DESCRIPTION_MAX" />
                             </div>
-                            <x-listings.photo-input class="md:col-span-2 lg:col-span-4" />
+                            <x-listings.photo-input class="lg:col-span-2" />
                         </x-listings.form-section>
                     </div>
 

@@ -13,7 +13,9 @@ use Illuminate\Validation\Validator;
 
 abstract class ListingRequest extends FormRequest
 {
-    protected const int UNSIGNED_INT_MAX = 4294967295;
+    public const int UNSIGNED_INT_MAX = 4294967295;
+
+    public const int DESCRIPTION_MAX = 5000;
 
     protected const array OPTIONAL_ENUM_FIELDS = ['license_plate_type', 'body_type', 'exterior_condition', 'interior_condition', 'seat_material'];
 
@@ -44,7 +46,7 @@ abstract class ListingRequest extends FormRequest
             'location_city' => ['required', 'string', 'max:100'],
             'location_state' => ['required', 'string', 'max:100'],
             'location_zipcode' => ['required', 'string', 'max:20'],
-            'description' => ['required', 'string', 'max:5000'],
+            'description' => ['required', 'string', 'max:'.self::DESCRIPTION_MAX],
         ];
 
         foreach (ListingFormOptions::ENUM_FIELDS as $field => $enum) {

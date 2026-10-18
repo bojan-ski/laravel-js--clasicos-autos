@@ -11,7 +11,7 @@
             <x-listings.empty-state :message="__('app.bookmarks.empty')" :action-href="route('listings.index')" :action-label="__('app.bookmarks.browse')" />
         @else
             @if ($listings->isNotEmpty())
-                <div class="grid gap-9 md:grid-cols-3">
+                <div class="grid gap-9 md:grid-cols-2 lg:grid-cols-3">
                     @foreach ($listings as $listing)
                         <x-listings.card :listing="$listing" />
                     @endforeach

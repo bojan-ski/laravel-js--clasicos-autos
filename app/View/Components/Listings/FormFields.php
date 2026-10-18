@@ -2,14 +2,13 @@
 
 namespace App\View\Components\Listings;
 
+use App\Http\Requests\Listings\ListingRequest;
 use App\Support\ListingFormOptions;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
 class FormFields extends Component
 {
-    private const int UNSIGNED_INT_MAX = 4294967295;
-
     /**
      * @param  array<string, int|string|null>  $values
      */
@@ -24,9 +23,9 @@ class FormFields extends Component
             $this->section('car', 'I', [
                 $this->text('name', 255, required: true),
                 $this->modelSelect(),
-                $this->number('price', 0, self::UNSIGNED_INT_MAX, required: true),
+                $this->number('price', 0, ListingRequest::UNSIGNED_INT_MAX, required: true),
                 $this->number('year', config('listings.min_year'), config('listings.max_year'), required: true),
-                $this->number('mileage', 0, self::UNSIGNED_INT_MAX, required: true),
+                $this->number('mileage', 0, ListingRequest::UNSIGNED_INT_MAX, required: true),
                 $this->select('transmission', required: true),
                 $this->select('fuel_type', required: true),
             ], requiredNote: true),
@@ -57,6 +56,11 @@ class FormFields extends Component
                 $this->text('location_zipcode', 20, required: true),
             ]),
         ];
+    }
+
+    public function customModelRequired(): bool
+    {
+        return old('car_model_id', $this->values['car_model_id'] ?? null) === ListingFormOptions::OTHER_MODEL;
     }
 
     public function render(): View

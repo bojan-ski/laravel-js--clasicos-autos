@@ -7,7 +7,7 @@
     <nav aria-label="{{ __('app.pagination.label') }}" class="flex justify-center">
         <div class="flex w-full items-center justify-between gap-3 md:hidden">
             @if ($paginator->onFirstPage())
-                <span aria-disabled="true" class="{{ $mobileControl }} border-rule text-muted opacity-60"><span aria-hidden="true">‹</span> {{ __('app.pagination.previous') }}</span>
+                <span aria-hidden="true" class="{{ $mobileControl }} border-rule text-muted">‹ {{ __('app.pagination.previous') }}</span>
             @else
                 <a href="{{ $paginator->previousPageUrl() }}" rel="prev" class="{{ $mobileControl }} border-rule text-ink hover:bg-ink/7"><span aria-hidden="true">‹</span> {{ __('app.pagination.previous') }}</a>
             @endif
@@ -17,14 +17,14 @@
             @if ($paginator->hasMorePages())
                 <a href="{{ $paginator->nextPageUrl() }}" rel="next" class="{{ $mobileControl }} border-red text-red hover:bg-red/12">{{ __('app.pagination.next') }} <span aria-hidden="true">›</span></a>
             @else
-                <span aria-disabled="true" class="{{ $mobileControl }} border-rule text-muted opacity-60">{{ __('app.pagination.next') }} <span aria-hidden="true">›</span></span>
+                <span aria-hidden="true" class="{{ $mobileControl }} border-rule text-muted">{{ __('app.pagination.next') }} ›</span>
             @endif
         </div>
 
         <ul class="hidden items-center gap-2 md:flex">
             <li>
                 @if ($paginator->onFirstPage())
-                    <span aria-disabled="true" class="{{ $box }} border-rule text-muted opacity-60"><span aria-hidden="true">‹</span><span class="sr-only">{{ __('app.pagination.previous') }}</span></span>
+                    <span aria-hidden="true" class="{{ $box }} border-rule text-muted">‹</span>
                 @else
                     <a href="{{ $paginator->previousPageUrl() }}" rel="prev" class="{{ $box }} border-rule text-ink hover:bg-ink/7"><span aria-hidden="true">‹</span><span class="sr-only">{{ __('app.pagination.previous') }}</span></a>
                 @endif
@@ -39,9 +39,9 @@
                     @foreach ($element as $page => $url)
                         <li>
                             @if ($page == $paginator->currentPage())
-                                <span aria-current="page" class="{{ $box }} border-red text-red">{{ $page }}</span>
+                                <span aria-current="page" class="{{ $box }} border-red text-red"><span class="sr-only">{{ __('app.pagination.page') }} </span>{{ $page }}</span>
                             @else
-                                <a href="{{ $url }}" class="{{ $box }} border-rule text-ink hover:bg-ink/7">{{ $page }}</a>
+                                <a href="{{ $url }}" class="{{ $box }} border-rule text-ink hover:bg-ink/7"><span class="sr-only">{{ __('app.pagination.page') }} </span>{{ $page }}</a>
                             @endif
                         </li>
                     @endforeach
@@ -52,7 +52,7 @@
                 @if ($paginator->hasMorePages())
                     <a href="{{ $paginator->nextPageUrl() }}" rel="next" class="{{ $box }} border-rule text-ink hover:bg-ink/7"><span aria-hidden="true">›</span><span class="sr-only">{{ __('app.pagination.next') }}</span></a>
                 @else
-                    <span aria-disabled="true" class="{{ $box }} border-rule text-muted opacity-60"><span aria-hidden="true">›</span><span class="sr-only">{{ __('app.pagination.next') }}</span></span>
+                    <span aria-hidden="true" class="{{ $box }} border-rule text-muted">›</span>
                 @endif
             </li>
         </ul>

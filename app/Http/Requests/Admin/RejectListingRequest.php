@@ -6,13 +6,15 @@ use Illuminate\Contracts\Validation\ValidationRule;
 
 class RejectListingRequest extends ModerateListingRequest
 {
+    public const int REASON_MAX = 1000;
+
     /**
      * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            'rejection_reason' => ['required', 'string', 'max:1000'],
+            'rejection_reason' => ['required', 'string', 'max:'.self::REASON_MAX],
             ...parent::rules(),
         ];
     }

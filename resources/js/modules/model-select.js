@@ -6,8 +6,9 @@ function setUpModelSelect(root) {
     const maker = root.querySelector('[data-model-select-maker]')
     const model = root.querySelector('[data-model-select-model]')
     const other = root.querySelector('[data-model-select-other]')
+    const otherInput = other?.querySelector('input')
     const configElement = root.querySelector('[data-model-select-config]')
-    if (!maker || !model || !other || !configElement) return
+    if (!maker || !model || !other || !otherInput || !configElement) return
 
     const config = JSON.parse(configElement.textContent)
     const placeholder = model.querySelector('option[value=""]')?.cloneNode(true)
@@ -15,7 +16,9 @@ function setUpModelSelect(root) {
     if (!placeholder || !otherOption) return
 
     const toggleOther = () => {
-        other.hidden = model.value !== config.other
+        const isOther = model.value === config.other
+        other.hidden = !isOther
+        otherInput.required = isOther
     }
 
     const rebuild = () => {

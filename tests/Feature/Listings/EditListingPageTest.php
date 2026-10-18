@@ -219,7 +219,15 @@ class EditListingPageTest extends TestCase
         $html = $this->page($listing)->getContent();
 
         $this->assertSame('other', $this->selected($html, 'car_model_id'));
-        $this->assertMatchesRegularExpression('/<input id="model"[^>]*value="Custom Roadster"/', $html);
+        $this->assertMatchesRegularExpression('/<input id="model"[^>]*value="Custom Roadster"[^>]*required aria-required="true"/', $html);
+    }
+
+    public function test_a_listed_model_listing_leaves_the_other_model_field_optional(): void
+    {
+        $html = $this->page(CarListing::factory()->create())->getContent();
+
+        $this->assertMatchesRegularExpression('/<input id="model" name="model"/', $html);
+        $this->assertDoesNotMatchRegularExpression('/<input id="model"[^>]*required/', $html);
     }
 
     public function test_after_a_failed_save_the_posted_values_win_over_the_listings(): void

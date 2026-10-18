@@ -25,7 +25,7 @@
                 <x-listings.empty-state :message="__('app.profile.listings.empty')" />
             @else
                 @if ($listings->isNotEmpty())
-                    <div class="grid gap-9 md:grid-cols-3">
+                    <div class="grid gap-9 md:grid-cols-2 lg:grid-cols-3">
                         @foreach ($listings as $listing)
                             <x-listings.card :listing="$listing" :show-status="true" :heading-level="3" />
                         @endforeach

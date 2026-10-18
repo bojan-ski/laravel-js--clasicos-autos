@@ -8,7 +8,7 @@
                 <form method="POST" action="{{ route('compare.clear') }}" class="md:justify-self-end">
                     @csrf
                     @method('DELETE')
-                    <x-ui.button variant="secondary" type="submit">{{ __('app.compare.clear_all') }}</x-ui.button>
+                    <x-ui.button variant="secondary" size="responsive" type="submit">{{ __('app.compare.clear_all') }}</x-ui.button>
                 </form>
             @endif
         </div>

@@ -19,7 +19,7 @@
     <p id="images-label" class="{{ $labelClass }}">{{ $label ?? __('app.listings.form.fields.images.label', ['max' => $max]) }} <span aria-hidden="true">*</span><span class="sr-only">({{ __('app.forms.required') }})</span></p>
 
     @if ($errors->any())
-        <p class="text-sm text-ink-2">{{ __('app.listings.form.photos.reselect') }}</p>
+        <p class="text-xs text-muted">{{ __('app.listings.form.photos.reselect') }}</p>
     @endif
 
     <div data-photo-drop class="hidden flex-col items-center gap-3 rounded-xs border-2 border-dashed border-gold bg-card px-6 py-8 text-center data-dragging:bg-gold/10 md:flex md:flex-1 md:justify-center">
