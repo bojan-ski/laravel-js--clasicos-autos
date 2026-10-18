@@ -13,7 +13,8 @@
             <input type="hidden" name="version" value="{{ $version }}">
             <x-forms.required-note />
             <x-forms.textarea name="rejection_reason" :id="$fieldId" :label="__('app.listings.moderation.reason_label')"
-                              :hint="__('app.listings.moderation.reason_hint')" required maxlength="1000" />
+                              :hint="__('app.listings.moderation.reason_hint', ['max' => \App\Http\Requests\Admin\RejectListingRequest::REASON_MAX])" required
+                              :maxlength="\App\Http\Requests\Admin\RejectListingRequest::REASON_MAX" />
             <div class="flex flex-col-reverse gap-3 md:flex-row md:justify-end">
                 <x-ui.button variant="secondary" size="responsive" class="w-full md:w-auto"
                              data-dialog-close commandfor="{{ $id }}" command="close">

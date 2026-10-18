@@ -56,6 +56,28 @@ class CarListingTest extends TestCase
         $this->assertSame($expected, $answers);
     }
 
+    /**
+     * @return array<string, array{ListingStatus, ?string, bool}>
+     */
+    public static function rejectionReasons(): array
+    {
+        return [
+            'rejected with a reason' => [ListingStatus::Rejected, 'The photos are blurry.', true],
+            'rejected without a reason' => [ListingStatus::Rejected, null, false],
+            'pending with a stale reason' => [ListingStatus::Pending, 'The photos are blurry.', false],
+        ];
+    }
+
+    #[DataProvider('rejectionReasons')]
+    public function test_only_a_rejected_listing_with_a_reason_has_a_rejection_reason(ListingStatus $status, ?string $reason, bool $expected): void
+    {
+        $listing = new CarListing;
+        $listing->status = $status;
+        $listing->rejection_reason = $reason;
+
+        $this->assertSame($expected, $listing->hasRejectionReason());
+    }
+
     public function test_a_listing_without_a_model_row_has_a_custom_model(): void
     {
         $custom = new CarListing(['car_model_id' => null, 'model' => 'Roadster Special']);

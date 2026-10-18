@@ -163,7 +163,7 @@ class ProfilePageTest extends TestCase
         $html = $this->actingAs($user)->get(route('profile'))->getContent();
 
         $this->assertMatchesRegularExpression('/<div class="flex flex-wrap items-baseline justify-between gap-4 border-b border-rule pb-2.5">\s*<h2 id="my-listings-heading"[^>]*>'.preg_quote(__('app.profile.listings.heading'), '/').'<\/h2>\s*<a href="'.preg_quote(route('listings.create'), '/').'"[^>]*border-red text-red[^>]*min-h-12[^>]*>'.preg_quote(__('app.profile.listings.create'), '/').'<\/a>/', $html);
-        $this->assertStringContainsString('<div class="grid gap-9 md:grid-cols-3">', $html);
+        $this->assertStringContainsString('<div class="grid gap-9 md:grid-cols-2 lg:grid-cols-3">', $html);
         $this->assertMatchesRegularExpression('/<h3 class="[^"]*">Bel Air<\/h3>/', $html);
     }
 

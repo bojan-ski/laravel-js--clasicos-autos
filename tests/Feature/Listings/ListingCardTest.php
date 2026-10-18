@@ -67,7 +67,8 @@ class ListingCardTest extends TestCase
 
         $this->card($listing)
             ->assertSee('src="'.$primary->cardUrl().'"', false)
-            ->assertSee('alt="Bel Air" width="800" height="600" loading="lazy"', false);
+            ->assertSee('alt="" width="800" height="600" loading="lazy"', false)
+            ->assertDontSee('alt="Bel Air"', false);
     }
 
     public function test_a_listing_without_images_shows_the_placeholder(): void
@@ -174,9 +175,10 @@ class ListingCardTest extends TestCase
         $card = $this->card($listing, showStatus: true);
 
         if ($stamped) {
-            $card->assertSee($status->label());
+            $card->assertSeeInOrder(['<span class="sr-only">Status:</span>', $status->label()], false);
         } else {
-            $card->assertDontSee($status->label());
+            $card->assertDontSee($status->label())
+                ->assertDontSee('Status:');
         }
     }
 

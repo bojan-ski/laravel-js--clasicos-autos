@@ -25,7 +25,7 @@
         @if ($listings->isEmpty())
             <x-listings.empty-state :filtered="$filtered" />
         @else
-            <div class="grid gap-9 md:grid-cols-3">
+            <div class="grid gap-9 md:grid-cols-2 lg:grid-cols-3">
                 @foreach ($listings as $listing)
                     <x-listings.card :listing="$listing" />
                 @endforeach

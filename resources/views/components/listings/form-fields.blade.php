@@ -8,7 +8,7 @@
 
         @foreach ($section['fields'] as $field)
             @if ($field['type'] === 'model-select')
-                <x-listings.model-select :options="$options" :values="$values" />
+                <x-listings.model-select :options="$options" :values="$values" :custom-model-required="$customModelRequired()" />
             @elseif ($field['type'] === 'select')
                 <x-forms.select :name="$field['name']" :label="$field['label']" :placeholder="$field['placeholder']"
                                 :options="$field['options']" :required="$field['required']" :value="$values[$field['name']] ?? null" />

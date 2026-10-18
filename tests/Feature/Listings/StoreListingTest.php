@@ -229,6 +229,15 @@ class StoreListingTest extends TestCase
         $this->assertSame([], Storage::disk('public')->allFiles());
     }
 
+    public function test_photo_errors_name_the_field_car_images_not_its_visible_label(): void
+    {
+        $this->store($this->payload(images: []))
+            ->assertSessionHasErrors(['images' => 'The car images field is required.']);
+
+        $this->store($this->payload(images: [UploadedFile::fake()->image('car.gif', 20, 20)]))
+            ->assertSessionHasErrors(['images.0' => 'The car images field must be a file of type: jpeg, jpg, png.']);
+    }
+
     /**
      * @return array<string, array{string, mixed}>
      */

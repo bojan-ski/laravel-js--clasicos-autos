@@ -2,7 +2,7 @@
     <div {{ $attributes->merge(['class' => 'min-w-0']) }}>
         <x-ui.postcard tilt="none" class="relative flex h-full flex-col gap-2 md:gap-3 {{ $tiltClass() }}" data-compare-postcard>
             @if ($imageUrl() !== null)
-                <img src="{{ $imageUrl() }}" alt="{{ $listing->name }}" width="800" height="600"
+                <img src="{{ $imageUrl() }}" alt="" width="800" height="600"
                      class="aspect-4/3 w-full object-cover photo-grade">
             @else
                 <div class="flex aspect-4/3 w-full items-center justify-center border border-rule bg-paper text-muted">
@@ -19,7 +19,7 @@
             <form method="POST" action="{{ $removeUrl() }}" class="mt-auto">
                 @csrf
                 @method('DELETE')
-                <x-ui.button variant="ghost" type="submit">{{ __('app.compare.remove') }}<span class="sr-only"> {{ $listing->name }}</span></x-ui.button>
+                <x-ui.button variant="ghost" size="responsive" type="submit">{{ __('app.compare.remove') }}<span class="sr-only"> {{ $listing->name }}</span></x-ui.button>
             </form>
         </x-ui.postcard>
     </div>

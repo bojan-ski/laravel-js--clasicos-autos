@@ -6,7 +6,7 @@
         <a href="{{ route('listings.index') }}" class="shrink-0 text-red underline-offset-4 hover:underline">{{ __('app.home.latest.all') }} <span aria-hidden="true">→</span></a>
     </div>
 
-    <div class="grid gap-9 md:grid-cols-3">
+    <div class="grid gap-9 md:grid-cols-2 lg:grid-cols-3">
         @foreach ($listings as $listing)
             <x-listings.card :listing="$listing" :heading-level="3" />
         @endforeach

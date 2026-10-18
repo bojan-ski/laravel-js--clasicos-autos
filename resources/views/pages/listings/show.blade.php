@@ -1,16 +1,20 @@
 <x-layouts.app :title="$listing->name" :seo="$seo">
-    <x-ui.back-link :href="$backUrl">
-        @can('update', $listing)
-            <x-ui.button variant="secondary" size="responsive" :href="route('listings.edit', $listing)">
-                {{ __('app.listings.edit.edit_control') }}
-            </x-ui.button>
-            <x-ui.button variant="secondary" size="responsive" :href="route('listings.images.edit', $listing)">
-                {{ __('app.listings.edit.edit_images_control') }}
-            </x-ui.button>
-        @endcan
-        @can('delete', $listing)
-            <x-listings.delete-dialog :action="route('listings.destroy', $listing)" />
-        @endcan
+    <x-ui.back-link :href="$backUrl" slot-class="max-md:basis-full">
+        @canany(['update', 'delete'], $listing)
+            <div class="grid w-full grid-cols-2 gap-2 md:flex md:w-auto md:items-center">
+                @can('update', $listing)
+                    <x-ui.button variant="secondary" size="responsive" :href="route('listings.edit', $listing)">
+                        {{ __('app.listings.edit.edit_control') }}
+                    </x-ui.button>
+                    <x-ui.button variant="secondary" size="responsive" :href="route('listings.images.edit', $listing)">
+                        {{ __('app.listings.edit.edit_images_control') }}
+                    </x-ui.button>
+                @endcan
+                @can('delete', $listing)
+                    <x-listings.delete-dialog :action="route('listings.destroy', $listing)" class="col-span-2 grid md:block" />
+                @endcan
+            </div>
+        @endcanany
     </x-ui.back-link>
 
     <section class="mx-auto flex max-w-7xl flex-col gap-6 px-5 py-6 md:gap-8 md:px-14 md:py-12">

@@ -111,6 +111,19 @@ class CreateListingPageTest extends TestCase
         $this->assertStringContainsString('<p id="model-hint" class="text-xs text-muted">Required when Other (specify) is chosen</p>', $html);
         $this->assertStringContainsString('<span class="sr-only">(required)</span>', $html);
         $this->assertMatchesRegularExpression('/<textarea id="description"[^>]*maxlength="5000"/', $html);
+        $this->assertStringContainsString('<p id="description-hint" class="text-xs text-muted">Up to 5000 characters</p>', $html);
+    }
+
+    public function test_the_other_model_field_is_required_when_the_form_comes_back_with_other_chosen(): void
+    {
+        $maker = CarMaker::factory()->create();
+
+        $html = $this->actingAs(User::factory()->create())
+            ->followingRedirects()
+            ->post(route('listings.store'), ['car_maker_id' => $maker->id, 'car_model_id' => ListingFormOptions::OTHER_MODEL])
+            ->getContent();
+
+        $this->assertMatchesRegularExpression('/<input id="model"[^>]*required aria-required="true"/', $html);
     }
 
     public function test_every_enum_select_lists_its_cases_in_order_after_the_placeholder(): void

@@ -127,7 +127,7 @@ class EditListingImagesPageTest extends TestCase
         $html = $this->page($listing)->getContent();
 
         $this->assertMatchesRegularExpression(
-            '/<img src="'.preg_quote(e($primary->url()), '/').'" alt="Sunset Bel Air — primary image" width="1600" height="900"\s+class="photo-grade h-52.5 w-full object-cover md:h-100">\s*<span[^>]*border-red text-red absolute[^>]*>\s*<span[^>]*><span[^>]*>PRIMARY<\/span>/',
+            '/<img src="'.preg_quote(e($primary->url()), '/').'" alt="Sunset Bel Air — primary image" width="1600" height="900"\s+class="photo-grade aspect-video w-full object-cover">\s*<span[^>]*border-red text-red absolute[^>]*>\s*<span[^>]*><span[^>]*>PRIMARY<\/span>/',
             $html,
         );
     }

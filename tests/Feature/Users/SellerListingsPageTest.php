@@ -231,7 +231,7 @@ class SellerListingsPageTest extends TestCase
         $response->assertSee(__('app.sellers.title', ['username' => 'jdoe']))
             ->assertSee('· 0 listings')
             ->assertSee(__('app.sellers.empty'))
-            ->assertDontSee('md:grid-cols-3', false)
+            ->assertDontSee('grid gap-9 md:grid-cols-2 lg:grid-cols-3', false)
             ->assertDontSee(__('app.pagination.label'));
     }
 
@@ -277,7 +277,7 @@ class SellerListingsPageTest extends TestCase
         $html = (string) $response->getContent();
 
         $response->assertSee('<title>'.e(__('app.sellers.title', ['username' => 'ana-brito'])).' — Clásicos Autos</title>', false)
-            ->assertSee('grid gap-9 md:grid-cols-3', false);
+            ->assertSee('grid gap-9 md:grid-cols-2 lg:grid-cols-3', false);
         $this->assertMatchesRegularExpression('/<span[^>]*lang="es"[^>]*>'.preg_quote(__('app.sellers.kicker'), '/').'<\/span>/', $html);
         $this->assertMatchesRegularExpression('/<span[^>]*aria-hidden="true"[^>]*>\s*<span[^>]*>\s*<span[^>]*>AB<\/span>/', $html);
     }

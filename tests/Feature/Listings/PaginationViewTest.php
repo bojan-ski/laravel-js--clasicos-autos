@@ -25,7 +25,15 @@ class PaginationViewTest extends TestCase
         $html = $this->links(total: 36, currentPage: 2);
 
         $this->assertSame(1, substr_count($html, 'aria-current="page"'));
-        $this->assertMatchesRegularExpression('/aria-current="page"[^>]*>2</', $html);
+        $this->assertMatchesRegularExpression('/aria-current="page"[^>]*><span class="sr-only">Page <\/span>2</', $html);
+    }
+
+    public function test_each_page_link_is_named_page_and_keeps_its_visible_digit(): void
+    {
+        $html = $this->links(total: 36, currentPage: 2);
+
+        $this->assertMatchesRegularExpression('/<a href="[^"]*page=1" class="[^"]*"><span class="sr-only">Page <\/span>1<\/a>/', $html);
+        $this->assertMatchesRegularExpression('/<a href="[^"]*page=3" class="[^"]*"><span class="sr-only">Page <\/span>3<\/a>/', $html);
     }
 
     public function test_the_mobile_line_shows_the_page_of_the_last_page(): void
@@ -42,7 +50,8 @@ class PaginationViewTest extends TestCase
 
         $this->assertStringNotContainsString('rel="prev"', $html);
         $this->assertStringContainsString('rel="next"', $html);
-        $this->assertSame(2, substr_count($html, 'aria-disabled="true"'));
+        $this->assertStringNotContainsString('aria-disabled', $html);
+        $this->assertSame(2, preg_match_all('/<span aria-hidden="true" class="[^"]*border-rule text-muted">‹/u', $html));
     }
 
     public function test_the_next_controls_are_inert_on_the_last_page(): void
@@ -51,7 +60,8 @@ class PaginationViewTest extends TestCase
 
         $this->assertStringNotContainsString('rel="next"', $html);
         $this->assertStringContainsString('rel="prev"', $html);
-        $this->assertSame(2, substr_count($html, 'aria-disabled="true"'));
+        $this->assertStringNotContainsString('aria-disabled', $html);
+        $this->assertSame(2, preg_match_all('/<span aria-hidden="true" class="[^"]*border-rule text-muted">(Next )?›/u', $html));
     }
 
     public function test_distant_pages_collapse_into_a_gap(): void

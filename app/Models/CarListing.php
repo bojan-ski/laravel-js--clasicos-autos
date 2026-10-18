@@ -170,6 +170,11 @@ class CarListing extends Model
         return $this->status === ListingStatus::Rejected;
     }
 
+    public function hasRejectionReason(): bool
+    {
+        return $this->isRejected() && $this->rejection_reason !== null;
+    }
+
     public function isPublic(): bool
     {
         return $this->isApproved() && $this->owner->status === UserStatus::Active;
