@@ -183,7 +183,7 @@ class ListingCardTest extends TestCase
     }
 
     #[DataProvider('statuses')]
-    public function test_without_the_status_variant_no_status_renders(ListingStatus $status): void
+    public function test_without_the_status_variant_no_status_renders(ListingStatus $status, bool $stamped): void
     {
         $this->card($this->listingWithStatus($status))
             ->assertDontSee($status->label())
