@@ -134,7 +134,7 @@ class LegalPagesTest extends TestCase
     }
 
     #[DataProvider('documents')]
-    public function test_current_legal_link_is_marked_in_footer_and_menu(string $route): void
+    public function test_current_legal_link_is_marked_in_footer_and_menu(string $route, string $key): void
     {
         $response = $this->get(route($route));
 
