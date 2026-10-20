@@ -1,58 +1,173 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🚗 Clásicos Autos
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**Clásicos Autos** is a public marketplace for classic cars (model year 1989 or older), with a Cuban "Postal" visual identity.
+Sellers list a car with up to eight photos, and buyers browse, search, compare, bookmark and message the seller. An admin approves every listing before it goes public. The core rule is that **nothing unreviewed is ever public**: a listing is visible only while it is approved and its owner's account is active.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🌐 Live Demo
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+**[khaki-donkey-838388.hostingersite.com](https://khaki-donkey-838388.hostingersite.com/)**
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+| Role | Email | Password | Notes |
+|---|---|---|---|
+| 🛡️ Admin | `admin@admin.com` | `123456` | Lands on `/admin/users` |
+| 👤 App user | `review@example.com` | `password` | Listings in every state (approved, pending, rejected), bookmarks, conversations, an open report |
+| 👤 App user | `stranger@example.com` | `password` | Seller with 13 approved listings and a custom-model listing |
+| 👤 App user | `buyer@example.com` | `password` | Buyer in a conversation with `review@example.com` |
 
-## Learning Laravel
+Sign in with each role to see how access changes. This is a shared public demo with made-up data. It may be reset at any time, and it sends no real email.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+---
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## ✨ Features
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+### 👀 Guest
+- 📜 Browse approved listings, with search (name, maker, model), multi-select brand chips and pagination
+- 🔎 Advanced search across five fieldsets
+- 🖼️ Listing detail with photo gallery, specs and the seller's contact details
+- ⚖️ Compare two listings side by side, with the differences highlighted
+- 📄 Privacy policy, terms and conditions, cookie policy
+- 🔐 Sign up, Sign in, Forgot/Reset password
 
-## Agentic Development
+### 👤 App User
+- 🚘 Create listings with up to eight photos, optimized into WebP variants with **Intervention Image**
+- ✏️ Edit listings and their photos (any edit sends the listing back to approval), delete own listings
+- 📋 Profile with "My car listings", status stamps and rejection reasons
+- ⭐ Bookmark listings
+- 💬 Message sellers, with new messages arriving live and an unread badge in the header
+- 🚩 Report the other party's message
+- ✉️ Contact the admin
+- 👤 Change password, delete own account
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+### 🛡️ Admin
+- ✅ Listings queue: approve, reject with a written reason, promote a custom model to the list
+- 👥 Users: search, view listings, suspend (7 days, 30 days, indefinite) / unsuspend, delete
+- 🚩 Reports: dismiss, delete the message, or suspend the author in one action
+- 💬 Read every conversation and delete any message
+- 📥 Feedback page for contact messages, marked as handled
+- 🏭 Makers and models: create, edit, activate / deactivate, delete when unreferenced
+- 🔑 Change own password
 
+### ⚙️ Platform
+- 🔄 Every new or edited listing returns to `pending`
+- 🙈 Suspending a user hides their listings without changing them; unsuspending restores each listing's own status
+- ⏰ Expired suspensions are lifted at sign-in, on the user's next request, or by the hourly `suspensions:lift` command
+- 🔎 Server-rendered SEO: meta and Open Graph tags, `sitemap.xml`, `Car` + `Offer` structured data on listing pages
+
+---
+
+## 🛠️ Tech Stack
+- **Framework**: [Laravel 13](https://laravel.com/) on PHP 8.4
+- **Database**: [MySQL](https://www.mysql.com/)
+- **Templating**: [Blade Templates](https://laravel.com/docs/blade) + vanilla JavaScript modules (progressive enhancement, no frontend framework)
+- **Styling**: [Tailwind CSS 4](https://tailwindcss.com/), built with [Vite 8](https://vite.dev/)
+- **Image Handling**: [Intervention Image 4](https://image.intervention.io/) (full, card and thumbnail WebP variants)
+- **Real-time**: [Pusher Channels](https://pusher.com/channels) + [Laravel Echo](https://laravel.com/docs/broadcasting)
+- **Queue**: [Laravel Queues](https://laravel.com/docs/queues) (database driver) for the password-reset email and broadcasts
+- **Testing**: [PHPUnit](https://phpunit.de/), run in parallel with [ParaTest](https://github.com/paratestphp/paratest)
+
+---
+
+## 🚀 Getting Started
+
+### 1. Clone the Repository
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone https://github.com/bojan-ski/laravel-js--clasicos-autos.git
+cd laravel-js--clasicos-autos
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### 2. Install Dependencies
+```bash
+composer install
+npm install
+```
 
-## Contributing
+### 3. Create the Databases
+Create two MySQL databases: `laravel_clasicos_autos` for the app and `laravel_clasicos_autos_testing` for the test suite (configured in `phpunit.xml`).
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 4. Environment Setup - .env
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-## Code of Conduct
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=laravel_clasicos_autos
+DB_USERNAME=
+DB_PASSWORD=
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# The admin account (created by the seeder, password at least 6 characters)
+ADMIN_EMAIL=
+ADMIN_PASSWORD=
 
-## Security Vulnerabilities
+QUEUE_CONNECTION=database
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# Live messaging (use "log" in development)
+BROADCAST_CONNECTION=pusher
+PUSHER_APP_ID=
+PUSHER_APP_KEY=
+PUSHER_APP_SECRET=
+PUSHER_APP_CLUSTER=
+```
 
-## License
+### 5. Run Migrations & Seed Database
+```bash
+php artisan migrate --seed
+php artisan storage:link
+```
+The seeder creates the admin from `ADMIN_EMAIL` and `ADMIN_PASSWORD` (it refuses to run without them), plus the makers and models.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+**Demo data.** For the full demo set, seed the walkthrough scenario on a fresh database. It runs only in the `local` and `testing` environments:
+```bash
+php artisan migrate:fresh --seed
+php artisan db:seed --class=WalkthroughScenarioSeeder
+```
+
+### 6. Start Servers
+```bash
+composer run dev
+```
+This starts the web server, the queue worker and Vite. The app runs at http://localhost:8000.
+
+### 7. Scheduled Tasks
+Expired suspensions are lifted hourly by the scheduler:
+```bash
+php artisan schedule:work
+```
+
+---
+
+## 🔑 Dummy Users
+
+All dummy accounts use the password **`password`**. The admin uses the `ADMIN_EMAIL` / `ADMIN_PASSWORD` from `.env`.
+
+| Role | Email | State |
+|---|---|---|
+| 👤 App user | `review@example.com` | Listings in every state, bookmarks, conversations, an open report, a contact message |
+| 👤 App user | `stranger@example.com` | 13 approved listings and a custom-model listing waiting for promotion |
+| 👤 App user | `buyer@example.com` | Buyer in a conversation with `review@example.com` |
+| 👤 App user | `seller01@demo.test` … `seller29@demo.test` | Active sellers with listings, bookmarks and conversations |
+| 🚫 App user | `seller30@demo.test` | Suspended for 30 days (sign-in is refused, listings hidden) |
+| 👤 App user | `seller@walkthrough.test` | Active, in a thread with the abuser below |
+| 😠 App user | `abuser@walkthrough.test` | Active, two approved listings, sent an abusive message to report |
+| ⌛ App user | `expired@walkthrough.test` | Suspension expired an hour ago, lifted on the next sign-in |
+| ➕ — | `buyer@walkthrough.test` | Left free on purpose: register a new account with it |
+
+> Any install reachable from the internet should delete these accounts or change their passwords: anyone who reads this README knows them.
+
+---
+
+## 🧪 Testing
+```bash
+php artisan test --parallel --processes=8 --compact
+```
+Each process uses its own `laravel_clasicos_autos_testing_test_N` database, created on first use. Add `--recreate-databases` if a run reports missing tables after a migration change. To run a single file while you work, run it without `--parallel`.
+
+---
+
+## 👨‍💻 Author
+Developed with ❤️ by BPdevelopment (bojan-ski)
